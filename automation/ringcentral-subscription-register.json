@@ -1,0 +1,229 @@
+{
+  "name": "RingCentral Subscription Registration",
+  "nodes": [
+    {
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 260],
+      "parameters": {}
+    },
+    {
+      "id": "execute-workflow-trigger",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 460],
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "reason", "type": "string" },
+            { "name": "errorDetail", "type": "string" }
+          ]
+        }
+      },
+      "notes": "Called by ringcentral-subscription-renew.json's fallback node with reason=renewal-fallback."
+    },
+    {
+      "id": "config",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 360],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "webhook-url",
+              "name": "webhookUrl",
+              "type": "string",
+              "value": "REPLACE_WITH_RECEIVE_HANDLER_PUBLIC_URL"
+            },
+            {
+              "id": "event-filter",
+              "name": "eventFilter",
+              "type": "string",
+              "value": "/restapi/v1.0/account/~/extension/~/message-store"
+            },
+            {
+              "id": "expires-in",
+              "name": "expiresIn",
+              "type": "number",
+              "value": 604800
+            },
+            {
+              "id": "transport-type",
+              "name": "transportType",
+              "type": "string",
+              "value": "WebHook"
+            },
+            {
+              "id": "reason",
+              "name": "reason",
+              "type": "string",
+              "value": "={{ $json.reason || 'manual-deploy' }}"
+            },
+            {
+              "id": "error-detail",
+              "name": "errorDetail",
+              "type": "string",
+              "value": "={{ $json.errorDetail || '' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "TODO(Alan): confirm eventFilter path matches what the existing receive handler assumes. TODO(Alan): fill in webhookUrl with the receive handler's real public URL before running."
+    },
+    {
+      "id": "create-subscription",
+      "name": "Create Subscription",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 360],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ ($env.RC_API_BASE || 'https://platform.ringcentral.com') + '/restapi/v1.0/subscription' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ eventFilters: [$json.eventFilter], deliveryMode: { transportType: $json.transportType, address: $json.webhookUrl }, expiresIn: $json.expiresIn }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "credentials": {
+        "oAuth2Api": {
+          "id": "REPLACE_WITH_EXISTING_RINGCENTRAL_CREDENTIAL_ID",
+          "name": "RingCentral OAuth2 (reuse existing send/receive credential — do NOT create a second one)"
+        }
+      },
+      "notes": "TODO(Alan): confirm the RC app has the subscription-webhook scope enabled, not just SMS send/receive — this call 403s without it. Requires the handshake code (ringcentral-webhook-handshake-snippet.js) to already be live in the receive handler."
+    },
+    {
+      "id": "created-ok",
+      "name": "Created OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [900, 360],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "created-ok-cond",
+              "leftValue": "={{ $json.statusCode >= 200 && $json.statusCode < 300 && !!$json.body.id }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "persist-subscription-id",
+      "name": "Persist Subscription ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 260],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nstaticData.subscriptionId = $json.body.id;\nstaticData.expirationTime = $json.body.expirationTime;\nstaticData.creationTime = $json.body.creationTime;\n\nreturn {\n  subscriptionId: staticData.subscriptionId,\n  expirationTime: staticData.expirationTime,\n  creationTime: staticData.creationTime,\n  reason: $json.reason,\n  fallbackRecovery: $json.reason === 'renewal-fallback'\n};"
+      },
+      "notes": "Persistence = n8n workflow static data (single-subscription/single-number scope, per doc recommendation). Revisit as a DB row if Axiom scales to multiple numbers/accounts."
+    },
+    {
+      "id": "format-error",
+      "name": "Format Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 460],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  statusCode: $json.statusCode,\n  errorBody: $json.body,\n  reason: $json.reason,\n  fallbackRecovery: $json.reason === 'renewal-fallback'\n};"
+      }
+    },
+    {
+      "id": "notify-success",
+      "name": "Notify Success (Gmail Draft)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1340, 260],
+      "parameters": {
+        "resource": "draft",
+        "operation": "create",
+        "subject": "={{ $json.fallbackRecovery ? 'RingCentral subscription RECOVERED (renewal fallback fired)' : 'RingCentral subscription registered' }}",
+        "message": "={{ 'Subscription ID: ' + $json.subscriptionId + '\\nExpires: ' + $json.expirationTime + '\\nCreated: ' + $json.creationTime + '\\n\\n' + ($json.fallbackRecovery ? 'This was NOT a fresh deploy — the daily renewal workflow could not renew the existing subscription and had to re-register from scratch. Something upstream is wrong even though it self-healed; worth checking why renewal failed.' : 'Fresh registration, initiated manually or via deploy.') }}",
+        "options": {}
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      },
+      "notes": "Matches the Gmail-draft notification pattern already used by content-log.md / prospecting-log.md automations."
+    },
+    {
+      "id": "notify-failure",
+      "name": "Notify Failure (Gmail Draft)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1340, 460],
+      "parameters": {
+        "resource": "draft",
+        "operation": "create",
+        "subject": "RingCentral subscription registration FAILED",
+        "message": "={{ 'Status: ' + $json.statusCode + '\\nBody: ' + JSON.stringify($json.errorBody) + '\\n\\nLikely cause: ' + ($json.statusCode === 403 ? 'missing subscription-webhook scope on the RC app' : ($json.statusCode === 400 ? 'malformed event filter or body' : 'handshake not implemented/live yet in the receive handler, or webhookUrl misconfigured')) + (\n$json.fallbackRecovery ? '\\n\\nThis fired from the daily renewal workflow\\'s fallback path — the subscription is currently NOT active. SMS will silently stop arriving until this is fixed.' : '') }}",
+        "options": {}
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [[{ "node": "Config", "type": "main", "index": 0 }]]
+    },
+    "Execute Workflow Trigger": {
+      "main": [[{ "node": "Config", "type": "main", "index": 0 }]]
+    },
+    "Config": {
+      "main": [[{ "node": "Create Subscription", "type": "main", "index": 0 }]]
+    },
+    "Create Subscription": {
+      "main": [[{ "node": "Created OK?", "type": "main", "index": 0 }]]
+    },
+    "Created OK?": {
+      "main": [
+        [{ "node": "Persist Subscription ID", "type": "main", "index": 0 }],
+        [{ "node": "Format Error", "type": "main", "index": 0 }]
+      ]
+    },
+    "Persist Subscription ID": {
+      "main": [[{ "node": "Notify Success (Gmail Draft)", "type": "main", "index": 0 }]]
+    },
+    "Format Error": {
+      "main": [[{ "node": "Notify Failure (Gmail Draft)", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null
+}

@@ -20,3 +20,4 @@ Direct and warm, confident without arrogance, technology explained simply, prote
 
 ## TODO(Alan)
 - Confirm this is still current — these lines were pulled from the agent prompts, not a standalone brand doc, so if you've refined the voice since writing those agents, update here (and consider updating the agent files to point here instead of duplicating).
+- No Spanish translation of the anchor phrase exists. Guardian caught a Spanish post (2026-07-24, Pocket AI recorder) where Content Agent inserted the English anchor verbatim into an otherwise Spanish caption, violating the one-language-per-post rule. Either provide an approved Spanish translation, or state explicitly that the anchor phrase stays untranslated as a proper-noun-style tagline (in which case content-agent/guardian need that exception written down, since right now it just reads as a mistake). Until resolved, Spanish posts should omit the anchor line rather than guess at a translation.

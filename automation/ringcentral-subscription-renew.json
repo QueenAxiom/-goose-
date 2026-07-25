@@ -1,0 +1,174 @@
+{
+  "name": "RingCentral Subscription Renewal",
+  "nodes": [
+    {
+      "id": "daily-schedule",
+      "name": "Daily 3am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 320],
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "cronExpression", "expression": "0 3 * * *" }
+          ]
+        }
+      },
+      "notes": "Off-peak, comfortably inside the ~7-day TTL with room for retries. TODO(Alan): confirm actual TTL for Axiom's RC account tier — daily is a safe default, not a confirmed number."
+    },
+    {
+      "id": "read-persisted-id",
+      "name": "Read Persisted Subscription ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 320],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nreturn {\n  subscriptionId: staticData.subscriptionId || null,\n  expirationTime: staticData.expirationTime || null\n};"
+      },
+      "notes": "Reads the same static data written by ringcentral-subscription-register.json's Persist Subscription ID node. Both workflows must live in the same n8n instance for static data to be shared."
+    },
+    {
+      "id": "has-subscription-id",
+      "name": "Has Subscription ID?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [680, 320],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "has-id-cond",
+              "leftValue": "={{ !!$json.subscriptionId }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "renew-subscription",
+      "name": "Renew Subscription",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 220],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ ($env.RC_API_BASE || 'https://platform.ringcentral.com') + '/restapi/v1.0/subscription/' + $json.subscriptionId + '/renew' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": false,
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "credentials": {
+        "oAuth2Api": {
+          "id": "REPLACE_WITH_EXISTING_RINGCENTRAL_CREDENTIAL_ID",
+          "name": "RingCentral OAuth2 (reuse existing send/receive credential — same one as the registration workflow)"
+        }
+      }
+    },
+    {
+      "id": "renewed-ok",
+      "name": "Renewed OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1120, 220],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "renewed-ok-cond",
+              "leftValue": "={{ $json.statusCode >= 200 && $json.statusCode < 300 && !!$json.body.expirationTime }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ]
+        }
+      },
+      "notes": "False branch causes to distinguish on import: 404 (already expired/deleted server-side — the exact failure mode this workflow exists to catch), 401 after refresh already attempted (credential misconfigured — alert loudly, don't retry-loop), 403 (scope revoked)."
+    },
+    {
+      "id": "update-persisted-expiry",
+      "name": "Update Persisted Expiry",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 140],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nstaticData.expirationTime = $json.body.expirationTime;\nif ($json.body.id) {\n  // RC typically doesn't rotate the ID on renew — verify against actual response.\n  staticData.subscriptionId = $json.body.id;\n}\nreturn {\n  subscriptionId: staticData.subscriptionId,\n  expirationTime: staticData.expirationTime\n};"
+      }
+    },
+    {
+      "id": "fallback-reregister",
+      "name": "Fallback: Re-register",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [900, 460],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_REGISTRATION_WORKFLOW_ID",
+          "mode": "list",
+          "cachedResultName": "RingCentral Subscription Registration"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "reason": "renewal-fallback",
+            "errorDetail": "={{ $json.body ? JSON.stringify($json.body) : ($json.subscriptionId === null ? 'no-subscription-id-in-static-data' : 'renew-call-returned-non-2xx') }}"
+          }
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "notes": "Calls ringcentral-subscription-register.json as a sub-workflow rather than duplicating creation logic. Its own Notify Success/Failure nodes fire the alert here — don't add a second notification in this workflow, to avoid double-alerting on one incident. TODO(Alan): after importing both workflows, paste the real workflow ID for the Registration workflow into workflowId.value."
+    }
+  ],
+  "connections": {
+    "Daily 3am": {
+      "main": [[{ "node": "Read Persisted Subscription ID", "type": "main", "index": 0 }]]
+    },
+    "Read Persisted Subscription ID": {
+      "main": [[{ "node": "Has Subscription ID?", "type": "main", "index": 0 }]]
+    },
+    "Has Subscription ID?": {
+      "main": [
+        [{ "node": "Renew Subscription", "type": "main", "index": 0 }],
+        [{ "node": "Fallback: Re-register", "type": "main", "index": 0 }]
+      ]
+    },
+    "Renew Subscription": {
+      "main": [[{ "node": "Renewed OK?", "type": "main", "index": 0 }]]
+    },
+    "Renewed OK?": {
+      "main": [
+        [{ "node": "Update Persisted Expiry", "type": "main", "index": 0 }],
+        [{ "node": "Fallback: Re-register", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null
+}

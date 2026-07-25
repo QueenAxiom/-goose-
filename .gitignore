@@ -1,0 +1,12 @@
+# Secrets & credentials
+.env
+.env.*
+!.env.example
+*credentials*.json
+*secret*
+*.key
+*.pem
+
+# OS / editor
+.DS_Store
+Thumbs.db
