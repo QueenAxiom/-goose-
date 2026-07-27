@@ -7,6 +7,8 @@ Referenced by `operations-manager.md` and `recorder.md` (global agent configs) a
 | Runway API integration timing | Deferred — not until 2026-07-29 at the earliest (video automation not a priority yet) | 2026-07-24 |
 | Messaging/telephony provider | RingCentral (existing paid account) instead of Twilio — no need to pay for/provision a second phone number when RingCentral's API covers SMS/voice | 2026-07-24 |
 | RingCentral subscription workflow alert channel | Gmail draft (matches existing `content-log.md`/`prospecting-log.md` automation-notification pattern) over Slack or self-SMS | 2026-07-24 |
+| YouTube scheduled auto-upload — scope vs. Runway deferral | Built now, not deferred. The 2026-07-24 Runway deferral is about AI video *generation*; this workflow only *publishes* videos Alan already created — different scope. Confirmed with Alan before building. | 2026-07-26 |
+| YouTube scheduled auto-upload — default privacy status | `public` (true zero-touch publish), unlike every other content automation in this repo which drafts and waits for Alan to post manually | 2026-07-26 |
 
 ## TODO(Alan)
 - This log was empty when created — no decisions had been recorded anywhere in the repo. Add entries here as decisions get made, or ask Recorder to log them after calls/meetings.

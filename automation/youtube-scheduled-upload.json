@@ -1,0 +1,360 @@
+{
+  "name": "YouTube Scheduled Upload",
+  "nodes": [
+    {
+      "id": "schedule-trigger",
+      "name": "Daily Check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "notes": "TODO(Alan): confirm 9am daily is the cadence you want. Change the cron expression if you'd rather run multiple times/day or on specific days."
+    },
+    {
+      "id": "list-pending-videos",
+      "name": "List Pending Videos",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [460, 300],
+      "parameters": {
+        "resource": "fileFolder",
+        "operation": "search",
+        "filter": {
+          "folderId": {
+            "mode": "id",
+            "value": "1RQv0S6sqIc2BS6pyEOMuEhxQ5dTHQv1-"
+          },
+          "whatToSearch": "files",
+          "mimeType": "video"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      },
+      "notes": "TODO(Alan): create two Drive folders — 'YouTube Uploads/Pending' (drop finished videos here, from PC or iCloud Drive via the Google Drive desktop app so it syncs into this same folder) and 'YouTube Uploads/Uploaded' (archive). Fill in Pending's folder ID here. If this returns 0 items, nothing downstream runs — that's expected, not an error."
+    },
+    {
+      "id": "lookup-metadata",
+      "name": "Lookup Metadata",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [680, 300],
+      "parameters": {
+        "operation": "lookup",
+        "documentId": {
+          "mode": "id",
+          "value": "1CjFJ_UA20Epf_OlUR78NaPkS1HvF9-ntRxWozH_GA_c"
+        },
+        "sheetName": {
+          "mode": "name",
+          "value": "Videos"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "filename",
+              "lookupValue": "={{ $json.name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "TODO(Alan): create a Sheet named 'Videos' with columns: filename, title, description, tags, privacyStatus (optional per-row override), status, videoId, videoUrl. One row per file you drop in Pending, filename must match exactly. No matching row = lookup returns empty and this item silently drops — consider whether that should notify-failure instead (flagging, not deciding)."
+    },
+    {
+      "id": "combine-video-data",
+      "name": "Combine Video Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 300],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "file-id",
+              "name": "fileId",
+              "type": "string",
+              "value": "={{ $('List Pending Videos').item.json.id }}"
+            },
+            {
+              "id": "file-name",
+              "name": "fileName",
+              "type": "string",
+              "value": "={{ $('List Pending Videos').item.json.name }}"
+            },
+            {
+              "id": "title",
+              "name": "title",
+              "type": "string",
+              "value": "={{ $json.title }}"
+            },
+            {
+              "id": "description",
+              "name": "description",
+              "type": "string",
+              "value": "={{ $json.description }}"
+            },
+            {
+              "id": "tags",
+              "name": "tags",
+              "type": "string",
+              "value": "={{ $json.tags }}"
+            },
+            {
+              "id": "privacy-status",
+              "name": "privacyStatus",
+              "type": "string",
+              "value": "={{ $json.privacyStatus || 'public' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Default privacy is 'public' unless the Sheet row sets privacyStatus explicitly. TODO(Alan): confirm you want true zero-touch publish — switch this default to 'unlisted' or 'private' if you want a manual review step before videos go live."
+    },
+    {
+      "id": "download-video-file",
+      "name": "Download Video File",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [1120, 300],
+      "parameters": {
+        "resource": "file",
+        "operation": "download",
+        "fileId": {
+          "mode": "id",
+          "value": "={{ $json.fileId }}"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "id": "upload-video",
+      "name": "Upload Video",
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [1340, 300],
+      "parameters": {
+        "resource": "video",
+        "operation": "upload",
+        "title": "={{ $json.title }}",
+        "regionCode": "US",
+        "categoryId": "22",
+        "options": {
+          "description": "={{ $json.description }}",
+          "tags": "={{ $json.tags }}",
+          "privacyStatus": "={{ $json.privacyStatus }}"
+        },
+        "binaryPropertyName": "data"
+      },
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "REPLACE_WITH_YOUTUBE_OAUTH2_CREDENTIAL_ID",
+          "name": "YouTube OAuth2 account"
+        }
+      },
+      "notes": "TODO(Alan): categoryId 22 = 'People & Blogs' — confirm that's the right category, full list is in YouTube's videoCategories.list docs. Requires the OAuth2 credential set up per the chat guide (Client ID/Secret with youtube.upload scope, your account added as OAuth consent screen test user). Built outside the n8n UI — sanity-check the 'options' field names against your n8n version's actual YouTube node, they've changed across versions."
+    },
+    {
+      "id": "uploaded-ok",
+      "name": "Uploaded OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1560, 300],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "uploaded-ok-cond",
+              "leftValue": "={{ !!$json.id }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "move-to-uploaded-folder",
+      "name": "Move To Uploaded Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [1780, 200],
+      "parameters": {
+        "resource": "file",
+        "operation": "move",
+        "fileId": {
+          "mode": "id",
+          "value": "={{ $('Combine Video Data').item.json.fileId }}"
+        },
+        "destinationFolderId": {
+          "mode": "id",
+          "value": "1tGAhuCd_NRbLhi5SHk7LE_4G1xrig8Gz"
+        }
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      },
+      "notes": "Moves the source file out of Pending so it's never re-uploaded on the next scheduled run. This is the only re-upload guard in this workflow — don't skip it."
+    },
+    {
+      "id": "update-row-status",
+      "name": "Update Row Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [2000, 200],
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "mode": "id",
+          "value": "1CjFJ_UA20Epf_OlUR78NaPkS1HvF9-ntRxWozH_GA_c"
+        },
+        "sheetName": {
+          "mode": "name",
+          "value": "Videos"
+        },
+        "columns": {
+          "matchingColumns": ["filename"],
+          "value": {
+            "filename": "={{ $('Combine Video Data').item.json.fileName }}",
+            "status": "uploaded",
+            "videoId": "={{ $('Upload Video').item.json.id }}",
+            "videoUrl": "={{ 'https://youtu.be/' + $('Upload Video').item.json.id }}"
+          }
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "notify-success",
+      "name": "Notify Success (Gmail Draft)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [2220, 200],
+      "parameters": {
+        "resource": "draft",
+        "operation": "create",
+        "subject": "={{ 'YouTube upload succeeded: ' + $('Combine Video Data').item.json.title }}",
+        "message": "={{ 'File: ' + $('Combine Video Data').item.json.fileName + '\\nTitle: ' + $('Combine Video Data').item.json.title + '\\nPrivacy: ' + $('Combine Video Data').item.json.privacyStatus + '\\nURL: https://youtu.be/' + $('Upload Video').item.json.id }}",
+        "options": {}
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      },
+      "notes": "Matches the Gmail-draft notification pattern already used by content-log.md / prospecting-log.md / the RingCentral subscription workflows. Fires even on 'public' auto-publish so you have a record without having to check YouTube Studio daily."
+    },
+    {
+      "id": "format-error",
+      "name": "Format Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1780, 420],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  fileName: $('Combine Video Data').item.json.fileName,\n  title: $('Combine Video Data').item.json.title,\n  errorBody: $json\n};"
+      }
+    },
+    {
+      "id": "notify-failure",
+      "name": "Notify Failure (Gmail Draft)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [2000, 420],
+      "parameters": {
+        "resource": "draft",
+        "operation": "create",
+        "subject": "={{ 'YouTube upload FAILED: ' + $json.fileName }}",
+        "message": "={{ 'File: ' + $json.fileName + '\\nTitle: ' + $json.title + '\\nError: ' + JSON.stringify($json.errorBody) + '\\n\\nThis file was NOT moved out of Pending, so it will be retried on the next scheduled run. If the error is something that will never succeed (e.g. bad file format), move it out of Pending yourself or it will keep failing and notifying every run.' }}",
+        "options": {}
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      },
+      "notes": "TODO(Alan): decide if repeated-failure files should auto-move to a 'Failed' folder after N retries instead of notifying forever. Not built — flagging rather than guessing your tolerance for noise."
+    }
+  ],
+  "connections": {
+    "Daily Check": {
+      "main": [[{ "node": "List Pending Videos", "type": "main", "index": 0 }]]
+    },
+    "List Pending Videos": {
+      "main": [[{ "node": "Lookup Metadata", "type": "main", "index": 0 }]]
+    },
+    "Lookup Metadata": {
+      "main": [[{ "node": "Combine Video Data", "type": "main", "index": 0 }]]
+    },
+    "Combine Video Data": {
+      "main": [[{ "node": "Download Video File", "type": "main", "index": 0 }]]
+    },
+    "Download Video File": {
+      "main": [[{ "node": "Upload Video", "type": "main", "index": 0 }]]
+    },
+    "Upload Video": {
+      "main": [[{ "node": "Uploaded OK?", "type": "main", "index": 0 }]]
+    },
+    "Uploaded OK?": {
+      "main": [
+        [{ "node": "Move To Uploaded Folder", "type": "main", "index": 0 }],
+        [{ "node": "Format Error", "type": "main", "index": 0 }]
+      ]
+    },
+    "Move To Uploaded Folder": {
+      "main": [[{ "node": "Update Row Status", "type": "main", "index": 0 }]]
+    },
+    "Update Row Status": {
+      "main": [[{ "node": "Notify Success (Gmail Draft)", "type": "main", "index": 0 }]]
+    },
+    "Format Error": {
+      "main": [[{ "node": "Notify Failure (Gmail Draft)", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null
+}
