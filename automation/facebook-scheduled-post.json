@@ -1,0 +1,249 @@
+{
+  "name": "Facebook Scheduled Post",
+  "nodes": [
+    {
+      "id": "schedule-trigger",
+      "name": "Daily Check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "notes": "TODO(Alan): confirm 9am daily is the cadence you want. Change the cron expression if you'd rather run multiple times/day or on specific days."
+    },
+    {
+      "id": "get-page-access-token",
+      "name": "Get Page Access Token",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "parameters": {
+        "authentication": "oAuth2",
+        "httpRequestMethod": "GET",
+        "node": "me",
+        "edge": "accounts",
+        "options": {}
+      },
+      "credentials": {
+        "facebookGraphApiOAuth2Api": {
+          "id": "REPLACE_WITH_FACEBOOK_GRAPH_CREDENTIAL_ID",
+          "name": "Facebook Graph account"
+        }
+      },
+      "notes": "Calls GET /me/accounts using the connected user's OAuth2 token to list every Facebook Page this account administers, each with its own long-lived Page access token. A USER access token cannot post to a Page directly -- Graph API requires the Page's own access token from this list, extracted in the next node. Requires the 'pages_show_list' permission at minimum (granted) -- posting itself needs 'pages_manage_posts', which was NOT yet added/tested in Alan's Meta app as of 2026-07-27 (see docs/facebook-scheduled-post-workflow.md)."
+    },
+    {
+      "id": "extract-target-page-token",
+      "name": "Extract Target Page Token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const targetPageId = '1096244530243584';\nconst match = $input.all().find(item => item.json.id === targetPageId);\nif (!match) {\n  throw new Error('Facebook Page ID ' + targetPageId + ' was not found in the list of Pages this account manages (GET /me/accounts). Check the Page ID in this node, and confirm the Facebook user connected to the credential is an admin of that Page.');\n}\nreturn [{ json: { pageId: match.json.id, pageAccessToken: match.json.access_token, pageName: match.json.name } }];"
+      },
+      "notes": "Page ID confirmed live 2026-07-28 by executing 'Get Page Access Token' in n8n after OAuth connected: the account manages exactly one Page, 'Everythinginternet.ca' (id 1096244530243584) -- not a separate 'Axiom Enterprises' page as the original design doc assumed. Throws a clear error and stops the run if the Page isn't found, rather than silently posting nowhere or with the wrong token."
+    },
+    {
+      "id": "get-all-posts",
+      "name": "Get All Posts",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [900, 300],
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "mode": "id",
+          "value": "1tEedBwa_wDAeg-DK4qCpCLt8Ssdhs-N0HipSO2yGYFA"
+        },
+        "sheetName": {
+          "mode": "name",
+          "value": "Posts"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "TODO(Alan): create a Sheet named 'Posts' with columns: postText, imageFileId (optional -- Google Drive file ID of the image, leave blank for a text-only post), scheduledDate (YYYY-MM-DD), status (pending/posted/failed), postId, postUrl. Reuse the same Google Sheets credential already wired into the YouTube/LinkedIn workflows -- don't create a second one. This reads every row every run; filtering to only the ones ready to post happens in the next node."
+    },
+    {
+      "id": "filter-ready",
+      "name": "Filter Ready To Post",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [1120, 300],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "status-pending",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "pending",
+              "operator": { "type": "string", "operation": "equals" }
+            },
+            {
+              "id": "date-due",
+              "leftValue": "={{ new Date($json.scheduledDate) <= new Date() }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ]
+        }
+      },
+      "notes": "Known n8n import quirk (same as the LinkedIn build): this Filter node's Value fields sometimes need to be re-typed by hand in the UI even when the JSON looks correct -- open the node and confirm both conditions are actually populated before relying on it. Also verify how Google Sheets is actually returning scheduledDate (string vs. serial date)."
+    },
+    {
+      "id": "has-image",
+      "name": "Has Image?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1340, 300],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "has-image-cond",
+              "leftValue": "={{ !!$json.imageFileId }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "download-image",
+      "name": "Download Image File",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [1560, 200],
+      "parameters": {
+        "resource": "file",
+        "operation": "download",
+        "fileId": {
+          "mode": "id",
+          "value": "={{ $json.imageFileId }}"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      },
+      "notes": "Reuse the same Google Drive credential already wired into the YouTube/LinkedIn workflows. Alan pastes the image's Drive file ID directly into the Sheet row, same pattern as the LinkedIn build."
+    },
+    {
+      "id": "create-approval-draft",
+      "name": "Create Approval Draft (Gmail)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1780, 300],
+      "parameters": {
+        "resource": "draft",
+        "operation": "create",
+        "subject": "={{ 'Facebook Page post ready for review: ' + $('Filter Ready To Post').item.json.postText.substring(0, 60) }}",
+        "message": "={{ 'Post text:\\n' + $('Filter Ready To Post').item.json.postText + '\\n\\nScheduled for: ' + $('Filter Ready To Post').item.json.scheduledDate + '\\n\\nImage: ' + ($('Filter Ready To Post').item.json.imageFileId ? ('Google Drive file ID ' + $('Filter Ready To Post').item.json.imageFileId) : 'no image') + '\\n\\nTarget Page: ' + $('Extract Target Page Token').first().json.pageName + ' (' + $('Extract Target Page Token').first().json.pageId + ')' + '\\n\\nGuardian review already happened upstream at draft time (per repo convention -- see automation/content-log.md). This workflow no longer posts to Facebook automatically. Review this draft and, if approved, publish it to the Page yourself.' }}",
+        "options": {}
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      },
+      "notes": "REPLACES the former 'Create Post With Image' and 'Create Text Only Post' Facebook Graph API nodes per Alan's 2026-08-02 decision (docs/decisions-log.md) -- this workflow no longer posts directly to Facebook. Single node handles both the has-image and no-image branches (Has Image? true -> Download Image File -> here; Has Image? false -> here directly). Judgment call: the draft references the image by its Drive file ID as text rather than attaching the actual binary, since 'Download Image File' output isn't guaranteed present on the no-image branch and the task only asked for 'a reference to the image (file ID or note no image)', not a live attachment -- flagging in case Alan would rather have the binary attached when available. Guardian review is assumed to have already happened at content-drafting time, same as every other content automation in this repo -- no in-workflow Guardian check was built here."
+    },
+    {
+      "id": "update-row-status",
+      "name": "Update Row Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [2000, 300],
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "mode": "id",
+          "value": "1tEedBwa_wDAeg-DK4qCpCLt8Ssdhs-N0HipSO2yGYFA"
+        },
+        "sheetName": {
+          "mode": "name",
+          "value": "Posts"
+        },
+        "columns": {
+          "matchingColumns": ["row_number"],
+          "value": {
+            "row_number": "={{ $('Filter Ready To Post').item.json.row_number }}",
+            "status": "awaiting_approval",
+            "postId": "",
+            "postUrl": ""
+          }
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Changed 2026-08-02: status is now 'awaiting_approval' instead of 'posted', and postId/postUrl are left blank, since n8n no longer creates the live post -- Alan does, manually, after reviewing the Gmail draft. This still guards against re-processing the row on the next daily run (Filter Ready To Post only matches status == pending), matching the original re-post-guard intent. No longer reads $json.id / $json.post_id since there's no Graph API response to read from -- the 'Posted OK?' IF node that used to gate this is removed entirely."
+    }
+  ],
+  "connections": {
+    "Daily Check": {
+      "main": [[{ "node": "Get Page Access Token", "type": "main", "index": 0 }]]
+    },
+    "Get Page Access Token": {
+      "main": [[{ "node": "Extract Target Page Token", "type": "main", "index": 0 }]]
+    },
+    "Extract Target Page Token": {
+      "main": [[{ "node": "Get All Posts", "type": "main", "index": 0 }]]
+    },
+    "Get All Posts": {
+      "main": [[{ "node": "Filter Ready To Post", "type": "main", "index": 0 }]]
+    },
+    "Filter Ready To Post": {
+      "main": [[{ "node": "Has Image?", "type": "main", "index": 0 }]]
+    },
+    "Has Image?": {
+      "main": [
+        [{ "node": "Download Image File", "type": "main", "index": 0 }],
+        [{ "node": "Create Approval Draft (Gmail)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Download Image File": {
+      "main": [[{ "node": "Create Approval Draft (Gmail)", "type": "main", "index": 0 }]]
+    },
+    "Create Approval Draft (Gmail)": {
+      "main": [[{ "node": "Update Row Status", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null
+}

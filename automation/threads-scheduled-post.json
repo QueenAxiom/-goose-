@@ -1,0 +1,343 @@
+{
+  "name": "Threads Scheduled Post",
+  "nodes": [
+    {
+      "id": "schedule-trigger",
+      "name": "Daily Check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "notes": "TODO(Alan): confirm 9am daily is the cadence you want, once the blocker below is resolved."
+    },
+    {
+      "id": "get-all-posts",
+      "name": "Get All Posts",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [460, 300],
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "mode": "id",
+          "value": "REPLACE_WITH_THREADS_SHEET_ID"
+        },
+        "sheetName": {
+          "mode": "name",
+          "value": "Posts"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "TODO(Alan): create a Sheet named 'Posts' with columns: postText, imageUrl (optional -- see deviation note below), scheduledDate (YYYY-MM-DD), status (pending/posted/failed), postId, postUrl. DEVIATION from the YouTube/Facebook/LinkedIn pattern, flagged not silent: this column is 'imageUrl', not 'imageFileId'. Threads' Content Publishing API only accepts a publicly-reachable image URL for image posts (no binary/multipart upload) -- so a Google Drive file ID doesn't work here directly. Alan must host the image somewhere with a public URL (a public Drive 'anyone with the link' share URL may work but is unverified against Threads' fetcher; a dedicated image host is more reliable) and put that URL directly in the row."
+    },
+    {
+      "id": "filter-ready",
+      "name": "Filter Ready To Post",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [680, 300],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "status-pending",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "pending",
+              "operator": { "type": "string", "operation": "equals" }
+            },
+            {
+              "id": "date-due",
+              "leftValue": "={{ new Date($json.scheduledDate) <= new Date() }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ]
+        }
+      },
+      "notes": "Known n8n import quirk (same as YouTube/LinkedIn/Facebook builds): this Filter node's Value fields sometimes need to be re-typed by hand in the UI even when the JSON looks correct."
+    },
+    {
+      "id": "has-image",
+      "name": "Has Image?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [900, 300],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "has-image-cond",
+              "leftValue": "={{ !!$json.imageUrl }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "create-container-image",
+      "name": "Create Media Container (Image)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 200],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.threads.net/v1.0/{{ 'REPLACE_WITH_THREADS_USER_ID' }}/threads",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "media_type", "value": "IMAGE" },
+            { "name": "image_url", "value": "={{ $('Filter Ready To Post').item.json.imageUrl }}" },
+            { "name": "text", "value": "={{ $('Filter Ready To Post').item.json.postText }}" }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "oAuth2Api": {
+          "id": "REPLACE_WITH_THREADS_OAUTH2_CREDENTIAL_ID",
+          "name": "Threads OAuth2 account"
+        }
+      },
+      "notes": "BLOCKED as of 2026-07-27 -- see docs/threads-scheduled-post-workflow.md 'Blocker' section. n8n has NO dedicated Threads node (confirmed live in the node picker: searching 'Threads' returns 'We didn't make that... yet -- you can probably do it with the HTTP Request node'), so this uses a generic HTTP Request node against Threads' own Graph API host (graph.threads.net, NOT graph.facebook.com -- Threads has a separate API surface from the main Facebook Graph API). Threads' two-step publish flow: (1) this node creates a 'media container' and returns a creation_id, (2) 'Publish Media Container' below actually posts it. Also requires the 'threads_content_publish' permission, which is NOT yet added to Alan's Meta app's Threads API use case (only 'threads_basic' is). Also requires a SEPARATE Threads App ID/Secret (Threads app ID 1047046641402198 was visible in the Meta console 2026-07-27, but its secret was not read/copied) -- distinct from the Facebook App ID/Secret Alan already supplied, which only authenticates the Facebook Graph API side, not Threads. REPLACE_WITH_THREADS_USER_ID is the Threads user/profile ID (obtained via GET /me on graph.threads.net once a Threads credential exists) -- not yet known. Built entirely from Meta's public Threads API documentation, not a live test execution -- sanity-check every field name before running."
+    },
+    {
+      "id": "create-container-text",
+      "name": "Create Media Container (Text)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 400],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.threads.net/v1.0/{{ 'REPLACE_WITH_THREADS_USER_ID' }}/threads",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "media_type", "value": "TEXT" },
+            { "name": "text", "value": "={{ $('Filter Ready To Post').item.json.postText }}" }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "oAuth2Api": {
+          "id": "REPLACE_WITH_THREADS_OAUTH2_CREDENTIAL_ID",
+          "name": "Threads OAuth2 account"
+        }
+      },
+      "notes": "Same BLOCKED status and same caveats as Create Media Container (Image) -- see that node's notes and docs/threads-scheduled-post-workflow.md."
+    },
+    {
+      "id": "publish-container",
+      "name": "Publish Media Container",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.threads.net/v1.0/{{ 'REPLACE_WITH_THREADS_USER_ID' }}/threads_publish",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "creation_id", "value": "={{ $json.id }}" }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "oAuth2Api": {
+          "id": "REPLACE_WITH_THREADS_OAUTH2_CREDENTIAL_ID",
+          "name": "Threads OAuth2 account"
+        }
+      },
+      "notes": "Second step of Threads' publish flow -- takes the creation_id (id) returned by whichever 'Create Media Container' node ran, and actually publishes it. Meta's docs recommend a short delay before publishing (they suggest polling the container's status_code until FINISHED, mainly relevant for video); for text/image this is usually near-instant but not guaranteed -- flagging as an unverified assumption, not built here, since it can't be tested against a live credential yet."
+    },
+    {
+      "id": "posted-ok",
+      "name": "Posted OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1560, 300],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "posted-ok-cond",
+              "leftValue": "={{ !!$json.id }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ]
+        }
+      },
+      "notes": "Assumes threads_publish's response has an 'id' field (the published Thread's ID) on success, per Meta's published docs -- unverified against a live call. Confirm on first real run."
+    },
+    {
+      "id": "update-row-status",
+      "name": "Update Row Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1780, 200],
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "mode": "id",
+          "value": "REPLACE_WITH_THREADS_SHEET_ID"
+        },
+        "sheetName": {
+          "mode": "name",
+          "value": "Posts"
+        },
+        "columns": {
+          "matchingColumns": ["row_number"],
+          "value": {
+            "row_number": "={{ $('Filter Ready To Post').item.json.row_number }}",
+            "status": "posted",
+            "postId": "={{ $json.id }}",
+            "postUrl": "={{ 'https://www.threads.net/t/' + $json.id }}"
+          }
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Matches by row_number, same pattern as the LinkedIn/Facebook builds. postUrl format ('threads.net/t/{id}') is a best-guess based on Threads' public URL shape, not verified -- confirm once a real post succeeds."
+    },
+    {
+      "id": "notify-success",
+      "name": "Notify Success (Gmail Draft)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [2000, 200],
+      "parameters": {
+        "resource": "draft",
+        "operation": "create",
+        "subject": "={{ 'Threads post succeeded' }}",
+        "message": "={{ 'Post text: ' + $('Filter Ready To Post').item.json.postText + '\\nScheduled for: ' + $('Filter Ready To Post').item.json.scheduledDate + '\\nURL: https://www.threads.net/t/' + $json.id }}",
+        "options": {}
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      },
+      "notes": "Matches the Gmail-draft notification pattern used across every other automation in this repo."
+    },
+    {
+      "id": "format-error",
+      "name": "Format Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1780, 420],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  postText: $('Filter Ready To Post').item.json.postText,\n  scheduledDate: $('Filter Ready To Post').item.json.scheduledDate,\n  errorBody: $json\n};"
+      }
+    },
+    {
+      "id": "notify-failure",
+      "name": "Notify Failure (Gmail Draft)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [2000, 420],
+      "parameters": {
+        "resource": "draft",
+        "operation": "create",
+        "subject": "={{ 'Threads post FAILED: ' + ($json.postText || '').substring(0, 60) }}",
+        "message": "={{ 'Post text: ' + $json.postText + '\\nScheduled for: ' + $json.scheduledDate + '\\nError: ' + JSON.stringify($json.errorBody) + '\\n\\nRow status was NOT updated, so it will retry next run.' }}",
+        "options": {}
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      },
+      "notes": "TODO(Alan): decide if repeated-failure rows should auto-flip to status=failed after N retries instead of notifying forever, same open question as every other workflow in this repo."
+    }
+  ],
+  "connections": {
+    "Daily Check": {
+      "main": [[{ "node": "Get All Posts", "type": "main", "index": 0 }]]
+    },
+    "Get All Posts": {
+      "main": [[{ "node": "Filter Ready To Post", "type": "main", "index": 0 }]]
+    },
+    "Filter Ready To Post": {
+      "main": [[{ "node": "Has Image?", "type": "main", "index": 0 }]]
+    },
+    "Has Image?": {
+      "main": [
+        [{ "node": "Create Media Container (Image)", "type": "main", "index": 0 }],
+        [{ "node": "Create Media Container (Text)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Create Media Container (Image)": {
+      "main": [[{ "node": "Publish Media Container", "type": "main", "index": 0 }]]
+    },
+    "Create Media Container (Text)": {
+      "main": [[{ "node": "Publish Media Container", "type": "main", "index": 0 }]]
+    },
+    "Publish Media Container": {
+      "main": [[{ "node": "Posted OK?", "type": "main", "index": 0 }]]
+    },
+    "Posted OK?": {
+      "main": [
+        [{ "node": "Update Row Status", "type": "main", "index": 0 }],
+        [{ "node": "Format Error", "type": "main", "index": 0 }]
+      ]
+    },
+    "Update Row Status": {
+      "main": [[{ "node": "Notify Success (Gmail Draft)", "type": "main", "index": 0 }]]
+    },
+    "Format Error": {
+      "main": [[{ "node": "Notify Failure (Gmail Draft)", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null
+}
