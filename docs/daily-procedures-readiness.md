@@ -9,10 +9,11 @@ Status snapshot as of 2026-08-02. Tracks what's blocking each scheduled/recurrin
 | Facebook scheduled post | No | Live n8n workflow is in a broken 23-node dual state (old + new design side by side, disconnected) from a failed cleanup attempt — needs manual fix before any test run |
 | RingCentral subscription register/renew | No | Webhook validation handshake not yet added to the existing receive workflow; JSON never imported into n8n |
 | YouTube scheduled auto-upload | No | Never imported into n8n; `REPLACE_WITH_...` placeholders (folder IDs, Sheet ID, Gmail credential) still unfilled |
+| Docs nightly backup | **Yes — live** | None. Runs locally via Windows Scheduled Task `AxiomDocsBackupToDrive` (daily 1am), not N8N — see `docs/decisions-log.md` 2026-08-05 supersession entry |
 | LinkedIn Company Page post | Blocked externally | LinkedIn won't add the Company Page product to the existing app — needs a new single-product app + Page verification |
 | Threads post | Blocked externally | `threads_content_publish` permission not granted, app secret not retrieved, no dedicated n8n node |
 
-Zero of the five are currently live and verified. Priority order below reflects urgency, not doc order — RingCentral is time-sensitive (silent subscription expiry, ~7 days) even though Facebook is closer to done.
+Zero of the six are currently live and verified. Priority order below reflects urgency, not doc order — RingCentral is time-sensitive (silent subscription expiry, ~7 days) even though Facebook is closer to done. Docs nightly backup is low-risk filler work — no shared credentials/nodes with anything else in flight, so it can proceed in parallel without displacing RingCentral as the top priority.
 
 ## 1. Facebook — fix the live n8n workflow (closest to done)
 
@@ -55,6 +56,12 @@ This is the only workflow in the repo that publishes live with **zero human revi
 - [ ] Confirm `public` privacy default is really wanted
 - [ ] Confirm `categoryId: 22` ("People & Blogs") is right for the channel
 - [ ] Test with one throwaway video end-to-end before trusting the daily schedule
+
+## 4. Docs nightly backup — LIVE (2026-08-05)
+
+Running locally, not via n8n — see `docs/decisions-log.md` 2026-08-05 supersession entry for why. Windows Scheduled Task `AxiomDocsBackupToDrive` runs `automation/backup-docs-to-drive.ps1` daily at 8am (changed from 1am on 2026-08-05), copying 5 tracked docs into `C:\Users\DELL\Google Drive Streaming\My Drive\Axiom Backups\YYYY-MM-DD\`, which syncs to Drive automatically. Verified working with a manual test run (5/5 copied) before scheduling. Log of each run: `automation/backup-docs-to-drive.log`.
+
+The N8N/GitHub-sourced design (`automation/docs-nightly-backup.json`, `docs/docs-nightly-backup-workflow.md`) is kept as a reference alternative, not active — its remaining TODOs only matter if this local mechanism ever needs replacing with a cloud-hosted one (e.g., if the machine won't reliably be on at 1am).
 
 ## Not actionable yet — blocked externally
 

@@ -1,0 +1,353 @@
+{
+  "name": "Docs Nightly Backup",
+  "nodes": [
+    {
+      "id": "nightly-check",
+      "name": "Nightly Check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 400],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 1 * * *"
+            }
+          ]
+        }
+      },
+      "notes": "1am daily — off-peak, deliberately offset from RingCentral's ~3am renewal and YouTube's 9am upload check so backups don't collide with other scheduled runs. TODO(Alan): confirm this time works, or adjust the cron expression."
+    },
+    {
+      "id": "compute-date-stamp",
+      "name": "Compute Date Stamp",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 400],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "date-stamp",
+              "name": "dateStamp",
+              "type": "string",
+              "value": "={{ $now.format('yyyy-LL-dd') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "One date string reused by every Drive upload branch below so all five backups from tonight's run share the same filename date suffix."
+    },
+    {
+      "id": "get-content-pipeline",
+      "name": "Get Content Pipeline Doc",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [700, 120],
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "get",
+        "owner": { "__rl": true, "mode": "list", "value": "QueenAxiom", "cachedResultName": "QueenAxiom" },
+        "repository": { "__rl": true, "mode": "list", "value": "-goose-", "cachedResultName": "-goose-" },
+        "filePath": "docs/content-automation-pipeline.md",
+        "asBinaryProperty": true,
+        "binaryPropertyName": "data",
+        "additionalParameters": {}
+      },
+      "credentials": {
+        "githubOAuth2Api": { "id": "REPLACE_WITH_GITHUB_CREDENTIAL_ID", "name": "GitHub account" }
+      },
+      "continueOnFail": true,
+      "notes": "Reuses the existing GitHub credential already connected in this n8n instance. Reads from the `main` branch of QueenAxiom/-goose- — this only backs up whatever has actually been pushed to GitHub, not uncommitted local changes. continueOnFail is on so one missing/renamed file doesn't kill the other four branches; a failed branch just produces no attachment/upload for that file tonight. Built outside the n8n UI — sanity-check the GitHub node's actual field names on import (asBinaryProperty/binaryPropertyName placement has changed across versions, same caveat as every other workflow in this repo)."
+    },
+    {
+      "id": "get-decisions-log",
+      "name": "Get Decisions Log",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [700, 280],
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "get",
+        "owner": { "__rl": true, "mode": "list", "value": "QueenAxiom", "cachedResultName": "QueenAxiom" },
+        "repository": { "__rl": true, "mode": "list", "value": "-goose-", "cachedResultName": "-goose-" },
+        "filePath": "docs/decisions-log.md",
+        "asBinaryProperty": true,
+        "binaryPropertyName": "data",
+        "additionalParameters": {}
+      },
+      "credentials": {
+        "githubOAuth2Api": { "id": "REPLACE_WITH_GITHUB_CREDENTIAL_ID", "name": "GitHub account" }
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "get-readiness-doc",
+      "name": "Get Readiness Doc",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [700, 440],
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "get",
+        "owner": { "__rl": true, "mode": "list", "value": "QueenAxiom", "cachedResultName": "QueenAxiom" },
+        "repository": { "__rl": true, "mode": "list", "value": "-goose-", "cachedResultName": "-goose-" },
+        "filePath": "docs/daily-procedures-readiness.md",
+        "asBinaryProperty": true,
+        "binaryPropertyName": "data",
+        "additionalParameters": {}
+      },
+      "credentials": {
+        "githubOAuth2Api": { "id": "REPLACE_WITH_GITHUB_CREDENTIAL_ID", "name": "GitHub account" }
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "get-content-log",
+      "name": "Get Content Log",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [700, 600],
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "get",
+        "owner": { "__rl": true, "mode": "list", "value": "QueenAxiom", "cachedResultName": "QueenAxiom" },
+        "repository": { "__rl": true, "mode": "list", "value": "-goose-", "cachedResultName": "-goose-" },
+        "filePath": "automation/content-log.md",
+        "asBinaryProperty": true,
+        "binaryPropertyName": "data",
+        "additionalParameters": {}
+      },
+      "credentials": {
+        "githubOAuth2Api": { "id": "REPLACE_WITH_GITHUB_CREDENTIAL_ID", "name": "GitHub account" }
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "get-prospecting-log",
+      "name": "Get Prospecting Log",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [700, 760],
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "get",
+        "owner": { "__rl": true, "mode": "list", "value": "QueenAxiom", "cachedResultName": "QueenAxiom" },
+        "repository": { "__rl": true, "mode": "list", "value": "-goose-", "cachedResultName": "-goose-" },
+        "filePath": "automation/prospecting-log.md",
+        "asBinaryProperty": true,
+        "binaryPropertyName": "data",
+        "additionalParameters": {}
+      },
+      "credentials": {
+        "githubOAuth2Api": { "id": "REPLACE_WITH_GITHUB_CREDENTIAL_ID", "name": "GitHub account" }
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "upload-content-pipeline",
+      "name": "Upload Content Pipeline to Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [960, 120],
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "name": "={{ 'content-automation-pipeline_' + $('Compute Date Stamp').item.json.dateStamp + '.md' }}",
+        "driveId": { "mode": "list", "value": "My Drive" },
+        "folderId": { "mode": "id", "value": "REPLACE_WITH_BACKUP_FOLDER_ID" },
+        "binaryData": true,
+        "binaryPropertyName": "data",
+        "options": {}
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": { "id": "REPLACE_WITH_GOOGLE_DRIVE_CREDENTIAL_ID", "name": "Google Drive account" }
+      },
+      "continueOnFail": true,
+      "notes": "TODO(Alan): create a Drive folder (suggest 'Axiom Backups') and put its ID here — shared by all five upload branches. Uploads as dated snapshots (not overwrite-in-place) so a bad night's copy never destroys backup history; Drive will accumulate one file per doc per day."
+    },
+    {
+      "id": "upload-decisions-log",
+      "name": "Upload Decisions Log to Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [960, 280],
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "name": "={{ 'decisions-log_' + $('Compute Date Stamp').item.json.dateStamp + '.md' }}",
+        "driveId": { "mode": "list", "value": "My Drive" },
+        "folderId": { "mode": "id", "value": "REPLACE_WITH_BACKUP_FOLDER_ID" },
+        "binaryData": true,
+        "binaryPropertyName": "data",
+        "options": {}
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": { "id": "REPLACE_WITH_GOOGLE_DRIVE_CREDENTIAL_ID", "name": "Google Drive account" }
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "upload-readiness-doc",
+      "name": "Upload Readiness Doc to Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [960, 440],
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "name": "={{ 'daily-procedures-readiness_' + $('Compute Date Stamp').item.json.dateStamp + '.md' }}",
+        "driveId": { "mode": "list", "value": "My Drive" },
+        "folderId": { "mode": "id", "value": "REPLACE_WITH_BACKUP_FOLDER_ID" },
+        "binaryData": true,
+        "binaryPropertyName": "data",
+        "options": {}
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": { "id": "REPLACE_WITH_GOOGLE_DRIVE_CREDENTIAL_ID", "name": "Google Drive account" }
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "upload-content-log",
+      "name": "Upload Content Log to Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [960, 600],
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "name": "={{ 'content-log_' + $('Compute Date Stamp').item.json.dateStamp + '.md' }}",
+        "driveId": { "mode": "list", "value": "My Drive" },
+        "folderId": { "mode": "id", "value": "REPLACE_WITH_BACKUP_FOLDER_ID" },
+        "binaryData": true,
+        "binaryPropertyName": "data",
+        "options": {}
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": { "id": "REPLACE_WITH_GOOGLE_DRIVE_CREDENTIAL_ID", "name": "Google Drive account" }
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "upload-prospecting-log",
+      "name": "Upload Prospecting Log to Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [960, 760],
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "name": "={{ 'prospecting-log_' + $('Compute Date Stamp').item.json.dateStamp + '.md' }}",
+        "driveId": { "mode": "list", "value": "My Drive" },
+        "folderId": { "mode": "id", "value": "REPLACE_WITH_BACKUP_FOLDER_ID" },
+        "binaryData": true,
+        "binaryPropertyName": "data",
+        "options": {}
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": { "id": "REPLACE_WITH_GOOGLE_DRIVE_CREDENTIAL_ID", "name": "Google Drive account" }
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "merge-attachments",
+      "name": "Merge Attachments",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1220, 440],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const binary = {};\nlet count = 0;\nfor (let i = 0; i < items.length; i++) {\n  if (items[i].binary && items[i].binary.data) {\n    count++;\n    binary['file' + count] = items[i].binary.data;\n  }\n}\nreturn [{ json: { attachedCount: count }, binary }];"
+      },
+      "notes": "Fan-in from all five GitHub branches (wire all five 'Get ... Doc/Log' nodes into this node's single input). Any branch that failed (continueOnFail) simply won't have binary.data and gets skipped here, so a bad file doesn't block the other attachments. Renumbers whatever arrives as file1..fileN — order isn't guaranteed to match the branch order above, only the count and content matter."
+    },
+    {
+      "id": "send-backup-email",
+      "name": "Send Backup Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1440, 440],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "rise@empoweredathome.com",
+        "subject": "={{ 'Nightly docs backup — ' + $('Compute Date Stamp').item.json.dateStamp }}",
+        "message": "={{ 'Nightly backup of ' + $json.attachedCount + '/5 tracked docs from GitHub (QueenAxiom/-goose-, main branch), also uploaded to the Axiom Backups Drive folder as dated snapshots. If attachedCount is below 5, check which GitHub fetch failed tonight (renamed/moved file, or not yet pushed to GitHub).' }}",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              { "property": "file1" },
+              { "property": "file2" },
+              { "property": "file3" },
+              { "property": "file4" },
+              { "property": "file5" }
+            ]
+          }
+        }
+      },
+      "credentials": {
+        "gmailOAuth2": { "id": "REPLACE_WITH_GMAIL_CREDENTIAL_ID", "name": "Gmail account" }
+      },
+      "notes": "Sends directly (not a draft) — this is a passive backup copy, not content awaiting approval, so it doesn't need the Guardian/draft pattern used elsewhere in this repo. Attachment field shape (attachmentsUi/attachmentsBinary) is a best guess at the current Gmail node schema — verify on import like every other node in this workflow."
+    }
+  ],
+  "connections": {
+    "Nightly Check": {
+      "main": [[{ "node": "Compute Date Stamp", "type": "main", "index": 0 }]]
+    },
+    "Compute Date Stamp": {
+      "main": [[
+        { "node": "Get Content Pipeline Doc", "type": "main", "index": 0 },
+        { "node": "Get Decisions Log", "type": "main", "index": 0 },
+        { "node": "Get Readiness Doc", "type": "main", "index": 0 },
+        { "node": "Get Content Log", "type": "main", "index": 0 },
+        { "node": "Get Prospecting Log", "type": "main", "index": 0 }
+      ]]
+    },
+    "Get Content Pipeline Doc": {
+      "main": [[
+        { "node": "Upload Content Pipeline to Drive", "type": "main", "index": 0 },
+        { "node": "Merge Attachments", "type": "main", "index": 0 }
+      ]]
+    },
+    "Get Decisions Log": {
+      "main": [[
+        { "node": "Upload Decisions Log to Drive", "type": "main", "index": 0 },
+        { "node": "Merge Attachments", "type": "main", "index": 0 }
+      ]]
+    },
+    "Get Readiness Doc": {
+      "main": [[
+        { "node": "Upload Readiness Doc to Drive", "type": "main", "index": 0 },
+        { "node": "Merge Attachments", "type": "main", "index": 0 }
+      ]]
+    },
+    "Get Content Log": {
+      "main": [[
+        { "node": "Upload Content Log to Drive", "type": "main", "index": 0 },
+        { "node": "Merge Attachments", "type": "main", "index": 0 }
+      ]]
+    },
+    "Get Prospecting Log": {
+      "main": [[
+        { "node": "Upload Prospecting Log to Drive", "type": "main", "index": 0 },
+        { "node": "Merge Attachments", "type": "main", "index": 0 }
+      ]]
+    },
+    "Merge Attachments": {
+      "main": [[{ "node": "Send Backup Email", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null
+}
