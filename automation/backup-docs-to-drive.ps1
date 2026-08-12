@@ -36,3 +36,17 @@ if ($Missing.Count -gt 0) {
 Add-Content -Path (Join-Path $RepoRoot "automation\backup-docs-to-drive.log") -Value $LogLine
 
 Write-Output $LogLine
+
+try {
+    Push-Location $RepoRoot
+    git add "automation\backup-docs-to-drive.log" | Out-Null
+    git diff --cached --quiet --exit-code -- "automation\backup-docs-to-drive.log"
+    if ($LASTEXITCODE -ne 0) {
+        git commit -m "chore: update backup log $DateStamp" | Out-Null
+        git push origin HEAD | Out-Null
+    }
+} catch {
+    Write-Warning "Failed to commit/push backup log: $_"
+} finally {
+    Pop-Location
+}
