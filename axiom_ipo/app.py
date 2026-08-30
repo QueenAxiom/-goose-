@@ -5,9 +5,12 @@ Axiom IPO Intelligence Web Application
 from flask import Flask, render_template, request, jsonify
 from axiom_ipo.scorer import IPOScorer, IPOData
 from axiom_ipo.historical_data import HISTORICAL_IPOS, get_historical_ipo, get_all_symbols, get_cohort_stats
+from axiom_ipo.trading_strategies import TradingStrategiesEngine, TradingEducationHub
 
 app = Flask(__name__)
 scorer = IPOScorer()
+strategies_engine = TradingStrategiesEngine()
+education = TradingEducationHub()
 
 # Sample IPO data for testing
 SAMPLE_IPOS = {
@@ -300,6 +303,84 @@ def generate_interpretation(backtest_result, ipo):
             return f"❌ Missed Upside: Buffett score {buffett}/100 seemed attractive but IPO underperformed ({actual:.1f}% return). {ipo.notes}"
         else:
             return f"❌ False Warning: Buffett score {buffett}/100 seemed concerning but IPO outperformed ({actual:.1f}% return). {ipo.notes}"
+
+
+@app.route("/api/strategies/recommended", methods=["POST"])
+def api_recommended_strategies():
+    """Get recommended trading strategies based on scores"""
+    data = request.get_json()
+
+    try:
+        ipo_trade_score = int(data.get("ipo_trade_score", 50))
+        buffett_score = int(data.get("buffett_score", 50))
+        market_conditions = data.get("market_conditions", "warm")
+
+        recommendations = strategies_engine.get_recommended_strategies(
+            ipo_trade_score, buffett_score, market_conditions
+        )
+
+        return jsonify({
+            "success": True,
+            "recommendations": recommendations,
+            "count": len(recommendations)
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+
+@app.route("/api/strategies/<strategy_name>", methods=["GET"])
+def api_strategy_details(strategy_name):
+    """Get detailed information about a specific trading strategy"""
+    try:
+        strategy_name = strategy_name.replace("-", " ").replace("_", " ").title()
+        details = strategies_engine.get_strategy_details(strategy_name)
+
+        if "error" in details:
+            return jsonify(details), 404
+
+        return jsonify({
+            "success": True,
+            "strategy": details
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+
+@app.route("/api/education/modules", methods=["GET"])
+def api_education_modules():
+    """List all available education modules"""
+    modules = education.list_modules()
+    return jsonify({
+        "success": True,
+        "modules": modules,
+        "count": len(modules)
+    })
+
+
+@app.route("/api/education/<module_name>", methods=["GET"])
+def api_education_module(module_name):
+    """Get full education module content"""
+    try:
+        module = education.get_module(module_name)
+
+        if "error" in module:
+            return jsonify(module), 404
+
+        return jsonify({
+            "success": True,
+            "module": module
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+
+@app.route("/api/education/tip", methods=["GET"])
+def api_trading_tip():
+    """Get a random trading tip"""
+    return jsonify({
+        "success": True,
+        "tip": education.get_quick_tip()
+    })
 
 
 if __name__ == "__main__":
