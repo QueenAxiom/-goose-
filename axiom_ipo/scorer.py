@@ -58,6 +58,19 @@ class AnalysisResult:
     risks: list[str]
 
 
+class BacktestResult:
+    """Results from backtesting against historical IPO"""
+    def __init__(self, ipo_symbol: str, ipo_name: str, predicted_buffett: int, predicted_trade: int,
+                 actual_3yr_return: float, correct_call: bool, first_day_return: float):
+        self.ipo_symbol = ipo_symbol
+        self.ipo_name = ipo_name
+        self.predicted_buffett = predicted_buffett
+        self.predicted_trade = predicted_trade
+        self.actual_3yr_return = actual_3yr_return
+        self.correct_call = correct_call
+        self.first_day_return = first_day_return
+
+
 class IPOScorer:
     """Core scoring engine for Axiom IPO Intelligence"""
 
@@ -316,3 +329,41 @@ class IPOScorer:
             risks.append("No evidence of management team being trusted by experienced investors (e.g., Berkshire)")
 
         return risks
+
+    def backtest_historical_ipo(self, historical_ipo) -> BacktestResult:
+        """Score a historical IPO and compare to actual results"""
+        # Convert historical IPO to IPOData
+        data = IPOData(
+            company_name=historical_ipo.company_name,
+            ipo_date=historical_ipo.ipo_date,
+            profitable=historical_ipo.profitable_at_ipo,
+            annual_revenue=historical_ipo.annual_revenue_m,
+            price_to_sales=historical_ipo.price_to_sales,
+            company_age_years=historical_ipo.company_age_years,
+            management_berkshire_history=historical_ipo.management_berkshire,
+            market_conditions=historical_ipo.market_conditions,
+            expected_volatility=historical_ipo.expected_volatility,
+            public_float_pct=historical_ipo.public_float_pct
+        )
+
+        # Score it
+        factors = self._calculate_factors(data)
+        buffett_score = self._calculate_buffett_score(data, factors)
+        trade_score = self._calculate_ipo_trade_score(data, factors)
+
+        # Determine if prediction was "correct"
+        # Buffett score should predict long-term success
+        actual_return = historical_ipo.three_year_return_pct
+        predicted_success = buffett_score >= 60  # Score >= 60 suggests good long-term candidate
+        actual_success = actual_return >= 20  # 20%+ return is "success"
+        correct_call = predicted_success == actual_success
+
+        return BacktestResult(
+            ipo_symbol=historical_ipo.symbol,
+            ipo_name=historical_ipo.company_name,
+            predicted_buffett=buffett_score,
+            predicted_trade=trade_score,
+            actual_3yr_return=actual_return,
+            correct_call=correct_call,
+            first_day_return=historical_ipo.first_day_return_pct
+        )
