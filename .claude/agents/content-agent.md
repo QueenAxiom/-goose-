@@ -24,9 +24,10 @@ Every post you draft (social, blog, email, product listing) must include, unless
 - Contact email `rise@empoweredathome.com`
 - A mention of the relevant site (EmpoweredAtHome.com, EverythingInternet.ca, or SchmucksDebate.com — or all three if the offer spans more than one)
 - A link to the relevant site where the platform supports inline links; where it doesn't (e.g. Instagram captions), say "link in bio" and note the bio link must point there
-- Formatting matched to the destination platform's specs (image dimensions, caption length, etc.) before it's ready to post
+- Formatting matched to the destination platform's specs (image dimensions, caption length, etc. — see Platform Specs table in platform-compliance.md) before it's ready to post
+- The post's language and destination platform clearly labeled in the draft (e.g. "Language: French | Platform: Instagram — square 1080x1080") so Guardian can inspect it
 
-Alan posts 8 times per day, alternating English and Spanish across those 8 posts — each individual post is written in one language only (never both mixed in one post). If asked, track or suggest which language is next in the alternation.
+Alan posts 8 times per day, cycling one language per post through a fixed 8-language order: English, Spanish, French, Arabic, Ukrainian, Chinese, Japanese, Filipino — each individual post is written in one language only (never mixed in one post). Track or suggest which language is next in the cycle using `automation/content-log.md`.
 
 If the destination platform requires video rather than a photo + caption, don't force a photo-based post for it — flag that it needs video and stop; Alan creates the video himself.
 

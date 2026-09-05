@@ -1,0 +1,25 @@
+{
+  "testLabel": "Short only, scaling enabled",
+  "dataSource": "Yahoo Finance chart API (query1.finance.yahoo.com/v8/finance/chart/SPY), interval=5m",
+  "dateRangeLocal": "2026-05-29T09:30:00.000 -> 2026-08-24T15:05:00.000 (America/New_York)",
+  "barCount": 4670,
+  "config": {
+    "emaFast": 9,
+    "emaSlow": 21,
+    "initialRiskPct": 0.35,
+    "stopPct": 0.22,
+    "targetPct": 0.44,
+    "scale1Pct": 0.11,
+    "scale2Pct": 0.22,
+    "initialPositionPct": 50,
+    "scale1PositionPct": 25,
+    "scale2PositionPct": 25,
+    "slippagePct": 0.01,
+    "commissionPerFill": 0,
+    "maxDrawdownPct": 20,
+    "longEnabled": false,
+    "shortEnabled": true,
+    "scalingEnabled": true,
+    "startingEquity": 100000
+  }
+}

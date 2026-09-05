@@ -11,7 +11,8 @@ Referenced by `sales-manager.md` and `content-agent.md`. Previously a pure skele
 
 **Pocket AI Voice Recorder** — active content-marketing subject (see `automation/content-log.md`, 2026-07-24 EN/ES drafts, real product photos referenced), but NOT confirmed as an Axiom-manufactured product:
 - This appears to be a third-party device made by Open Vision Engineering, sold on Amazon (ASINs `B0GV1JFT89`, `B0GV214XQ9`) at $79, with an optional $19.99/mo "Pocket Pro" subscription
-- TODO(Alan): clarify the actual relationship — is EmpoweredAtHome.com an affiliate for this device, a reseller, or is this a private-label/rebrand? Content-agent needs this to know what claims it's allowed to make (e.g. can it link to a purchase page, or only describe the product editorially?)
+- **Update (2026-08-07):** Alan confirmed Axiom Enterprises owns/has access to a **Plaud Note Pro** device — a different manufacturer than the Open Vision Engineering attribution above. Not yet confirmed whether this is the same device being marketed here (i.e. the Open Vision Engineering research was wrong) or a separate asset unrelated to this content. See `docs/tool-inventory.md` for the Plaud asset entry, including its new MCP server support.
+- TODO(Alan): clarify the actual relationship — is EmpoweredAtHome.com an affiliate for this device, a reseller, or is this a private-label/rebrand? Is the marketed device the Plaud Note Pro or the Open Vision Engineering device? Content-agent needs this to know what claims it's allowed to make (e.g. can it link to a purchase page, or only describe the product editorially?)
 
 ## EverythingInternet.ca
 

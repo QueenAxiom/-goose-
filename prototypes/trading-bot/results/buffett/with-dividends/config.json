@@ -1,0 +1,15 @@
+{
+  "dataSource": "Yahoo Finance chart API (query1.finance.yahoo.com/v8/finance/chart/SPY), interval=1d, events=div",
+  "dateRange": "2001-08-27 -> 2026-08-21",
+  "barCount": 6283,
+  "config": {
+    "startingEquity": 100000,
+    "initialDeployPct": 50,
+    "dipBandPct": 10,
+    "dipAddPct": 10,
+    "slippagePct": 0.01,
+    "commissionPerFill": 0,
+    "collectDividends": true,
+    "dividends": "101 real historical payments, see dividend_payments.csv"
+  }
+}

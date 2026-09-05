@@ -1,0 +1,9 @@
+buyId,kind,band,date,price,shares,cost,cashRemainingAfter,sharesAfter,avgCostAfter,athAtTrigger,drawdownPctAtTrigger,commentary
+B001,initial,0,2001-08-28,118.29,422,49919.15,50080.85,422,118.29,,,"Opening stake. Time in the market, not timing it - the rest of the cash stays ready for when it's needed."
+B002,dip,1,2001-09-18,104.34,95,9912.34,40168.51,517,115.73,118.31,11.84,"First real pullback. This is exactly the kind of dip a patient buyer waits for - adding here, not panicking."
+B003,dip,2,2002-07-11,91.77,108,9911.07,30257.44,625,111.59,118.31,22.14,"Deeper now. Prices this far below the highs are a gift for anyone still holding cash, not a reason to run."
+B004,dip,3,2002-07-23,82.56,121,9989.55,20267.89,746,106.88,118.31,30.52,This is a real correction. Others are fearful - that's precisely the setup a disciplined buyer wants.
+B005,dip,1,2008-01-09,139.1,71,9876.38,10391.51,817,109.68,156.48,11.23,"First real pullback. This is exactly the kind of dip a patient buyer waits for - adding here, not panicking."
+B006,dip,2,2008-07-08,125,79,9875.2,516.31,896,111.03,156.48,20.1,"Deeper now. Prices this far below the highs are a gift for anyone still holding cash, not a reason to run."
+B007,dip,3,2008-10-07,106.85,4,427.4,88.91,900,111.01,156.48,33.08,This is a real correction. Others are fearful - that's precisely the setup a disciplined buyer wants.
+B008,dip,4,2008-10-10,86.77,1,86.77,2.14,901,110.99,156.48,42.04,"A genuine crisis-level drawdown. Uncomfortable, but this is when the best long-term prices get made."

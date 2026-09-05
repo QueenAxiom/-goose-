@@ -1,0 +1,485 @@
+{
+  "noDividends": {
+    "dataRange": "2001-08-27 -> 2026-08-21",
+    "years": 24.98,
+    "startingEquity": 100000,
+    "endingEquity": 689915.84,
+    "netPnl": 589915.84,
+    "returnPct": 589.92,
+    "cagrPct": 8.04,
+    "maxDrawdownPct": 55.21,
+    "numBuys": 8,
+    "initialBuys": 1,
+    "dipBuys": 7,
+    "deepestDrawdownBandHit": 4,
+    "finalShares": 901,
+    "avgCostBasis": 110.99,
+    "finalCashPct": 0,
+    "deployedPct": 100,
+    "dividendsCollected": 0,
+    "numDividendPayments": 0,
+    "baseline": {
+      "description": "100% lump-sum on day 1, no dip-buying, no cash reserve, no dividends",
+      "finalEquity": 647076.78,
+      "returnPct": 547.08,
+      "cagrPct": 7.76,
+      "maxDrawdownPct": 56.46,
+      "dividendsCollected": 0
+    },
+    "vsBaselinePct": 42.84,
+    "config": {
+      "startingEquity": 100000,
+      "initialDeployPct": 50,
+      "dipBandPct": 10,
+      "dipAddPct": 10,
+      "slippagePct": 0.01,
+      "commissionPerFill": 0,
+      "collectDividends": false,
+      "dividends": []
+    }
+  },
+  "withDividends": {
+    "dataRange": "2001-08-27 -> 2026-08-21",
+    "years": 24.98,
+    "startingEquity": 100000,
+    "endingEquity": 986884.62,
+    "netPnl": 886884.62,
+    "returnPct": 886.88,
+    "cagrPct": 9.6,
+    "maxDrawdownPct": 52.35,
+    "numBuys": 17,
+    "initialBuys": 1,
+    "dipBuys": 16,
+    "deepestDrawdownBandHit": 4,
+    "finalShares": 1253,
+    "avgCostBasis": 144.35,
+    "finalCashPct": 27.44,
+    "deployedPct": 72.56,
+    "dividendsCollected": 108313.18,
+    "numDividendPayments": 101,
+    "baseline": {
+      "description": "100% lump-sum on day 1, no dip-buying ladder, but collects the same real dividends (fair comparison - isolates the ladder's edge)",
+      "finalEquity": 731650.3,
+      "returnPct": 631.65,
+      "cagrPct": 8.29,
+      "maxDrawdownPct": 50.18,
+      "dividendsCollected": 84573.52
+    },
+    "vsBaselinePct": 255.23,
+    "config": {
+      "startingEquity": 100000,
+      "initialDeployPct": 50,
+      "dipBandPct": 10,
+      "dipAddPct": 10,
+      "slippagePct": 0.01,
+      "commissionPerFill": 0,
+      "collectDividends": true,
+      "dividends": [
+        {
+          "date": "2001-09-21",
+          "amountPerShare": 0.369
+        },
+        {
+          "date": "2001-12-21",
+          "amountPerShare": 0.393
+        },
+        {
+          "date": "2002-03-15",
+          "amountPerShare": 0.331
+        },
+        {
+          "date": "2002-06-21",
+          "amountPerShare": 0.353
+        },
+        {
+          "date": "2002-09-20",
+          "amountPerShare": 0.378
+        },
+        {
+          "date": "2002-12-20",
+          "amountPerShare": 0.436
+        },
+        {
+          "date": "2003-03-21",
+          "amountPerShare": 0.354
+        },
+        {
+          "date": "2003-06-20",
+          "amountPerShare": 0.36
+        },
+        {
+          "date": "2003-09-19",
+          "amountPerShare": 0.4
+        },
+        {
+          "date": "2003-12-19",
+          "amountPerShare": 0.516
+        },
+        {
+          "date": "2004-03-19",
+          "amountPerShare": 0.395
+        },
+        {
+          "date": "2004-06-18",
+          "amountPerShare": 0.414
+        },
+        {
+          "date": "2004-09-17",
+          "amountPerShare": 0.469
+        },
+        {
+          "date": "2004-11-15",
+          "amountPerShare": 0.351
+        },
+        {
+          "date": "2004-12-17",
+          "amountPerShare": 0.568
+        },
+        {
+          "date": "2005-03-18",
+          "amountPerShare": 0.467
+        },
+        {
+          "date": "2005-06-17",
+          "amountPerShare": 0.488
+        },
+        {
+          "date": "2005-09-16",
+          "amountPerShare": 0.522
+        },
+        {
+          "date": "2005-12-16",
+          "amountPerShare": 0.672
+        },
+        {
+          "date": "2006-03-17",
+          "amountPerShare": 0.519
+        },
+        {
+          "date": "2006-06-16",
+          "amountPerShare": 0.555
+        },
+        {
+          "date": "2006-09-15",
+          "amountPerShare": 0.579
+        },
+        {
+          "date": "2006-12-15",
+          "amountPerShare": 0.793
+        },
+        {
+          "date": "2007-03-16",
+          "amountPerShare": 0.551
+        },
+        {
+          "date": "2007-06-15",
+          "amountPerShare": 0.656
+        },
+        {
+          "date": "2007-09-21",
+          "amountPerShare": 0.719
+        },
+        {
+          "date": "2007-12-21",
+          "amountPerShare": 0.775
+        },
+        {
+          "date": "2008-03-20",
+          "amountPerShare": 0.642
+        },
+        {
+          "date": "2008-06-20",
+          "amountPerShare": 0.669
+        },
+        {
+          "date": "2008-09-19",
+          "amountPerShare": 0.691
+        },
+        {
+          "date": "2008-12-19",
+          "amountPerShare": 0.719
+        },
+        {
+          "date": "2009-03-20",
+          "amountPerShare": 0.561
+        },
+        {
+          "date": "2009-06-19",
+          "amountPerShare": 0.518
+        },
+        {
+          "date": "2009-09-18",
+          "amountPerShare": 0.508
+        },
+        {
+          "date": "2009-12-18",
+          "amountPerShare": 0.59
+        },
+        {
+          "date": "2010-03-19",
+          "amountPerShare": 0.48
+        },
+        {
+          "date": "2010-06-18",
+          "amountPerShare": 0.531
+        },
+        {
+          "date": "2010-09-17",
+          "amountPerShare": 0.602
+        },
+        {
+          "date": "2010-12-17",
+          "amountPerShare": 0.653
+        },
+        {
+          "date": "2011-03-18",
+          "amountPerShare": 0.553
+        },
+        {
+          "date": "2011-06-17",
+          "amountPerShare": 0.628
+        },
+        {
+          "date": "2011-09-16",
+          "amountPerShare": 0.625
+        },
+        {
+          "date": "2011-12-16",
+          "amountPerShare": 0.77
+        },
+        {
+          "date": "2012-03-16",
+          "amountPerShare": 0.614
+        },
+        {
+          "date": "2012-06-15",
+          "amountPerShare": 0.688
+        },
+        {
+          "date": "2012-09-21",
+          "amountPerShare": 0.779
+        },
+        {
+          "date": "2012-12-21",
+          "amountPerShare": 1.022
+        },
+        {
+          "date": "2013-03-15",
+          "amountPerShare": 0.694
+        },
+        {
+          "date": "2013-06-21",
+          "amountPerShare": 0.839
+        },
+        {
+          "date": "2013-09-20",
+          "amountPerShare": 0.838
+        },
+        {
+          "date": "2013-12-20",
+          "amountPerShare": 0.98
+        },
+        {
+          "date": "2014-03-21",
+          "amountPerShare": 0.825
+        },
+        {
+          "date": "2014-06-20",
+          "amountPerShare": 0.937
+        },
+        {
+          "date": "2014-09-19",
+          "amountPerShare": 0.939
+        },
+        {
+          "date": "2014-12-19",
+          "amountPerShare": 1.135
+        },
+        {
+          "date": "2015-03-20",
+          "amountPerShare": 0.931
+        },
+        {
+          "date": "2015-06-19",
+          "amountPerShare": 1.03
+        },
+        {
+          "date": "2015-09-18",
+          "amountPerShare": 1.033
+        },
+        {
+          "date": "2015-12-18",
+          "amountPerShare": 1.212
+        },
+        {
+          "date": "2016-03-18",
+          "amountPerShare": 1.05
+        },
+        {
+          "date": "2016-06-17",
+          "amountPerShare": 1.078
+        },
+        {
+          "date": "2016-09-16",
+          "amountPerShare": 1.082
+        },
+        {
+          "date": "2016-12-16",
+          "amountPerShare": 1.329
+        },
+        {
+          "date": "2017-03-17",
+          "amountPerShare": 1.033
+        },
+        {
+          "date": "2017-06-16",
+          "amountPerShare": 1.183
+        },
+        {
+          "date": "2017-09-15",
+          "amountPerShare": 1.235
+        },
+        {
+          "date": "2017-12-15",
+          "amountPerShare": 1.351
+        },
+        {
+          "date": "2018-03-16",
+          "amountPerShare": 1.097
+        },
+        {
+          "date": "2018-06-15",
+          "amountPerShare": 1.246
+        },
+        {
+          "date": "2018-09-21",
+          "amountPerShare": 1.323
+        },
+        {
+          "date": "2018-12-21",
+          "amountPerShare": 1.435
+        },
+        {
+          "date": "2019-03-15",
+          "amountPerShare": 1.233
+        },
+        {
+          "date": "2019-06-21",
+          "amountPerShare": 1.432
+        },
+        {
+          "date": "2019-09-20",
+          "amountPerShare": 1.384
+        },
+        {
+          "date": "2019-12-20",
+          "amountPerShare": 1.57
+        },
+        {
+          "date": "2020-03-20",
+          "amountPerShare": 1.406
+        },
+        {
+          "date": "2020-06-19",
+          "amountPerShare": 1.366
+        },
+        {
+          "date": "2020-09-18",
+          "amountPerShare": 1.339
+        },
+        {
+          "date": "2020-12-18",
+          "amountPerShare": 1.58
+        },
+        {
+          "date": "2021-03-19",
+          "amountPerShare": 1.278
+        },
+        {
+          "date": "2021-06-18",
+          "amountPerShare": 1.376
+        },
+        {
+          "date": "2021-09-17",
+          "amountPerShare": 1.428
+        },
+        {
+          "date": "2021-12-17",
+          "amountPerShare": 1.633
+        },
+        {
+          "date": "2022-03-18",
+          "amountPerShare": 1.366
+        },
+        {
+          "date": "2022-06-17",
+          "amountPerShare": 1.577
+        },
+        {
+          "date": "2022-09-16",
+          "amountPerShare": 1.596
+        },
+        {
+          "date": "2022-12-16",
+          "amountPerShare": 1.781
+        },
+        {
+          "date": "2023-03-17",
+          "amountPerShare": 1.506
+        },
+        {
+          "date": "2023-06-16",
+          "amountPerShare": 1.638
+        },
+        {
+          "date": "2023-09-15",
+          "amountPerShare": 1.583
+        },
+        {
+          "date": "2023-12-15",
+          "amountPerShare": 1.906
+        },
+        {
+          "date": "2024-03-15",
+          "amountPerShare": 1.595
+        },
+        {
+          "date": "2024-06-21",
+          "amountPerShare": 1.759
+        },
+        {
+          "date": "2024-09-20",
+          "amountPerShare": 1.746
+        },
+        {
+          "date": "2024-12-20",
+          "amountPerShare": 1.966
+        },
+        {
+          "date": "2025-03-21",
+          "amountPerShare": 1.696
+        },
+        {
+          "date": "2025-06-20",
+          "amountPerShare": 1.761
+        },
+        {
+          "date": "2025-09-19",
+          "amountPerShare": 1.831
+        },
+        {
+          "date": "2025-12-19",
+          "amountPerShare": 1.993
+        },
+        {
+          "date": "2026-03-20",
+          "amountPerShare": 1.797
+        },
+        {
+          "date": "2026-06-18",
+          "amountPerShare": 1.904
+        }
+      ]
+    }
+  }
+}

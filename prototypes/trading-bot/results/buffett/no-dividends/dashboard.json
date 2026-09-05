@@ -1,0 +1,39 @@
+{
+  "dataRange": "2001-08-27 -> 2026-08-21",
+  "years": 24.98,
+  "startingEquity": 100000,
+  "endingEquity": 689915.84,
+  "netPnl": 589915.84,
+  "returnPct": 589.92,
+  "cagrPct": 8.04,
+  "maxDrawdownPct": 55.21,
+  "numBuys": 8,
+  "initialBuys": 1,
+  "dipBuys": 7,
+  "deepestDrawdownBandHit": 4,
+  "finalShares": 901,
+  "avgCostBasis": 110.99,
+  "finalCashPct": 0,
+  "deployedPct": 100,
+  "dividendsCollected": 0,
+  "numDividendPayments": 0,
+  "baseline": {
+    "description": "100% lump-sum on day 1, no dip-buying, no cash reserve, no dividends",
+    "finalEquity": 647076.78,
+    "returnPct": 547.08,
+    "cagrPct": 7.76,
+    "maxDrawdownPct": 56.46,
+    "dividendsCollected": 0
+  },
+  "vsBaselinePct": 42.84,
+  "config": {
+    "startingEquity": 100000,
+    "initialDeployPct": 50,
+    "dipBandPct": 10,
+    "dipAddPct": 10,
+    "slippagePct": 0.01,
+    "commissionPerFill": 0,
+    "collectDividends": false,
+    "dividends": []
+  }
+}

@@ -1,0 +1,2713 @@
+[
+  {
+    "index": 73,
+    "time": "2026-05-29T15:35:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 74,
+    "time": "2026-05-29T15:40:00.000",
+    "type": "entry",
+    "tradeId": "T0001",
+    "side": "long",
+    "price": 757.4600219726562,
+    "shares": 210
+  },
+  {
+    "index": 78,
+    "time": "2026-06-01T09:30:00.000",
+    "type": "exit",
+    "tradeId": "T0001",
+    "reason": "stop",
+    "price": 755.72,
+    "netPnl": -381.72
+  },
+  {
+    "index": 102,
+    "time": "2026-06-01T11:30:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 103,
+    "time": "2026-06-01T11:35:00.000",
+    "type": "entry",
+    "tradeId": "T0002",
+    "side": "long",
+    "price": 757.0499877929688,
+    "shares": 209
+  },
+  {
+    "index": 119,
+    "time": "2026-06-01T12:55:00.000",
+    "type": "scale1",
+    "tradeId": "T0002",
+    "price": 757.958531053819,
+    "shares": 104
+  },
+  {
+    "index": 126,
+    "time": "2026-06-01T13:30:00.000",
+    "type": "scale2",
+    "tradeId": "T0002",
+    "price": 758.7913693158898,
+    "shares": 104
+  },
+  {
+    "index": 153,
+    "time": "2026-06-01T15:45:00.000",
+    "type": "exit",
+    "tradeId": "T0002",
+    "reason": "trend_reversal",
+    "price": 758.58,
+    "netPnl": 348.31
+  },
+  {
+    "index": 171,
+    "time": "2026-06-02T10:45:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 172,
+    "time": "2026-06-02T10:50:00.000",
+    "type": "entry",
+    "tradeId": "T0003",
+    "side": "long",
+    "price": 759.27001953125,
+    "shares": 209
+  },
+  {
+    "index": 175,
+    "time": "2026-06-02T11:05:00.000",
+    "type": "scale1",
+    "tradeId": "T0003",
+    "price": 760.1812270743897,
+    "shares": 104
+  },
+  {
+    "index": 203,
+    "time": "2026-06-02T13:25:00.000",
+    "type": "exit",
+    "tradeId": "T0003",
+    "reason": "trend_reversal",
+    "price": 758.95,
+    "netPnl": -211.08
+  },
+  {
+    "index": 224,
+    "time": "2026-06-02T15:10:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 225,
+    "time": "2026-06-02T15:15:00.000",
+    "type": "entry",
+    "tradeId": "T0004",
+    "side": "long",
+    "price": 759.239990234375,
+    "shares": 209
+  },
+  {
+    "index": 234,
+    "time": "2026-06-03T09:30:00.000",
+    "type": "exit",
+    "tradeId": "T0004",
+    "reason": "trend_reversal",
+    "price": 758.19,
+    "netPnl": -234.44
+  },
+  {
+    "index": 286,
+    "time": "2026-06-03T13:50:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 287,
+    "time": "2026-06-03T13:55:00.000",
+    "type": "entry",
+    "tradeId": "T0005",
+    "side": "long",
+    "price": 755.6199951171875,
+    "shares": 209
+  },
+  {
+    "index": 302,
+    "time": "2026-06-03T15:10:00.000",
+    "type": "exit",
+    "tradeId": "T0005",
+    "reason": "trend_reversal",
+    "price": 754.96,
+    "netPnl": -152.8
+  },
+  {
+    "index": 330,
+    "time": "2026-06-04T11:00:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 331,
+    "time": "2026-06-04T11:05:00.000",
+    "type": "entry",
+    "tradeId": "T0006",
+    "side": "long",
+    "price": 754.510009765625,
+    "shares": 209
+  },
+  {
+    "index": 331,
+    "time": "2026-06-04T11:05:00.000",
+    "type": "scale1",
+    "tradeId": "T0006",
+    "price": 755.4155047734449,
+    "shares": 104
+  },
+  {
+    "index": 343,
+    "time": "2026-06-04T12:05:00.000",
+    "type": "scale2",
+    "tradeId": "T0006",
+    "price": 756.2455487802881,
+    "shares": 104
+  },
+  {
+    "index": 366,
+    "time": "2026-06-04T14:00:00.000",
+    "type": "exit",
+    "tradeId": "T0006",
+    "reason": "target",
+    "price": 757.75,
+    "netPnl": 1062.34
+  },
+  {
+    "index": 470,
+    "time": "2026-06-08T09:40:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 471,
+    "time": "2026-06-08T09:45:00.000",
+    "type": "entry",
+    "tradeId": "T0007",
+    "side": "long",
+    "price": 742.72998046875,
+    "shares": 215
+  },
+  {
+    "index": 472,
+    "time": "2026-06-08T09:50:00.000",
+    "type": "scale1",
+    "tradeId": "T0007",
+    "price": 743.6213381456104,
+    "shares": 107
+  },
+  {
+    "index": 473,
+    "time": "2026-06-08T09:55:00.000",
+    "type": "exit",
+    "tradeId": "T0007",
+    "reason": "stop",
+    "price": 741.02,
+    "netPnl": -661.36
+  },
+  {
+    "index": 547,
+    "time": "2026-06-09T09:35:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 548,
+    "time": "2026-06-09T09:40:00.000",
+    "type": "entry",
+    "tradeId": "T0008",
+    "side": "long",
+    "price": 744.4299926757812,
+    "shares": 213
+  },
+  {
+    "index": 548,
+    "time": "2026-06-09T09:40:00.000",
+    "type": "scale1",
+    "tradeId": "T0008",
+    "price": 745.3233905542914,
+    "shares": 106
+  },
+  {
+    "index": 549,
+    "time": "2026-06-09T09:45:00.000",
+    "type": "scale2",
+    "tradeId": "T0008",
+    "price": 746.1423454335339,
+    "shares": 106
+  },
+  {
+    "index": 554,
+    "time": "2026-06-09T10:10:00.000",
+    "type": "exit",
+    "tradeId": "T0008",
+    "reason": "stop",
+    "price": 742.72,
+    "netPnl": -1019.68
+  },
+  {
+    "index": 595,
+    "time": "2026-06-09T13:35:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 596,
+    "time": "2026-06-09T13:40:00.000",
+    "type": "entry",
+    "tradeId": "T0009",
+    "side": "long",
+    "price": 732.1400146484375,
+    "shares": 214
+  },
+  {
+    "index": 596,
+    "time": "2026-06-09T13:40:00.000",
+    "type": "scale1",
+    "tradeId": "T0009",
+    "price": 733.0186632014173,
+    "shares": 107
+  },
+  {
+    "index": 596,
+    "time": "2026-06-09T13:40:00.000",
+    "type": "scale2",
+    "tradeId": "T0009",
+    "price": 733.8240977529321,
+    "shares": 107
+  },
+  {
+    "index": 606,
+    "time": "2026-06-09T14:30:00.000",
+    "type": "exit",
+    "tradeId": "T0009",
+    "reason": "target",
+    "price": 735.29,
+    "netPnl": 1057.41
+  },
+  {
+    "index": 706,
+    "time": "2026-06-11T09:50:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 707,
+    "time": "2026-06-11T09:55:00.000",
+    "type": "entry",
+    "tradeId": "T0010",
+    "side": "long",
+    "price": 731.010009765625,
+    "shares": 217
+  },
+  {
+    "index": 710,
+    "time": "2026-06-11T10:10:00.000",
+    "type": "exit",
+    "tradeId": "T0010",
+    "reason": "stop",
+    "price": 729.33,
+    "netPnl": -380.68
+  },
+  {
+    "index": 733,
+    "time": "2026-06-11T12:05:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 734,
+    "time": "2026-06-11T12:10:00.000",
+    "type": "entry",
+    "tradeId": "T0011",
+    "side": "long",
+    "price": 728.97998046875,
+    "shares": 216
+  },
+  {
+    "index": 734,
+    "time": "2026-06-11T12:10:00.000",
+    "type": "scale1",
+    "tradeId": "T0011",
+    "price": 729.8548366331104,
+    "shares": 108
+  },
+  {
+    "index": 742,
+    "time": "2026-06-11T12:50:00.000",
+    "type": "exit",
+    "tradeId": "T0011",
+    "reason": "stop",
+    "price": 727.3,
+    "netPnl": -653.41
+  },
+  {
+    "index": 749,
+    "time": "2026-06-11T13:25:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 750,
+    "time": "2026-06-11T13:30:00.000",
+    "type": "entry",
+    "tradeId": "T0012",
+    "side": "long",
+    "price": 732.5399780273438,
+    "shares": 214
+  },
+  {
+    "index": 750,
+    "time": "2026-06-11T13:30:00.000",
+    "type": "scale1",
+    "tradeId": "T0012",
+    "price": 733.4191065803742,
+    "shares": 107
+  },
+  {
+    "index": 750,
+    "time": "2026-06-11T13:30:00.000",
+    "type": "scale2",
+    "tradeId": "T0012",
+    "price": 734.2249811356018,
+    "shares": 107
+  },
+  {
+    "index": 752,
+    "time": "2026-06-11T13:40:00.000",
+    "type": "exit",
+    "tradeId": "T0012",
+    "reason": "target",
+    "price": 735.69,
+    "netPnl": 1057.99
+  },
+  {
+    "index": 814,
+    "time": "2026-06-12T12:20:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 815,
+    "time": "2026-06-12T12:25:00.000",
+    "type": "entry",
+    "tradeId": "T0013",
+    "side": "long",
+    "price": 740.75,
+    "shares": 214
+  },
+  {
+    "index": 820,
+    "time": "2026-06-12T12:50:00.000",
+    "type": "scale1",
+    "tradeId": "T0013",
+    "price": 741.6389814825001,
+    "shares": 107
+  },
+  {
+    "index": 823,
+    "time": "2026-06-12T13:05:00.000",
+    "type": "scale2",
+    "tradeId": "T0013",
+    "price": 742.4538879649999,
+    "shares": 107
+  },
+  {
+    "index": 836,
+    "time": "2026-06-12T14:10:00.000",
+    "type": "exit",
+    "tradeId": "T0013",
+    "reason": "trend_reversal",
+    "price": 740.96,
+    "netPnl": -205.15
+  },
+  {
+    "index": 841,
+    "time": "2026-06-12T14:35:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 842,
+    "time": "2026-06-12T14:40:00.000",
+    "type": "entry",
+    "tradeId": "T0014",
+    "side": "long",
+    "price": 741.75,
+    "shares": 213
+  },
+  {
+    "index": 852,
+    "time": "2026-06-12T15:30:00.000",
+    "type": "exit",
+    "tradeId": "T0014",
+    "reason": "trend_reversal",
+    "price": 740.46,
+    "netPnl": -291.43
+  },
+  {
+    "index": 858,
+    "time": "2026-06-15T09:30:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 859,
+    "time": "2026-06-15T09:35:00.000",
+    "type": "entry",
+    "tradeId": "T0015",
+    "side": "long",
+    "price": 752.7000122070312,
+    "shares": 209
+  },
+  {
+    "index": 861,
+    "time": "2026-06-15T09:45:00.000",
+    "type": "scale1",
+    "tradeId": "T0015",
+    "price": 753.6033350186812,
+    "shares": 104
+  },
+  {
+    "index": 875,
+    "time": "2026-06-15T10:55:00.000",
+    "type": "scale2",
+    "tradeId": "T0015",
+    "price": 754.43138782911,
+    "shares": 104
+  },
+  {
+    "index": 885,
+    "time": "2026-06-15T11:45:00.000",
+    "type": "exit",
+    "tradeId": "T0015",
+    "reason": "target",
+    "price": 755.94,
+    "netPnl": 1059.79
+  },
+  {
+    "index": 1024,
+    "time": "2026-06-17T10:20:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1025,
+    "time": "2026-06-17T10:25:00.000",
+    "type": "entry",
+    "tradeId": "T0016",
+    "side": "long",
+    "price": 752.1099853515625,
+    "shares": 212
+  },
+  {
+    "index": 1026,
+    "time": "2026-06-17T10:30:00.000",
+    "type": "exit",
+    "tradeId": "T0016",
+    "reason": "stop",
+    "price": 750.38,
+    "netPnl": -382.64
+  },
+  {
+    "index": 1043,
+    "time": "2026-06-17T11:55:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1044,
+    "time": "2026-06-17T12:00:00.000",
+    "type": "entry",
+    "tradeId": "T0017",
+    "side": "long",
+    "price": 750.6199951171875,
+    "shares": 211
+  },
+  {
+    "index": 1053,
+    "time": "2026-06-17T12:45:00.000",
+    "type": "exit",
+    "tradeId": "T0017",
+    "reason": "trend_reversal",
+    "price": 749.97,
+    "netPnl": -151.94
+  },
+  {
+    "index": 1099,
+    "time": "2026-06-18T10:05:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1100,
+    "time": "2026-06-18T10:10:00.000",
+    "type": "entry",
+    "tradeId": "T0018",
+    "side": "long",
+    "price": 745.7899780273438,
+    "shares": 213
+  },
+  {
+    "index": 1102,
+    "time": "2026-06-18T10:20:00.000",
+    "type": "scale1",
+    "tradeId": "T0018",
+    "price": 746.6850080378742,
+    "shares": 106
+  },
+  {
+    "index": 1118,
+    "time": "2026-06-18T11:40:00.000",
+    "type": "exit",
+    "tradeId": "T0018",
+    "reason": "trend_reversal",
+    "price": 744.77,
+    "netPnl": -437.55
+  },
+  {
+    "index": 1121,
+    "time": "2026-06-18T11:55:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1122,
+    "time": "2026-06-18T12:00:00.000",
+    "type": "entry",
+    "tradeId": "T0019",
+    "side": "long",
+    "price": 746.260009765625,
+    "shares": 211
+  },
+  {
+    "index": 1129,
+    "time": "2026-06-18T12:35:00.000",
+    "type": "scale1",
+    "tradeId": "T0019",
+    "price": 747.1556038659448,
+    "shares": 105
+  },
+  {
+    "index": 1137,
+    "time": "2026-06-18T13:15:00.000",
+    "type": "scale2",
+    "tradeId": "T0019",
+    "price": 747.976571965288,
+    "shares": 105
+  },
+  {
+    "index": 1149,
+    "time": "2026-06-18T14:15:00.000",
+    "type": "exit",
+    "tradeId": "T0019",
+    "reason": "trend_reversal",
+    "price": 746.54,
+    "netPnl": -172.01
+  },
+  {
+    "index": 1166,
+    "time": "2026-06-18T15:40:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1167,
+    "time": "2026-06-18T15:45:00.000",
+    "type": "entry",
+    "tradeId": "T0020",
+    "side": "long",
+    "price": 747.2999877929688,
+    "shares": 211
+  },
+  {
+    "index": 1169,
+    "time": "2026-06-18T15:55:00.000",
+    "type": "scale1",
+    "tradeId": "T0020",
+    "price": 748.1968299813191,
+    "shares": 105
+  },
+  {
+    "index": 1170,
+    "time": "2026-06-22T09:30:00.000",
+    "type": "scale2",
+    "tradeId": "T0020",
+    "price": 749.0189421708899,
+    "shares": 105
+  },
+  {
+    "index": 1182,
+    "time": "2026-06-22T10:30:00.000",
+    "type": "exit",
+    "tradeId": "T0020",
+    "reason": "stop",
+    "price": 745.58,
+    "netPnl": -1013.97
+  },
+  {
+    "index": 1226,
+    "time": "2026-06-22T14:10:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1227,
+    "time": "2026-06-22T14:15:00.000",
+    "type": "entry",
+    "tradeId": "T0021",
+    "side": "long",
+    "price": 744.97998046875,
+    "shares": 209
+  },
+  {
+    "index": 1234,
+    "time": "2026-06-22T14:50:00.000",
+    "type": "exit",
+    "tradeId": "T0021",
+    "reason": "trend_reversal",
+    "price": 744,
+    "netPnl": -221.31
+  },
+  {
+    "index": 1283,
+    "time": "2026-06-23T12:25:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1284,
+    "time": "2026-06-23T12:30:00.000",
+    "type": "entry",
+    "tradeId": "T0022",
+    "side": "long",
+    "price": 737.3800048828125,
+    "shares": 211
+  },
+  {
+    "index": 1300,
+    "time": "2026-06-23T13:50:00.000",
+    "type": "exit",
+    "tradeId": "T0022",
+    "reason": "trend_reversal",
+    "price": 736.01,
+    "netPnl": -305.39
+  },
+  {
+    "index": 1327,
+    "time": "2026-06-24T09:35:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1328,
+    "time": "2026-06-24T09:40:00.000",
+    "type": "entry",
+    "tradeId": "T0023",
+    "side": "long",
+    "price": 736.3400268554688,
+    "shares": 211
+  },
+  {
+    "index": 1328,
+    "time": "2026-06-24T09:40:00.000",
+    "type": "exit",
+    "tradeId": "T0023",
+    "reason": "stop",
+    "price": 734.65,
+    "netPnl": -372.85
+  },
+  {
+    "index": 1404,
+    "time": "2026-06-25T09:30:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1405,
+    "time": "2026-06-25T09:35:00.000",
+    "type": "entry",
+    "tradeId": "T0024",
+    "side": "long",
+    "price": 737.3099975585938,
+    "shares": 210
+  },
+  {
+    "index": 1406,
+    "time": "2026-06-25T09:40:00.000",
+    "type": "exit",
+    "tradeId": "T0024",
+    "reason": "stop",
+    "price": 735.61,
+    "netPnl": -371.57
+  },
+  {
+    "index": 1411,
+    "time": "2026-06-25T10:05:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1412,
+    "time": "2026-06-25T10:10:00.000",
+    "type": "entry",
+    "tradeId": "T0025",
+    "side": "long",
+    "price": 734.9299926757812,
+    "shares": 209
+  },
+  {
+    "index": 1412,
+    "time": "2026-06-25T10:10:00.000",
+    "type": "scale1",
+    "tradeId": "T0025",
+    "price": 735.8119895092914,
+    "shares": 104
+  },
+  {
+    "index": 1413,
+    "time": "2026-06-25T10:15:00.000",
+    "type": "exit",
+    "tradeId": "T0025",
+    "reason": "stop",
+    "price": 733.24,
+    "netPnl": -636.11
+  },
+  {
+    "index": 1435,
+    "time": "2026-06-25T12:05:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1436,
+    "time": "2026-06-25T12:10:00.000",
+    "type": "entry",
+    "tradeId": "T0026",
+    "side": "long",
+    "price": 735.3300170898438,
+    "shares": 208
+  },
+  {
+    "index": 1436,
+    "time": "2026-06-25T12:10:00.000",
+    "type": "scale1",
+    "tradeId": "T0026",
+    "price": 736.2124939966535,
+    "shares": 104
+  },
+  {
+    "index": 1440,
+    "time": "2026-06-25T12:30:00.000",
+    "type": "exit",
+    "tradeId": "T0026",
+    "reason": "stop",
+    "price": 733.64,
+    "netPnl": -634.69
+  },
+  {
+    "index": 1461,
+    "time": "2026-06-25T14:15:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1462,
+    "time": "2026-06-25T14:20:00.000",
+    "type": "entry",
+    "tradeId": "T0027",
+    "side": "long",
+    "price": 734.8200073242188,
+    "shares": 207
+  },
+  {
+    "index": 1463,
+    "time": "2026-06-25T14:25:00.000",
+    "type": "scale1",
+    "tradeId": "T0027",
+    "price": 735.7018721632087,
+    "shares": 103
+  },
+  {
+    "index": 1467,
+    "time": "2026-06-25T14:45:00.000",
+    "type": "exit",
+    "tradeId": "T0027",
+    "reason": "stop",
+    "price": 733.13,
+    "netPnl": -629.92
+  },
+  {
+    "index": 1492,
+    "time": "2026-06-26T10:20:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1493,
+    "time": "2026-06-26T10:25:00.000",
+    "type": "entry",
+    "tradeId": "T0028",
+    "side": "long",
+    "price": 733.4400024414062,
+    "shares": 206
+  },
+  {
+    "index": 1496,
+    "time": "2026-06-26T10:40:00.000",
+    "type": "exit",
+    "tradeId": "T0028",
+    "reason": "stop",
+    "price": 731.75,
+    "netPnl": -362.58
+  },
+  {
+    "index": 1560,
+    "time": "2026-06-29T09:30:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1561,
+    "time": "2026-06-29T09:35:00.000",
+    "type": "entry",
+    "tradeId": "T0029",
+    "side": "long",
+    "price": 738.6699829101562,
+    "shares": 203
+  },
+  {
+    "index": 1561,
+    "time": "2026-06-29T09:35:00.000",
+    "type": "exit",
+    "tradeId": "T0029",
+    "reason": "stop",
+    "price": 736.97,
+    "netPnl": -359.85
+  },
+  {
+    "index": 1726,
+    "time": "2026-07-01T10:20:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1727,
+    "time": "2026-07-01T10:25:00.000",
+    "type": "entry",
+    "tradeId": "T0030",
+    "side": "long",
+    "price": 746.8099975585938,
+    "shares": 200
+  },
+  {
+    "index": 1734,
+    "time": "2026-07-01T11:00:00.000",
+    "type": "scale1",
+    "tradeId": "T0030",
+    "price": 747.7062517047639,
+    "shares": 100
+  },
+  {
+    "index": 1737,
+    "time": "2026-07-01T11:15:00.000",
+    "type": "scale2",
+    "tradeId": "T0030",
+    "price": 748.527824851178,
+    "shares": 100
+  },
+  {
+    "index": 1758,
+    "time": "2026-07-01T13:00:00.000",
+    "type": "exit",
+    "tradeId": "T0030",
+    "reason": "trend_reversal",
+    "price": 747.44,
+    "netPnl": -24.24
+  },
+  {
+    "index": 1795,
+    "time": "2026-07-02T09:35:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1796,
+    "time": "2026-07-02T09:40:00.000",
+    "type": "entry",
+    "tradeId": "T0031",
+    "side": "long",
+    "price": 748.8099975585938,
+    "shares": 200
+  },
+  {
+    "index": 1796,
+    "time": "2026-07-02T09:40:00.000",
+    "type": "scale1",
+    "tradeId": "T0031",
+    "price": 749.7086519247639,
+    "shares": 100
+  },
+  {
+    "index": 1797,
+    "time": "2026-07-02T09:45:00.000",
+    "type": "scale2",
+    "tradeId": "T0031",
+    "price": 750.5324252911779,
+    "shares": 100
+  },
+  {
+    "index": 1808,
+    "time": "2026-07-02T10:40:00.000",
+    "type": "exit",
+    "tradeId": "T0031",
+    "reason": "stop",
+    "price": 747.09,
+    "netPnl": -965.92
+  },
+  {
+    "index": 1855,
+    "time": "2026-07-02T14:35:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1856,
+    "time": "2026-07-02T14:40:00.000",
+    "type": "entry",
+    "tradeId": "T0032",
+    "side": "long",
+    "price": 743.1649780273438,
+    "shares": 199
+  },
+  {
+    "index": 1861,
+    "time": "2026-07-02T15:05:00.000",
+    "type": "exit",
+    "tradeId": "T0032",
+    "reason": "stop",
+    "price": 741.46,
+    "netPnl": -354.9
+  },
+  {
+    "index": 1867,
+    "time": "2026-07-02T15:35:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1868,
+    "time": "2026-07-02T15:40:00.000",
+    "type": "entry",
+    "tradeId": "T0033",
+    "side": "long",
+    "price": 743.1099853515625,
+    "shares": 199
+  },
+  {
+    "index": 1870,
+    "time": "2026-07-02T15:50:00.000",
+    "type": "scale1",
+    "tradeId": "T0033",
+    "price": 744.0017990760829,
+    "shares": 99
+  },
+  {
+    "index": 1871,
+    "time": "2026-07-02T15:55:00.000",
+    "type": "scale2",
+    "tradeId": "T0033",
+    "price": 744.8193018020679,
+    "shares": 99
+  },
+  {
+    "index": 1872,
+    "time": "2026-07-06T09:30:00.000",
+    "type": "exit",
+    "tradeId": "T0033",
+    "reason": "target",
+    "price": 746.31,
+    "netPnl": 996.13
+  },
+  {
+    "index": 1928,
+    "time": "2026-07-06T14:10:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1929,
+    "time": "2026-07-06T14:15:00.000",
+    "type": "entry",
+    "tradeId": "T0034",
+    "side": "long",
+    "price": 751.0399780273438,
+    "shares": 199
+  },
+  {
+    "index": 1937,
+    "time": "2026-07-06T14:55:00.000",
+    "type": "scale1",
+    "tradeId": "T0034",
+    "price": 751.9413086153743,
+    "shares": 99
+  },
+  {
+    "index": 1950,
+    "time": "2026-07-07T09:30:00.000",
+    "type": "exit",
+    "tradeId": "T0034",
+    "reason": "stop",
+    "price": 749.31,
+    "netPnl": -618.89
+  },
+  {
+    "index": 1982,
+    "time": "2026-07-07T12:10:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 1983,
+    "time": "2026-07-07T12:15:00.000",
+    "type": "entry",
+    "tradeId": "T0035",
+    "side": "long",
+    "price": 748.0499877929688,
+    "shares": 198
+  },
+  {
+    "index": 1985,
+    "time": "2026-07-07T12:25:00.000",
+    "type": "scale1",
+    "tradeId": "T0035",
+    "price": 748.947730063819,
+    "shares": 99
+  },
+  {
+    "index": 2013,
+    "time": "2026-07-07T14:45:00.000",
+    "type": "exit",
+    "tradeId": "T0035",
+    "reason": "trend_reversal",
+    "price": 748.08,
+    "netPnl": -94.71
+  },
+  {
+    "index": 2063,
+    "time": "2026-07-08T12:25:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2064,
+    "time": "2026-07-08T12:30:00.000",
+    "type": "entry",
+    "tradeId": "T0036",
+    "side": "long",
+    "price": 743.0900268554688,
+    "shares": 199
+  },
+  {
+    "index": 2066,
+    "time": "2026-07-08T12:40:00.000",
+    "type": "scale1",
+    "tradeId": "T0036",
+    "price": 743.9818166275984,
+    "shares": 99
+  },
+  {
+    "index": 2069,
+    "time": "2026-07-08T12:55:00.000",
+    "type": "scale2",
+    "tradeId": "T0036",
+    "price": 744.7992973970423,
+    "shares": 99
+  },
+  {
+    "index": 2106,
+    "time": "2026-07-09T09:30:00.000",
+    "type": "exit",
+    "tradeId": "T0036",
+    "reason": "target",
+    "price": 746.28,
+    "netPnl": 996.11
+  },
+  {
+    "index": 2180,
+    "time": "2026-07-09T15:40:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2181,
+    "time": "2026-07-09T15:45:00.000",
+    "type": "entry",
+    "tradeId": "T0037",
+    "side": "long",
+    "price": 751.4000244140625,
+    "shares": 199
+  },
+  {
+    "index": 2182,
+    "time": "2026-07-09T15:50:00.000",
+    "type": "exit",
+    "tradeId": "T0037",
+    "reason": "trend_reversal",
+    "price": 750.75,
+    "netPnl": -143.33
+  },
+  {
+    "index": 2183,
+    "time": "2026-07-09T15:55:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2184,
+    "time": "2026-07-10T09:30:00.000",
+    "type": "entry",
+    "tradeId": "T0038",
+    "side": "long",
+    "price": 752.0499877929688,
+    "shares": 199
+  },
+  {
+    "index": 2185,
+    "time": "2026-07-10T09:35:00.000",
+    "type": "scale1",
+    "tradeId": "T0038",
+    "price": 752.952530503819,
+    "shares": 99
+  },
+  {
+    "index": 2196,
+    "time": "2026-07-10T10:30:00.000",
+    "type": "exit",
+    "tradeId": "T0038",
+    "reason": "stop",
+    "price": 750.32,
+    "netPnl": -619.72
+  },
+  {
+    "index": 2206,
+    "time": "2026-07-10T11:20:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2207,
+    "time": "2026-07-10T11:25:00.000",
+    "type": "entry",
+    "tradeId": "T0039",
+    "side": "long",
+    "price": 753.0499877929688,
+    "shares": 197
+  },
+  {
+    "index": 2210,
+    "time": "2026-07-10T11:40:00.000",
+    "type": "exit",
+    "tradeId": "T0039",
+    "reason": "stop",
+    "price": 751.32,
+    "netPnl": -356.01
+  },
+  {
+    "index": 2341,
+    "time": "2026-07-14T09:35:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2342,
+    "time": "2026-07-14T09:40:00.000",
+    "type": "entry",
+    "tradeId": "T0040",
+    "side": "long",
+    "price": 751.1799926757812,
+    "shares": 197
+  },
+  {
+    "index": 2349,
+    "time": "2026-07-14T10:15:00.000",
+    "type": "exit",
+    "tradeId": "T0040",
+    "reason": "stop",
+    "price": 749.45,
+    "netPnl": -355.13
+  },
+  {
+    "index": 2380,
+    "time": "2026-07-14T12:50:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2381,
+    "time": "2026-07-14T12:55:00.000",
+    "type": "entry",
+    "tradeId": "T0041",
+    "side": "long",
+    "price": 751.47998046875,
+    "shares": 196
+  },
+  {
+    "index": 2386,
+    "time": "2026-07-14T13:20:00.000",
+    "type": "scale1",
+    "tradeId": "T0041",
+    "price": 752.3818391081104,
+    "shares": 98
+  },
+  {
+    "index": 2409,
+    "time": "2026-07-14T15:15:00.000",
+    "type": "exit",
+    "tradeId": "T0041",
+    "reason": "trend_reversal",
+    "price": 752.01,
+    "netPnl": 54.13
+  },
+  {
+    "index": 2410,
+    "time": "2026-07-14T15:20:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2411,
+    "time": "2026-07-14T15:25:00.000",
+    "type": "entry",
+    "tradeId": "T0042",
+    "side": "long",
+    "price": 752.4000244140625,
+    "shares": 196
+  },
+  {
+    "index": 2413,
+    "time": "2026-07-14T15:35:00.000",
+    "type": "exit",
+    "tradeId": "T0042",
+    "reason": "trend_reversal",
+    "price": 751.88,
+    "netPnl": -115.73
+  },
+  {
+    "index": 2414,
+    "time": "2026-07-14T15:40:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2415,
+    "time": "2026-07-14T15:45:00.000",
+    "type": "entry",
+    "tradeId": "T0043",
+    "side": "long",
+    "price": 752.280029296875,
+    "shares": 196
+  },
+  {
+    "index": 2417,
+    "time": "2026-07-14T15:55:00.000",
+    "type": "exit",
+    "tradeId": "T0043",
+    "reason": "trend_reversal",
+    "price": 751.79,
+    "netPnl": -109.85
+  },
+  {
+    "index": 2418,
+    "time": "2026-07-15T09:30:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2419,
+    "time": "2026-07-15T09:35:00.000",
+    "type": "entry",
+    "tradeId": "T0044",
+    "side": "long",
+    "price": 755.2000122070312,
+    "shares": 195
+  },
+  {
+    "index": 2421,
+    "time": "2026-07-15T09:45:00.000",
+    "type": "exit",
+    "tradeId": "T0044",
+    "reason": "stop",
+    "price": 753.46,
+    "netPnl": -353.4
+  },
+  {
+    "index": 2437,
+    "time": "2026-07-15T11:05:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2438,
+    "time": "2026-07-15T11:10:00.000",
+    "type": "entry",
+    "tradeId": "T0045",
+    "side": "long",
+    "price": 754.030029296875,
+    "shares": 194
+  },
+  {
+    "index": 2438,
+    "time": "2026-07-15T11:10:00.000",
+    "type": "exit",
+    "tradeId": "T0045",
+    "reason": "trend_reversal",
+    "price": 753.06,
+    "netPnl": -201.9
+  },
+  {
+    "index": 2465,
+    "time": "2026-07-15T13:25:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2466,
+    "time": "2026-07-15T13:30:00.000",
+    "type": "entry",
+    "tradeId": "T0046",
+    "side": "long",
+    "price": 752.8099975585938,
+    "shares": 194
+  },
+  {
+    "index": 2469,
+    "time": "2026-07-15T13:45:00.000",
+    "type": "scale1",
+    "tradeId": "T0046",
+    "price": 753.713452364764,
+    "shares": 97
+  },
+  {
+    "index": 2470,
+    "time": "2026-07-15T13:50:00.000",
+    "type": "scale2",
+    "tradeId": "T0046",
+    "price": 754.541626171178,
+    "shares": 97
+  },
+  {
+    "index": 2490,
+    "time": "2026-07-15T15:30:00.000",
+    "type": "exit",
+    "tradeId": "T0046",
+    "reason": "trend_reversal",
+    "price": 753.18,
+    "netPnl": -124.83
+  },
+  {
+    "index": 2492,
+    "time": "2026-07-15T15:40:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2493,
+    "time": "2026-07-15T15:45:00.000",
+    "type": "entry",
+    "tradeId": "T0047",
+    "side": "long",
+    "price": 754.0800170898438,
+    "shares": 193
+  },
+  {
+    "index": 2496,
+    "time": "2026-07-16T09:30:00.000",
+    "type": "exit",
+    "tradeId": "T0047",
+    "reason": "stop",
+    "price": 752.35,
+    "netPnl": -349.26
+  },
+  {
+    "index": 2506,
+    "time": "2026-07-16T10:20:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2507,
+    "time": "2026-07-16T10:25:00.000",
+    "type": "entry",
+    "tradeId": "T0048",
+    "side": "long",
+    "price": 753.6400146484375,
+    "shares": 193
+  },
+  {
+    "index": 2509,
+    "time": "2026-07-16T10:35:00.000",
+    "type": "scale1",
+    "tradeId": "T0048",
+    "price": 754.5444655664173,
+    "shares": 96
+  },
+  {
+    "index": 2526,
+    "time": "2026-07-16T12:00:00.000",
+    "type": "exit",
+    "tradeId": "T0048",
+    "reason": "trend_reversal",
+    "price": 752.67,
+    "netPnl": -380.34
+  },
+  {
+    "index": 2603,
+    "time": "2026-07-17T11:55:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2604,
+    "time": "2026-07-17T12:00:00.000",
+    "type": "entry",
+    "tradeId": "T0049",
+    "side": "long",
+    "price": 746.8800048828125,
+    "shares": 194
+  },
+  {
+    "index": 2604,
+    "time": "2026-07-17T12:00:00.000",
+    "type": "exit",
+    "tradeId": "T0049",
+    "reason": "stop",
+    "price": 745.16,
+    "netPnl": -347.72
+  },
+  {
+    "index": 2652,
+    "time": "2026-07-20T09:30:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2653,
+    "time": "2026-07-20T09:35:00.000",
+    "type": "entry",
+    "tradeId": "T0050",
+    "side": "long",
+    "price": 748.030029296875,
+    "shares": 193
+  },
+  {
+    "index": 2656,
+    "time": "2026-07-20T09:50:00.000",
+    "type": "exit",
+    "tradeId": "T0050",
+    "reason": "stop",
+    "price": 746.31,
+    "netPnl": -346.46
+  },
+  {
+    "index": 2674,
+    "time": "2026-07-20T11:20:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2675,
+    "time": "2026-07-20T11:25:00.000",
+    "type": "entry",
+    "tradeId": "T0051",
+    "side": "long",
+    "price": 745.719970703125,
+    "shares": 193
+  },
+  {
+    "index": 2683,
+    "time": "2026-07-20T12:05:00.000",
+    "type": "scale1",
+    "tradeId": "T0051",
+    "price": 746.6149166971657,
+    "shares": 96
+  },
+  {
+    "index": 2693,
+    "time": "2026-07-20T12:55:00.000",
+    "type": "exit",
+    "tradeId": "T0051",
+    "reason": "trend_reversal",
+    "price": 744.93,
+    "netPnl": -329.91
+  },
+  {
+    "index": 2731,
+    "time": "2026-07-21T09:35:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2732,
+    "time": "2026-07-21T09:40:00.000",
+    "type": "entry",
+    "tradeId": "T0052",
+    "side": "long",
+    "price": 745.260009765625,
+    "shares": 192
+  },
+  {
+    "index": 2739,
+    "time": "2026-07-21T10:15:00.000",
+    "type": "scale1",
+    "tradeId": "T0052",
+    "price": 746.1544037559449,
+    "shares": 96
+  },
+  {
+    "index": 2741,
+    "time": "2026-07-21T10:25:00.000",
+    "type": "scale2",
+    "tradeId": "T0052",
+    "price": 746.9742717452881,
+    "shares": 96
+  },
+  {
+    "index": 2764,
+    "time": "2026-07-21T12:20:00.000",
+    "type": "exit",
+    "tradeId": "T0052",
+    "reason": "target",
+    "price": 748.46,
+    "netPnl": 965.71
+  },
+  {
+    "index": 2804,
+    "time": "2026-07-21T15:40:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2805,
+    "time": "2026-07-21T15:45:00.000",
+    "type": "entry",
+    "tradeId": "T0053",
+    "side": "long",
+    "price": 748.530029296875,
+    "shares": 193
+  },
+  {
+    "index": 2808,
+    "time": "2026-07-22T09:30:00.000",
+    "type": "exit",
+    "tradeId": "T0053",
+    "reason": "stop",
+    "price": 746.81,
+    "netPnl": -346.69
+  },
+  {
+    "index": 2814,
+    "time": "2026-07-22T10:00:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2815,
+    "time": "2026-07-22T10:05:00.000",
+    "type": "entry",
+    "tradeId": "T0054",
+    "side": "long",
+    "price": 748.969970703125,
+    "shares": 192
+  },
+  {
+    "index": 2818,
+    "time": "2026-07-22T10:20:00.000",
+    "type": "exit",
+    "tradeId": "T0054",
+    "reason": "trend_reversal",
+    "price": 747.53,
+    "netPnl": -291.77
+  },
+  {
+    "index": 2828,
+    "time": "2026-07-22T11:10:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2829,
+    "time": "2026-07-22T11:15:00.000",
+    "type": "entry",
+    "tradeId": "T0055",
+    "side": "long",
+    "price": 748.8800048828125,
+    "shares": 192
+  },
+  {
+    "index": 2837,
+    "time": "2026-07-22T11:55:00.000",
+    "type": "scale1",
+    "tradeId": "T0055",
+    "price": 749.7787432654725,
+    "shares": 96
+  },
+  {
+    "index": 2856,
+    "time": "2026-07-22T13:30:00.000",
+    "type": "exit",
+    "tradeId": "T0055",
+    "reason": "trend_reversal",
+    "price": 748.81,
+    "netPnl": -122.23
+  },
+  {
+    "index": 2922,
+    "time": "2026-07-23T12:30:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2923,
+    "time": "2026-07-23T12:35:00.000",
+    "type": "entry",
+    "tradeId": "T0056",
+    "side": "long",
+    "price": 739.0999755859375,
+    "shares": 194
+  },
+  {
+    "index": 2926,
+    "time": "2026-07-23T12:50:00.000",
+    "type": "exit",
+    "tradeId": "T0056",
+    "reason": "trend_reversal",
+    "price": 737.91,
+    "netPnl": -245.93
+  },
+  {
+    "index": 2932,
+    "time": "2026-07-23T13:20:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2933,
+    "time": "2026-07-23T13:25:00.000",
+    "type": "entry",
+    "tradeId": "T0057",
+    "side": "long",
+    "price": 738.97998046875,
+    "shares": 194
+  },
+  {
+    "index": 2934,
+    "time": "2026-07-23T13:30:00.000",
+    "type": "exit",
+    "tradeId": "T0057",
+    "reason": "trend_reversal",
+    "price": 738.02,
+    "netPnl": -201.31
+  },
+  {
+    "index": 2964,
+    "time": "2026-07-24T09:30:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 2965,
+    "time": "2026-07-24T09:35:00.000",
+    "type": "entry",
+    "tradeId": "T0058",
+    "side": "long",
+    "price": 739.2899780273438,
+    "shares": 193
+  },
+  {
+    "index": 2969,
+    "time": "2026-07-24T09:55:00.000",
+    "type": "exit",
+    "tradeId": "T0058",
+    "reason": "stop",
+    "price": 737.59,
+    "netPnl": -342.41
+  },
+  {
+    "index": 3042,
+    "time": "2026-07-27T09:30:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3043,
+    "time": "2026-07-27T09:35:00.000",
+    "type": "entry",
+    "tradeId": "T0059",
+    "side": "long",
+    "price": 744.6599731445312,
+    "shares": 191
+  },
+  {
+    "index": 3043,
+    "time": "2026-07-27T09:35:00.000",
+    "type": "scale1",
+    "tradeId": "T0059",
+    "price": 745.5536470249018,
+    "shares": 95
+  },
+  {
+    "index": 3047,
+    "time": "2026-07-27T09:55:00.000",
+    "type": "exit",
+    "tradeId": "T0059",
+    "reason": "stop",
+    "price": 742.95,
+    "netPnl": -588.91
+  },
+  {
+    "index": 3098,
+    "time": "2026-07-27T14:10:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3099,
+    "time": "2026-07-27T14:15:00.000",
+    "type": "entry",
+    "tradeId": "T0060",
+    "side": "long",
+    "price": 737.75,
+    "shares": 191
+  },
+  {
+    "index": 3102,
+    "time": "2026-07-27T14:30:00.000",
+    "type": "exit",
+    "tradeId": "T0060",
+    "reason": "trend_reversal",
+    "price": 736.83,
+    "netPnl": -189.56
+  },
+  {
+    "index": 3106,
+    "time": "2026-07-27T14:50:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3107,
+    "time": "2026-07-27T14:55:00.000",
+    "type": "entry",
+    "tradeId": "T0061",
+    "side": "long",
+    "price": 738.5599975585938,
+    "shares": 191
+  },
+  {
+    "index": 3109,
+    "time": "2026-07-27T15:05:00.000",
+    "type": "scale1",
+    "tradeId": "T0061",
+    "price": 739.4463507972638,
+    "shares": 95
+  },
+  {
+    "index": 3122,
+    "time": "2026-07-28T09:40:00.000",
+    "type": "exit",
+    "tradeId": "T0061",
+    "reason": "stop",
+    "price": 736.86,
+    "netPnl": -584.09
+  },
+  {
+    "index": 3135,
+    "time": "2026-07-28T10:45:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3136,
+    "time": "2026-07-28T10:50:00.000",
+    "type": "entry",
+    "tradeId": "T0062",
+    "side": "long",
+    "price": 739.2999877929688,
+    "shares": 189
+  },
+  {
+    "index": 3141,
+    "time": "2026-07-28T11:15:00.000",
+    "type": "scale1",
+    "tradeId": "T0062",
+    "price": 740.187229101319,
+    "shares": 94
+  },
+  {
+    "index": 3142,
+    "time": "2026-07-28T11:20:00.000",
+    "type": "scale2",
+    "tradeId": "T0062",
+    "price": 741.0005404108898,
+    "shares": 94
+  },
+  {
+    "index": 3160,
+    "time": "2026-07-28T12:50:00.000",
+    "type": "exit",
+    "tradeId": "T0062",
+    "reason": "target",
+    "price": 742.48,
+    "netPnl": 941.13
+  },
+  {
+    "index": 3186,
+    "time": "2026-07-28T15:00:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3187,
+    "time": "2026-07-28T15:05:00.000",
+    "type": "entry",
+    "tradeId": "T0063",
+    "side": "long",
+    "price": 741.8800048828125,
+    "shares": 191
+  },
+  {
+    "index": 3197,
+    "time": "2026-07-28T15:55:00.000",
+    "type": "exit",
+    "tradeId": "T0063",
+    "reason": "trend_reversal",
+    "price": 740.69,
+    "netPnl": -242.24
+  },
+  {
+    "index": 3240,
+    "time": "2026-07-29T13:00:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3241,
+    "time": "2026-07-29T13:05:00.000",
+    "type": "entry",
+    "tradeId": "T0064",
+    "side": "long",
+    "price": 735.89501953125,
+    "shares": 192
+  },
+  {
+    "index": 3243,
+    "time": "2026-07-29T13:15:00.000",
+    "type": "scale1",
+    "tradeId": "T0064",
+    "price": 736.7781745031398,
+    "shares": 96
+  },
+  {
+    "index": 3252,
+    "time": "2026-07-29T14:00:00.000",
+    "type": "scale2",
+    "tradeId": "T0064",
+    "price": 737.5877399730762,
+    "shares": 96
+  },
+  {
+    "index": 3252,
+    "time": "2026-07-29T14:00:00.000",
+    "type": "exit",
+    "tradeId": "T0064",
+    "reason": "target",
+    "price": 739.06,
+    "netPnl": 953.57
+  },
+  {
+    "index": 3281,
+    "time": "2026-07-30T09:55:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3282,
+    "time": "2026-07-30T10:00:00.000",
+    "type": "entry",
+    "tradeId": "T0065",
+    "side": "long",
+    "price": 738.625,
+    "shares": 193
+  },
+  {
+    "index": 3291,
+    "time": "2026-07-30T10:45:00.000",
+    "type": "exit",
+    "tradeId": "T0065",
+    "reason": "stop",
+    "price": 736.93,
+    "netPnl": -342.1
+  },
+  {
+    "index": 3305,
+    "time": "2026-07-30T11:55:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3306,
+    "time": "2026-07-30T12:00:00.000",
+    "type": "entry",
+    "tradeId": "T0066",
+    "side": "long",
+    "price": 737.1500244140625,
+    "shares": 193
+  },
+  {
+    "index": 3306,
+    "time": "2026-07-30T12:00:00.000",
+    "type": "scale1",
+    "tradeId": "T0066",
+    "price": 738.0346855298621,
+    "shares": 96
+  },
+  {
+    "index": 3308,
+    "time": "2026-07-30T12:10:00.000",
+    "type": "scale2",
+    "tradeId": "T0066",
+    "price": 738.8456316432203,
+    "shares": 96
+  },
+  {
+    "index": 3334,
+    "time": "2026-07-30T14:20:00.000",
+    "type": "exit",
+    "tradeId": "T0066",
+    "reason": "target",
+    "price": 740.32,
+    "netPnl": 958.29
+  },
+  {
+    "index": 3370,
+    "time": "2026-07-31T10:50:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3371,
+    "time": "2026-07-31T10:55:00.000",
+    "type": "entry",
+    "tradeId": "T0067",
+    "side": "long",
+    "price": 742.1900024414062,
+    "shares": 194
+  },
+  {
+    "index": 3375,
+    "time": "2026-07-31T11:15:00.000",
+    "type": "scale1",
+    "tradeId": "T0067",
+    "price": 743.0807120852363,
+    "shares": 97
+  },
+  {
+    "index": 3377,
+    "time": "2026-07-31T11:25:00.000",
+    "type": "exit",
+    "tradeId": "T0067",
+    "reason": "stop",
+    "price": 740.48,
+    "netPnl": -597.5
+  },
+  {
+    "index": 3379,
+    "time": "2026-07-31T11:35:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3380,
+    "time": "2026-07-31T11:40:00.000",
+    "type": "entry",
+    "tradeId": "T0068",
+    "side": "long",
+    "price": 742.0599975585938,
+    "shares": 192
+  },
+  {
+    "index": 3382,
+    "time": "2026-07-31T11:50:00.000",
+    "type": "scale1",
+    "tradeId": "T0068",
+    "price": 742.9505511822639,
+    "shares": 96
+  },
+  {
+    "index": 3388,
+    "time": "2026-07-31T12:20:00.000",
+    "type": "scale2",
+    "tradeId": "T0068",
+    "price": 743.7668988061779,
+    "shares": 96
+  },
+  {
+    "index": 3399,
+    "time": "2026-07-31T13:15:00.000",
+    "type": "exit",
+    "tradeId": "T0068",
+    "reason": "target",
+    "price": 745.25,
+    "netPnl": 961.56
+  },
+  {
+    "index": 3642,
+    "time": "2026-08-05T14:00:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3643,
+    "time": "2026-08-05T14:05:00.000",
+    "type": "entry",
+    "tradeId": "T0069",
+    "side": "long",
+    "price": 772.1199951171875,
+    "shares": 187
+  },
+  {
+    "index": 3649,
+    "time": "2026-08-05T14:35:00.000",
+    "type": "exit",
+    "tradeId": "T0069",
+    "reason": "trend_reversal",
+    "price": 771.38,
+    "netPnl": -152.28
+  },
+  {
+    "index": 3657,
+    "time": "2026-08-05T15:15:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3658,
+    "time": "2026-08-05T15:20:00.000",
+    "type": "entry",
+    "tradeId": "T0070",
+    "side": "long",
+    "price": 771.8300170898438,
+    "shares": 187
+  },
+  {
+    "index": 3661,
+    "time": "2026-08-05T15:35:00.000",
+    "type": "exit",
+    "tradeId": "T0070",
+    "reason": "trend_reversal",
+    "price": 771.23,
+    "netPnl": -127.01
+  },
+  {
+    "index": 3675,
+    "time": "2026-08-06T10:15:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3676,
+    "time": "2026-08-06T10:20:00.000",
+    "type": "entry",
+    "tradeId": "T0071",
+    "side": "long",
+    "price": 771.7239990234375,
+    "shares": 186
+  },
+  {
+    "index": 3677,
+    "time": "2026-08-06T10:25:00.000",
+    "type": "exit",
+    "tradeId": "T0071",
+    "reason": "trend_reversal",
+    "price": 770.37,
+    "netPnl": -265.65
+  },
+  {
+    "index": 3721,
+    "time": "2026-08-06T14:05:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3722,
+    "time": "2026-08-06T14:10:00.000",
+    "type": "entry",
+    "tradeId": "T0072",
+    "side": "long",
+    "price": 768.8699951171875,
+    "shares": 186
+  },
+  {
+    "index": 3723,
+    "time": "2026-08-06T14:15:00.000",
+    "type": "scale1",
+    "tradeId": "T0072",
+    "price": 769.7927236870277,
+    "shares": 93
+  },
+  {
+    "index": 3739,
+    "time": "2026-08-06T15:35:00.000",
+    "type": "exit",
+    "tradeId": "T0072",
+    "reason": "trend_reversal",
+    "price": 768.45,
+    "netPnl": -216.41
+  },
+  {
+    "index": 3744,
+    "time": "2026-08-07T09:30:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3745,
+    "time": "2026-08-07T09:35:00.000",
+    "type": "entry",
+    "tradeId": "T0073",
+    "side": "long",
+    "price": 771.5,
+    "shares": 185
+  },
+  {
+    "index": 3747,
+    "time": "2026-08-07T09:45:00.000",
+    "type": "scale1",
+    "tradeId": "T0073",
+    "price": 772.4258848650002,
+    "shares": 92
+  },
+  {
+    "index": 3752,
+    "time": "2026-08-07T10:10:00.000",
+    "type": "exit",
+    "tradeId": "T0073",
+    "reason": "stop",
+    "price": 769.73,
+    "netPnl": -590.93
+  },
+  {
+    "index": 3812,
+    "time": "2026-08-07T15:10:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3813,
+    "time": "2026-08-07T15:15:00.000",
+    "type": "entry",
+    "tradeId": "T0074",
+    "side": "long",
+    "price": 772.9099731445312,
+    "shares": 184
+  },
+  {
+    "index": 3821,
+    "time": "2026-08-07T15:55:00.000",
+    "type": "scale1",
+    "tradeId": "T0074",
+    "price": 773.8375501324017,
+    "shares": 92
+  },
+  {
+    "index": 3834,
+    "time": "2026-08-10T10:30:00.000",
+    "type": "scale2",
+    "tradeId": "T0074",
+    "price": 774.6878361229577,
+    "shares": 92
+  },
+  {
+    "index": 3847,
+    "time": "2026-08-10T11:35:00.000",
+    "type": "exit",
+    "tradeId": "T0074",
+    "reason": "trend_reversal",
+    "price": 773.2,
+    "netPnl": -155.4
+  },
+  {
+    "index": 3848,
+    "time": "2026-08-10T11:40:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3849,
+    "time": "2026-08-10T11:45:00.000",
+    "type": "entry",
+    "tradeId": "T0075",
+    "side": "long",
+    "price": 773.8099975585938,
+    "shares": 183
+  },
+  {
+    "index": 3849,
+    "time": "2026-08-10T11:45:00.000",
+    "type": "exit",
+    "tradeId": "T0075",
+    "reason": "trend_reversal",
+    "price": 773.47,
+    "netPnl": -75.9
+  },
+  {
+    "index": 3850,
+    "time": "2026-08-10T11:50:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3851,
+    "time": "2026-08-10T11:55:00.000",
+    "type": "entry",
+    "tradeId": "T0076",
+    "side": "long",
+    "price": 774.1900024414062,
+    "shares": 183
+  },
+  {
+    "index": 3857,
+    "time": "2026-08-10T12:25:00.000",
+    "type": "exit",
+    "tradeId": "T0076",
+    "reason": "trend_reversal",
+    "price": 773.29,
+    "netPnl": -178.38
+  },
+  {
+    "index": 3887,
+    "time": "2026-08-10T14:55:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3888,
+    "time": "2026-08-10T15:00:00.000",
+    "type": "entry",
+    "tradeId": "T0077",
+    "side": "long",
+    "price": 773.2000122070312,
+    "shares": 183
+  },
+  {
+    "index": 3898,
+    "time": "2026-08-10T15:50:00.000",
+    "type": "exit",
+    "tradeId": "T0077",
+    "reason": "trend_reversal",
+    "price": 772.3,
+    "netPnl": -178.35
+  },
+  {
+    "index": 3900,
+    "time": "2026-08-11T09:30:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3901,
+    "time": "2026-08-11T09:35:00.000",
+    "type": "entry",
+    "tradeId": "T0078",
+    "side": "long",
+    "price": 773.4600219726562,
+    "shares": 182
+  },
+  {
+    "index": 3920,
+    "time": "2026-08-11T11:10:00.000",
+    "type": "exit",
+    "tradeId": "T0078",
+    "reason": "trend_reversal",
+    "price": 772.58,
+    "netPnl": -173.75
+  },
+  {
+    "index": 3973,
+    "time": "2026-08-11T15:35:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3974,
+    "time": "2026-08-11T15:40:00.000",
+    "type": "entry",
+    "tradeId": "T0079",
+    "side": "long",
+    "price": 771.0700073242188,
+    "shares": 183
+  },
+  {
+    "index": 3975,
+    "time": "2026-08-11T15:45:00.000",
+    "type": "exit",
+    "tradeId": "T0079",
+    "reason": "trend_reversal",
+    "price": 770.3,
+    "netPnl": -154.48
+  },
+  {
+    "index": 3978,
+    "time": "2026-08-12T09:30:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 3979,
+    "time": "2026-08-12T09:35:00.000",
+    "type": "entry",
+    "tradeId": "T0080",
+    "side": "long",
+    "price": 773.0499877929688,
+    "shares": 182
+  },
+  {
+    "index": 3990,
+    "time": "2026-08-12T10:30:00.000",
+    "type": "exit",
+    "tradeId": "T0080",
+    "reason": "stop",
+    "price": 771.27,
+    "netPnl": -337.64
+  },
+  {
+    "index": 4009,
+    "time": "2026-08-12T12:05:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 4010,
+    "time": "2026-08-12T12:10:00.000",
+    "type": "entry",
+    "tradeId": "T0081",
+    "side": "long",
+    "price": 772.3699951171875,
+    "shares": 181
+  },
+  {
+    "index": 4021,
+    "time": "2026-08-12T13:05:00.000",
+    "type": "scale1",
+    "tradeId": "T0081",
+    "price": 773.2969240720277,
+    "shares": 90
+  },
+  {
+    "index": 4050,
+    "time": "2026-08-12T15:30:00.000",
+    "type": "exit",
+    "tradeId": "T0081",
+    "reason": "trend_reversal",
+    "price": 772.8,
+    "netPnl": 19.86
+  },
+  {
+    "index": 4056,
+    "time": "2026-08-13T09:30:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 4057,
+    "time": "2026-08-13T09:35:00.000",
+    "type": "entry",
+    "tradeId": "T0082",
+    "side": "long",
+    "price": 775.3900146484375,
+    "shares": 181
+  },
+  {
+    "index": 4057,
+    "time": "2026-08-13T09:35:00.000",
+    "type": "scale1",
+    "tradeId": "T0082",
+    "price": 776.3205679589173,
+    "shares": 90
+  },
+  {
+    "index": 4060,
+    "time": "2026-08-13T09:50:00.000",
+    "type": "scale2",
+    "tradeId": "T0082",
+    "price": 777.173582267932,
+    "shares": 90
+  },
+  {
+    "index": 4066,
+    "time": "2026-08-13T10:20:00.000",
+    "type": "exit",
+    "tradeId": "T0082",
+    "reason": "target",
+    "price": 778.72,
+    "netPnl": 945.21
+  },
+  {
+    "index": 4096,
+    "time": "2026-08-13T12:50:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 4097,
+    "time": "2026-08-13T12:55:00.000",
+    "type": "entry",
+    "tradeId": "T0083",
+    "side": "long",
+    "price": 776.6799926757812,
+    "shares": 182
+  },
+  {
+    "index": 4118,
+    "time": "2026-08-13T14:40:00.000",
+    "type": "scale1",
+    "tradeId": "T0083",
+    "price": 777.6120941017914,
+    "shares": 91
+  },
+  {
+    "index": 4123,
+    "time": "2026-08-13T15:05:00.000",
+    "type": "scale2",
+    "tradeId": "T0083",
+    "price": 778.4665275285339,
+    "shares": 91
+  },
+  {
+    "index": 4145,
+    "time": "2026-08-14T10:25:00.000",
+    "type": "exit",
+    "tradeId": "T0083",
+    "reason": "trend_reversal",
+    "price": 777.33,
+    "netPnl": -24.12
+  },
+  {
+    "index": 4196,
+    "time": "2026-08-14T14:40:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 4197,
+    "time": "2026-08-14T14:45:00.000",
+    "type": "entry",
+    "tradeId": "T0084",
+    "side": "long",
+    "price": 776.2100219726562,
+    "shares": 182
+  },
+  {
+    "index": 4212,
+    "time": "2026-08-17T09:30:00.000",
+    "type": "exit",
+    "tradeId": "T0084",
+    "reason": "trend_reversal",
+    "price": 775.43,
+    "netPnl": -155.64
+  },
+  {
+    "index": 4330,
+    "time": "2026-08-18T12:50:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 4331,
+    "time": "2026-08-18T12:55:00.000",
+    "type": "entry",
+    "tradeId": "T0085",
+    "side": "long",
+    "price": 768.8200073242188,
+    "shares": 184
+  },
+  {
+    "index": 4336,
+    "time": "2026-08-18T13:20:00.000",
+    "type": "exit",
+    "tradeId": "T0085",
+    "reason": "trend_reversal",
+    "price": 768.18,
+    "netPnl": -131.32
+  },
+  {
+    "index": 4368,
+    "time": "2026-08-19T09:30:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 4369,
+    "time": "2026-08-19T09:35:00.000",
+    "type": "entry",
+    "tradeId": "T0086",
+    "side": "long",
+    "price": 770.030029296875,
+    "shares": 183
+  },
+  {
+    "index": 4372,
+    "time": "2026-08-19T09:50:00.000",
+    "type": "exit",
+    "tradeId": "T0086",
+    "reason": "stop",
+    "price": 768.26,
+    "netPnl": -338.17
+  },
+  {
+    "index": 4437,
+    "time": "2026-08-19T15:15:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 4438,
+    "time": "2026-08-19T15:20:00.000",
+    "type": "entry",
+    "tradeId": "T0087",
+    "side": "long",
+    "price": 770.010009765625,
+    "shares": 183
+  },
+  {
+    "index": 4441,
+    "time": "2026-08-19T15:35:00.000",
+    "type": "exit",
+    "tradeId": "T0087",
+    "reason": "trend_reversal",
+    "price": 769.1,
+    "netPnl": -180.98
+  },
+  {
+    "index": 4525,
+    "time": "2026-08-21T09:35:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 4526,
+    "time": "2026-08-21T09:40:00.000",
+    "type": "entry",
+    "tradeId": "T0088",
+    "side": "long",
+    "price": 765.1199951171875,
+    "shares": 183
+  },
+  {
+    "index": 4542,
+    "time": "2026-08-21T11:00:00.000",
+    "type": "scale1",
+    "tradeId": "T0088",
+    "price": 766.0382232745277,
+    "shares": 91
+  },
+  {
+    "index": 4549,
+    "time": "2026-08-21T11:35:00.000",
+    "type": "scale2",
+    "tradeId": "T0088",
+    "price": 766.879939432356,
+    "shares": 91
+  },
+  {
+    "index": 4571,
+    "time": "2026-08-21T13:25:00.000",
+    "type": "exit",
+    "tradeId": "T0088",
+    "reason": "trend_reversal",
+    "price": 765.72,
+    "netPnl": -37.47
+  },
+  {
+    "index": 4590,
+    "time": "2026-08-21T15:00:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 4591,
+    "time": "2026-08-21T15:05:00.000",
+    "type": "entry",
+    "tradeId": "T0089",
+    "side": "long",
+    "price": 766.0349731445312,
+    "shares": 183
+  },
+  {
+    "index": 4602,
+    "time": "2026-08-24T09:30:00.000",
+    "type": "exit",
+    "tradeId": "T0089",
+    "reason": "stop",
+    "price": 764.27,
+    "netPnl": -336.41
+  },
+  {
+    "index": 4628,
+    "time": "2026-08-24T11:40:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 4629,
+    "time": "2026-08-24T11:45:00.000",
+    "type": "entry",
+    "tradeId": "T0090",
+    "side": "long",
+    "price": 764.27001953125,
+    "shares": 183
+  },
+  {
+    "index": 4632,
+    "time": "2026-08-24T12:00:00.000",
+    "type": "scale1",
+    "tradeId": "T0090",
+    "price": 765.1872276243897,
+    "shares": 91
+  },
+  {
+    "index": 4648,
+    "time": "2026-08-24T13:20:00.000",
+    "type": "exit",
+    "tradeId": "T0090",
+    "reason": "trend_reversal",
+    "price": 763.49,
+    "netPnl": -311.55
+  },
+  {
+    "index": 4660,
+    "time": "2026-08-24T14:20:00.000",
+    "type": "signal",
+    "side": "long"
+  },
+  {
+    "index": 4661,
+    "time": "2026-08-24T14:25:00.000",
+    "type": "entry",
+    "tradeId": "T0091",
+    "side": "long",
+    "price": 764.614990234375,
+    "shares": 182
+  }
+]

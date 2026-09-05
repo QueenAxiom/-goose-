@@ -1,0 +1,18 @@
+buyId,kind,band,date,price,shares,cost,cashRemainingAfter,sharesAfter,avgCostAfter,athAtTrigger,drawdownPctAtTrigger,commentary
+B001,initial,0,2001-08-28,118.29,422,49919.15,50080.85,422,118.29,,,"Opening stake. Time in the market, not timing it - the rest of the cash stays ready for when it's needed."
+B002,dip,1,2001-09-18,104.34,95,9912.34,40168.51,517,115.73,118.31,11.84,"First real pullback. This is exactly the kind of dip a patient buyer waits for - adding here, not panicking."
+B003,dip,2,2002-07-11,91.77,108,9911.07,31005.02,625,111.59,118.31,22.14,"Deeper now. Prices this far below the highs are a gift for anyone still holding cash, not a reason to run."
+B004,dip,3,2002-07-23,82.56,121,9989.55,21015.47,746,106.88,118.31,30.52,This is a real correction. Others are fearful - that's precisely the setup a disciplined buyer wants.
+B005,dip,1,2008-01-09,139.1,71,9876.38,20044.09,817,109.68,156.48,11.23,"First real pullback. This is exactly the kind of dip a patient buyer waits for - adding here, not panicking."
+B006,dip,2,2008-07-08,125,79,9875.2,11239.97,896,111.03,156.48,20.1,"Deeper now. Prices this far below the highs are a gift for anyone still holding cash, not a reason to run."
+B007,dip,3,2008-10-07,106.85,93,9937.11,1922,989,110.64,156.48,33.08,This is a real correction. Others are fearful - that's precisely the setup a disciplined buyer wants.
+B008,dip,4,2008-10-10,86.77,22,1908.91,13.09,1011,110.12,156.48,42.04,"A genuine crisis-level drawdown. Uncomfortable, but this is when the best long-term prices get made."
+B009,dip,1,2015-08-25,195.45,51,9967.93,10254.04,1062,114.22,213.5,11.24,"First real pullback. This is exactly the kind of dip a patient buyer waits for - adding here, not panicking."
+B010,dip,1,2018-02-09,260.83,38,9911.39,12646.99,1100,119.28,286.58,10.1,"First real pullback. This is exactly the kind of dip a patient buyer waits for - adding here, not panicking."
+B011,dip,1,2018-10-30,263.7,37,9756.77,6922.83,1137,123.98,293.58,10.12,"First real pullback. This is exactly the kind of dip a patient buyer waits for - adding here, not panicking."
+B012,dip,2,2018-12-26,235.99,36,8495.77,58.66,1173,127.42,293.58,20.18,"Deeper now. Prices this far below the highs are a gift for anyone still holding cash, not a reason to run."
+B013,dip,1,2020-02-28,288.73,23,6640.76,8.98,1196,130.52,338.34,12.07,"First real pullback. This is exactly the kind of dip a patient buyer waits for - adding here, not panicking."
+B014,dip,3,2020-03-23,228.21,7,1597.49,93.07,1203,131.09,338.34,32.38,This is a real correction. Others are fearful - that's precisely the setup a disciplined buyer wants.
+B015,dip,1,2022-02-23,432.7,23,9952.18,2170.9,1226,136.75,477.71,10.08,"First real pullback. This is exactly the kind of dip a patient buyer waits for - adding here, not panicking."
+B016,dip,2,2022-06-14,376.89,10,3768.88,76.74,1236,138.69,477.71,21.5,"Deeper now. Prices this far below the highs are a gift for anyone still holding cash, not a reason to run."
+B017,dip,1,2025-03-14,556.17,17,9454.82,13677.05,1253,144.35,612.93,10.04,"First real pullback. This is exactly the kind of dip a patient buyer waits for - adding here, not panicking."
