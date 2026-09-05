@@ -14,5 +14,13 @@ Referenced by `marketing-director.md` as "the three-doors structure and mission.
 
 *"Proud Sponsor of The Golden Goose Project — Building Stronger Communities."*
 
+## Mission tagline (confirmed by Alan, 2026-09-05)
+
+*"Technology solutions that make business and life better."*
+
+This is the umbrella line across all three doors: EmpoweredAtHome.com (life),
+EverythingInternet.ca (business — the hub), and SchmucksDebate.com (life/career).
+Marketing Director should ground campaign strategy in this line going forward.
+
 ## TODO(Alan)
-- Write the actual mission statement / "three-doors" framing — what ties the three sites together as one ecosystem, and what the "door" metaphor means (e.g. three entry points into one brand?). Marketing Director needs this to ground campaign strategy.
+- Confirm whether the "three doors" metaphor itself (three entry points into one brand) is the intended framing, or just informal internal shorthand — the tagline above answers "why," not yet "how the three doors relate to each other."
