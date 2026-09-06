@@ -22,5 +22,11 @@ This is the umbrella line across all three doors: EmpoweredAtHome.com (life),
 EverythingInternet.ca (business — the hub), and SchmucksDebate.com (life/career).
 Marketing Director should ground campaign strategy in this line going forward.
 
-## TODO(Alan)
-- Confirm whether the "three doors" metaphor itself (three entry points into one brand) is the intended framing, or just informal internal shorthand — the tagline above answers "why," not yet "how the three doors relate to each other."
+## Three doors — framing status (2026-09-05)
+
+"Three doors" is internal shorthand, not a customer-facing brand framing. Nothing
+ties the three sites together for a visitor today (no shared logo, no cross-links,
+no "part of the Axiom family" mention), and the audiences don't obviously overlap
+(smart-home shoppers vs. career-advice seekers). Revisit only if real cross-traffic
+between the sites emerges, or if a deliberate parent-brand play is decided later.
+The mission tagline above remains the internal north star in the meantime.
