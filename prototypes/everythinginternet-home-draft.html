@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EverythingInternet.ca — Homepage Draft (for review, not yet published)</title>
+</head>
+<body>
+<!--
+  DRAFT — not live. Built 2026-09-05 as a compact, brand-aligned replacement
+  for the actual production homepage of everythinginternet.ca, which is
+  currently WordPress's untouched default install (no directory, random
+  blog post as homepage). Content/copy/company list sourced from the
+  approved 2026-08-12/2026-08-17 decisions in docs/everythinginternet-launch-content.md
+  and the earlier prototypes/everythinginternet-directory.html mockup —
+  this is a smaller, self-contained rebuild of that same approved content,
+  not a byte-for-byte copy (the original prototype is ~1000 lines with much
+  heavier CSS; this trims it to fit practical WordPress-editor constraints).
+
+  Compliance note for reviewer: the 29-company board uses REAL company names,
+  logos-as-text, and outbound links (1Password, Shopify, Wealthsimple, etc.)
+  with NO business relationship to these companies. Alan explicitly approved
+  this approach on 2026-08-12 with a disclaimer line ("Inclusion here isn't
+  an endorsement or paid partnership...") as the agreed mitigation — see
+  memory/decisions-log for that decision. Please specifically check: (1)
+  whether using real trademarks/company names this way carries legal risk
+  beyond what the disclaimer covers, (2) whether the disclaimer's placement/
+  visibility is adequate, (3) general ad/marketing claim accuracy ("no
+  pay-to-play rankings", "Now Live" eyebrow, "29 companies" count).
+-->
+<style>
+.ei-page{--navy:#0f1f3d;--navy-deep:#0a1730;--paper:#f7f5f0;--ink:#1a1a1a;--accent:#a8382c;--line:#d8d3c7;
+font-family:Georgia,'Times New Roman',serif;color:var(--ink);background:var(--paper);margin:0 -9999rem;padding:0 9999rem;}
+.ei-page *{box-sizing:border-box;}
+.ei-hero{background:var(--navy);color:var(--paper);padding:4rem 1.5rem 3rem;text-align:center;}
+.ei-hero .eyebrow{font-family:-apple-system,Segoe UI,Arial,sans-serif;text-transform:uppercase;letter-spacing:.14em;font-size:.75rem;color:#c9b98e;margin-bottom:1rem;}
+.ei-hero h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.1;margin:0 0 1rem;font-weight:700;}
+.ei-hero p{font-family:-apple-system,Segoe UI,Arial,sans-serif;max-width:640px;margin:0 auto 2rem;font-size:1.1rem;color:#dfe3ec;}
+.ei-cta-row{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;font-family:-apple-system,Segoe UI,Arial,sans-serif;}
+.ei-btn{display:inline-block;padding:.9rem 1.8rem;border-radius:2px;font-weight:600;text-decoration:none;font-size:1rem;}
+.ei-btn-primary{background:var(--accent);color:#fff;}
+.ei-btn-secondary{background:transparent;color:var(--paper);border:1px solid #5a6b8c;}
+.ei-section{max-width:1100px;margin:0 auto;padding:3.5rem 1.5rem;}
+.ei-section .eyebrow{font-family:-apple-system,Segoe UI,Arial,sans-serif;text-transform:uppercase;letter-spacing:.14em;font-size:.75rem;color:var(--accent);margin-bottom:.75rem;font-weight:700;}
+.ei-section h2{font-size:clamp(1.6rem,3.5vw,2.2rem);margin:0 0 .75rem;color:var(--navy);}
+.ei-section .lede{font-family:-apple-system,Segoe UI,Arial,sans-serif;font-size:1.05rem;max-width:680px;color:#3a3a3a;}
+.ei-disclaimer{font-family:-apple-system,Segoe UI,Arial,sans-serif;font-size:.8rem;color:#6b6b6b;max-width:680px;margin-top:.5rem;font-style:italic;}
+.ei-board{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;margin-top:2rem;font-family:-apple-system,Segoe UI,Arial,sans-serif;}
+.ei-card{background:#fff;border:1px solid var(--line);border-radius:4px;padding:1rem 1.1rem;}
+.ei-card a{color:var(--navy);font-weight:700;text-decoration:none;font-size:1rem;}
+.ei-card a:hover{text-decoration:underline;}
+.ei-card .cat{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin:.35rem 0 .15rem;}
+.ei-card .loc{font-size:.78rem;color:#777;margin-bottom:.4rem;}
+.ei-card .desc{font-size:.85rem;color:#444;line-height:1.4;}
+.ei-trust{text-align:center;font-family:-apple-system,Segoe UI,Arial,sans-serif;font-size:.9rem;color:var(--navy);font-weight:600;margin-top:2rem;}
+.ei-cols{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;font-family:-apple-system,Segoe UI,Arial,sans-serif;}
+.ei-cols h3{color:var(--navy);font-size:1.15rem;margin-bottom:.75rem;}
+.ei-cols ul{padding-left:1.1rem;margin:0;color:#333;font-size:.95rem;line-height:1.6;}
+.ei-closing{background:var(--navy-deep);color:var(--paper);text-align:center;padding:3rem 1.5rem;font-family:-apple-system,Segoe UI,Arial,sans-serif;font-size:1.2rem;}
+.ei-closing a{color:#f2c14e;}
+@media (max-width:640px){.ei-cols{grid-template-columns:1fr;}}
+</style>
+
+<div class="ei-page">
+
+<section class="ei-hero">
+<div class="eyebrow">Now Live &mdash; Canada's Tech Directory</div>
+<h1>Canada's tech companies. Found.</h1>
+<p>One directory, built the way Canadian businesses actually find each other &mdash; no pay-to-play rankings, no noise. Just real companies doing real work.</p>
+<div class="ei-cta-row">
+<a class="ei-btn ei-btn-secondary" href="#board">Browse the Directory</a>
+<a class="ei-btn ei-btn-primary" href="/shop/">Get Listed &mdash; $499</a>
+</div>
+</section>
+
+<section class="ei-section" id="board">
+<div class="eyebrow">The Directory</div>
+<h2>29 companies. Tuned in.</h2>
+<p class="lede">The real board &mdash; real Canadian companies, real categories, the kind of listing your company joins from day one.</p>
+<p class="ei-disclaimer">Shown for illustration: real, notable Canadian tech companies in each category. Inclusion here isn't an endorsement or paid partnership &mdash; it's a picture of the caliber of company this board is built for.</p>
+
+<div class="ei-board">
+<div class="ei-card"><a href="https://1password.com/" target="_blank" rel="noopener">1Password</a><div class="cat">Password &amp; Security</div><div class="loc">Toronto, ON</div><div class="desc">Password, passkey, and security vault for individuals and enterprises.</div></div>
+<div class="ei-card"><a href="https://www.ada.cx/" target="_blank" rel="noopener">Ada</a><div class="cat">AI &amp; Customer Service</div><div class="loc">Toronto, ON</div><div class="desc">AI-native customer service platform and voice AI agents for automated support at scale.</div></div>
+<div class="ei-card"><a href="https://www.benevity.com/" target="_blank" rel="noopener">Benevity</a><div class="cat">Corporate Giving &amp; Grants</div><div class="loc">Calgary, AB</div><div class="desc">Employee giving, volunteering, grants management, and impact reporting platform.</div></div>
+<div class="ei-card"><a href="https://www.blackberry.com/" target="_blank" rel="noopener">Blackberry</a><div class="cat">Secure Communications</div><div class="loc">Waterloo, ON</div><div class="desc">Critical event management, crisis communications, and sovereign-grade secure communications.</div></div>
+<div class="ei-card"><a href="https://qnx.com/" target="_blank" rel="noopener">Blackberry QNX</a><div class="cat">Embedded Systems</div><div class="loc">Ottawa, ON</div><div class="desc">Embedded OS and middleware for safety-critical vehicles, medical devices, and industrial systems.</div></div>
+<div class="ei-card"><a href="https://www.clio.com/" target="_blank" rel="noopener">Clio</a><div class="cat">Legal Practice Management</div><div class="loc">Vancouver, BC</div><div class="desc">Legal practice management, CRM, accounting, payments, and AI tools built for law firms.</div></div>
+<div class="ei-card"><a href="https://www.coveo.com/" target="_blank" rel="noopener">Coveo</a><div class="cat">AI Search &amp; Recommendations</div><div class="loc">Qu&eacute;bec City, QC</div><div class="desc">AI relevance platform delivering search, recommendations, and generative experiences for enterprises.</div></div>
+<div class="ei-card"><a href="https://www.d2l.com/" target="_blank" rel="noopener">D2L</a><div class="cat">Learning Management</div><div class="loc">Kitchener, ON</div><div class="desc">Learning management (Brightspace), content authoring, and ecommerce for corporate training and education.</div></div>
+<div class="ei-card"><a href="https://www.dayforce.com/" target="_blank" rel="noopener">Dayforce</a><div class="cat">HR &amp; Payroll</div><div class="loc">Toronto, ON</div><div class="desc">Unified payroll, HR, talent, workforce management, and AI-powered people platform.</div></div>
+<div class="ei-card"><a href="https://www.ecobee.com/" target="_blank" rel="noopener">Ecobee</a><div class="cat">Smart Home</div><div class="loc">Toronto, ON</div><div class="desc">Smart thermostats, doorbell cameras, and connected home security systems.</div></div>
+<div class="ei-card"><a href="https://www.fongo.com/" target="_blank" rel="noopener">Fongo</a><div class="cat">VoIP &amp; Business Phone</div><div class="loc">Mississauga, ON</div><div class="desc">VoIP calling, texting, and cloud business phone services for Canadian consumers and businesses.</div></div>
+<div class="ei-card"><a href="https://www.freshbooks.com/" target="_blank" rel="noopener">Freshbooks</a><div class="cat">Accounting &amp; Invoicing</div><div class="loc">Toronto, ON</div><div class="desc">Cloud accounting, invoicing, payments, and time tracking built for small and medium businesses.</div></div>
+<div class="ei-card"><a href="https://www.geotab.com/" target="_blank" rel="noopener">Geotab</a><div class="cat">Fleet &amp; Vehicle Telematics</div><div class="loc">Oakville, ON</div><div class="desc">Fleet telematics hardware, analytics, driver management, and marketplace for connected vehicles.</div></div>
+<div class="ei-card"><a href="https://www.hootsuite.com/" target="_blank" rel="noopener">Hootsuite</a><div class="cat">Social Media Management</div><div class="loc">Vancouver, BC</div><div class="desc">Social media management and social listening suite for brands and agencies.</div></div>
+<div class="ei-card"><a href="https://jane.app/" target="_blank" rel="noopener">Jane Software</a><div class="cat">Healthcare Practice Management</div><div class="loc">Vancouver, BC</div><div class="desc">Clinic and practitioner management platform with telehealth and online booking.</div></div>
+<div class="ei-card"><a href="https://www.getjobber.com/" target="_blank" rel="noopener">Jobber</a><div class="cat">Field Service Management</div><div class="loc">Edmonton, AB</div><div class="desc">Field service management for home-service businesses &mdash; scheduling, invoicing, and client management.</div></div>
+<div class="ei-card"><a href="https://www.kinaxis.com/" target="_blank" rel="noopener">Kinaxis</a><div class="cat">Supply Chain Planning</div><div class="loc">Ottawa, ON</div><div class="desc">AI-enabled supply chain planning and orchestration for global enterprises.</div></div>
+<div class="ei-card"><a href="https://later.com/" target="_blank" rel="noopener">Later</a><div class="cat">Social Media Scheduling</div><div class="loc">Vancouver, BC</div><div class="desc">Social media scheduling, publishing, and influencer marketing platform.</div></div>
+<div class="ei-card"><a href="https://www.lightspeedhq.com/" target="_blank" rel="noopener">Lightspeed</a><div class="cat">Retail &amp; Restaurant POS</div><div class="loc">Montr&eacute;al, QC</div><div class="desc">Retail POS, restaurant POS, ecommerce, and integrated payments for merchants.</div></div>
+<div class="ei-card"><a href="https://miovision.com/" target="_blank" rel="noopener">Miovision</a><div class="cat">Smart City Traffic Management</div><div class="loc">Kitchener, ON</div><div class="desc">Traffic operations cloud, video traffic data collection, and AI signal optimization for smart cities.</div></div>
+<div class="ei-card"><a href="https://nanoleaf.me/" target="_blank" rel="noopener">Nanoleaf</a><div class="cat">Smart Lighting</div><div class="loc">Toronto, ON</div><div class="desc">Modular smart lighting panels, bulbs, and connected lighting systems for homes and offices.</div></div>
+<div class="ei-card"><a href="https://www.opentext.com/" target="_blank" rel="noopener">Opentext</a><div class="cat">Enterprise Content Management</div><div class="loc">Waterloo, ON</div><div class="desc">Enterprise content management, B2B integration, cybersecurity, DevOps, IT operations, analytics, and AI.</div></div>
+<div class="ei-card"><a href="https://www.pointclickcare.com/" target="_blank" rel="noopener">Pointclickcare</a><div class="cat">Senior Care EHR</div><div class="loc">Mississauga, ON</div><div class="desc">Senior care EHR and operational platform with AI-powered advisory tools for long-term care.</div></div>
+<div class="ei-card"><a href="https://www.kobo.com/" target="_blank" rel="noopener">Rakuten Kobo</a><div class="cat">eBooks &amp; eReaders</div><div class="loc">Toronto, ON</div><div class="desc">eBook and audiobook app plus e-reader hardware (Clara, Libra, Sage, Elipsa).</div></div>
+<div class="ei-card"><a href="https://safe.com/" target="_blank" rel="noopener">Safe Software</a><div class="cat">Data Integration &amp; Automation</div><div class="loc">Surrey, BC</div><div class="desc">Enterprise data integration (FME), automation, and spatial data authoring tools.</div></div>
+<div class="ei-card"><a href="https://www.shopify.com/" target="_blank" rel="noopener">Shopify</a><div class="cat">Ecommerce Platform</div><div class="loc">Ottawa, ON</div><div class="desc">All-in-one commerce platform &mdash; checkout, payments, POS, creator tools, and affiliate marketplace.</div></div>
+<div class="ei-card"><a href="https://soti.net/" target="_blank" rel="noopener">Soti</a><div class="cat">Enterprise Mobility Management</div><div class="loc">Mississauga, ON</div><div class="desc">Enterprise mobility management, device diagnostics, IoT management, and low-code business apps.</div></div>
+<div class="ei-card"><a href="https://www.thinkific.com/" target="_blank" rel="noopener">Thinkific</a><div class="cat">Course &amp; Community Platform</div><div class="loc">Vancouver, BC</div><div class="desc">Course, community, membership, and creator monetization platform for knowledge entrepreneurs.</div></div>
+<div class="ei-card"><a href="https://www.wealthsimple.com/" target="_blank" rel="noopener">Wealthsimple</a><div class="cat">Trading &amp; Investing</div><div class="loc">Toronto, ON</div><div class="desc">Trading, managed investing, cash accounts, tax filing, and crypto platform for Canadians.</div></div>
+</div>
+
+<div class="ei-trust">No pay-to-play rankings, no pay-to-fake reviews.</div>
+</section>
+
+<section class="ei-section">
+<div class="ei-cols">
+<div>
+<h3>For Companies &mdash; Get Discovered</h3>
+<ul>
+<li>Get discovered by buyers who are already searching &mdash; not scrolling past another ad.</li>
+<li>One flat $499, once. No subscription, no algorithm to keep feeding.</li>
+<li>Submit your details, set your listing, and it's yours &mdash; no pay-to-play rankings, ever.</li>
+</ul>
+</div>
+<div>
+<h3>For Browsers &mdash; Compare Honestly</h3>
+<ul>
+<li>Every listing is a real, verified company &mdash; not a sponsored slot dressed up as a result.</li>
+<li>Compare by category, not by who paid the most this month.</li>
+<li>Built by Canadians who got tired of guessing too.</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="ei-closing">
+List your company. Or find the one you've been looking for. Either way, welcome to the directory Canada actually needed.<br/>
+<a href="/shop/">Get Listed &mdash; $499 &rarr;</a>
+</section>
+
+</div>
+</body>
+</html>
