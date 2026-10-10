@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Peek Shield</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Big+Shoulders+Display:wght@700;800&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: one-screen tool. Control rail on the left (stacks on top on phones), shielded reading stage fills the rest. */
+:root {
+  --paper: #f3f5f2;
+  --surface: #ffffff;
+  --ink: #17201c;
+  --muted: #5d6a63;
+  --line: #d5dcd7;
+  --accent: #1f7a5a;
+  --accent-ink: #ffffff;
+  --veil: #e7ece8;
+  --font-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0f1412; --surface: #161d1a; --ink: #e3ebe6; --muted: #93a39a;
+    --line: #2a3530; --accent: #4cc596; --accent-ink: #08130e; --veil: #1b2420;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0f1412; --surface: #161d1a; --ink: #e3ebe6; --muted: #93a39a;
+  --line: #2a3530; --accent: #4cc596; --accent-ink: #08130e; --veil: #1b2420;
+  color-scheme: dark;
+}
+
+html, body { height: 100%; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  display: flex; flex-direction: column;
+  padding-inline: 16px; box-sizing: border-box;
+}
+*, *::before, *::after { box-sizing: inherit; }
+
+header.bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding-block: 12px; flex-wrap: wrap;
+}
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand h1 {
+  font-family: var(--font-display); font-weight: 800; font-size: 30px; line-height: 1;
+  letter-spacing: 0.02em; text-transform: uppercase; margin: 0;
+}
+.brand span { color: var(--muted); font-size: 13px; }
+
+button, .file-btn {
+  font: inherit; font-weight: 700; font-size: 14px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  border-radius: 8px; padding: 8px 14px; cursor: pointer;
+}
+button:hover, .file-btn:hover { border-color: var(--accent); }
+button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible, .file-btn:focus-within {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+kbd { font-family: var(--font-mono); font-size: 11px; border: 1px solid currentColor; border-radius: 4px; padding: 0 4px; opacity: .75; }
+
+.app {
+  flex: 1; min-height: 0;
+  display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 16px;
+  padding-bottom: 16px;
+}
+
+/* Controls */
+.rail { min-width: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.panel {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 14px; display: flex; flex-direction: column; gap: 12px;
+}
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.panel-head h2 {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: .08em;
+  text-transform: uppercase; margin: 0;
+}
+.panel p.hint { margin: 0; color: var(--muted); font-size: 13px; }
+.panel.off .field { opacity: .45; }
+
+.switch { position: relative; width: 42px; height: 24px; flex: none; }
+.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.switch span {
+  position: absolute; inset: 0; border-radius: 99px; background: var(--line); transition: background .15s;
+  pointer-events: none;
+}
+.switch span::after {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%;
+  background: var(--surface); transition: transform .15s;
+}
+.switch input:checked + span { background: var(--accent); }
+.switch input:checked + span::after { transform: translateX(18px); }
+.switch input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label, .field .lbl { font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; }
+.field output { font-family: var(--font-mono); font-size: 12px; color: var(--ink); font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label {
+  display: block; text-align: center; padding: 6px 4px; font-size: 13px; color: var(--ink); cursor: pointer;
+  justify-content: center;
+}
+.seg label + input + label, .seg input + label ~ label { border-left: 1px solid var(--line); }
+.seg input:checked + label { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+.seg input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+/* Stage */
+.stage-wrap { min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.stage-tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.stage-tools .note { color: var(--muted); font-size: 13px; margin-left: auto; }
+.file-btn { position: relative; overflow: hidden; }
+.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+.stage {
+  --x: 50%; --y: 40%; --r: 90px; --feather: 18px; --blur: 10px; --shade: 55%;
+  --pattern-alpha: .35; --pattern-size: 3px; --fade: 0%;
+  position: relative; flex: 1; min-height: 320px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+}
+.reader {
+  position: absolute; inset: 0; overflow-y: auto; padding: 28px 24px 40vh;
+  color: color-mix(in srgb, var(--ink), var(--surface) var(--fade));
+  font-size: 18px; line-height: 1.7;
+}
+.reader article { max-width: 64ch; margin: 0 auto; }
+.reader article p { margin: 0 0 1em; }
+.reader textarea {
+  width: 100%; max-width: 64ch; display: block; margin: 0 auto; min-height: 60vh;
+  font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line);
+  border-radius: 8px; padding: 14px; resize: vertical;
+}
+
+.veil, .pattern { position: absolute; inset: 0; pointer-events: none; }
+.veil {
+  background: color-mix(in srgb, var(--veil) var(--shade), transparent);
+  backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
+}
+.stage[data-shape="circle"] .veil {
+  -webkit-mask-image: radial-gradient(circle at var(--x) var(--y), transparent var(--r), #000 calc(var(--r) + var(--feather)));
+          mask-image: radial-gradient(circle at var(--x) var(--y), transparent var(--r), #000 calc(var(--r) + var(--feather)));
+}
+.stage[data-shape="strip"] .veil {
+  -webkit-mask-image: linear-gradient(to bottom,
+    #000 calc(var(--y) - var(--r) - var(--feather)), transparent calc(var(--y) - var(--r)),
+    transparent calc(var(--y) + var(--r)), #000 calc(var(--y) + var(--r) + var(--feather)));
+          mask-image: linear-gradient(to bottom,
+    #000 calc(var(--y) - var(--r) - var(--feather)), transparent calc(var(--y) - var(--r)),
+    transparent calc(var(--y) + var(--r)), #000 calc(var(--y) + var(--r) + var(--feather)));
+}
+.stage.closed .veil, .stage.covered .veil { -webkit-mask-image: none; mask-image: none; }
+.stage.no-peek:not(.covered) .veil { display: none; }
+.stage.covered .veil { background: var(--veil); }
+
+.pattern { opacity: var(--pattern-alpha); }
+.stage.no-pattern .pattern { display: none; }
+.stage[data-pattern="lines"] .pattern {
+  background-image: repeating-linear-gradient(90deg, var(--ink) 0 1px, transparent 1px var(--pattern-size));
+}
+.stage[data-pattern="grid"] .pattern {
+  background-image:
+    repeating-linear-gradient(90deg, var(--ink) 0 1px, transparent 1px var(--pattern-size)),
+    repeating-linear-gradient(0deg, var(--ink) 0 1px, transparent 1px var(--pattern-size));
+}
+.stage[data-pattern="weave"] .pattern {
+  background-image:
+    repeating-linear-gradient(45deg, var(--ink) 0 1px, transparent 1px var(--pattern-size)),
+    repeating-linear-gradient(-45deg, var(--ink) 0 1px, transparent 1px var(--pattern-size));
+}
+
+.cover-msg {
+  position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 16px;
+  font-family: var(--font-display); font-size: 28px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .04em; color: var(--muted); pointer-events: none;
+}
+.cover-msg small { display: block; font-family: var(--font-body); font-size: 14px; text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+/* Phone */
+@media (max-width: 760px) {
+  .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .rail { overflow: visible; }
+  .rail details > .panels { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+  .stage { min-height: 60dvh; }
+  .reader { font-size: 17px; padding: 20px 16px 40vh; }
+  .stage-tools .note { margin-left: 0; width: 100%; }
+}
+@media (min-width: 761px) {
+  .rail details > summary { display: none; }
+  .rail details > .panels { display: flex; flex-direction: column; gap: 12px; }
+}
+.rail summary {
+  cursor: pointer; font-weight: 700; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 8px; padding: 10px 14px; list-style-position: inside;
+}
+@media (prefers-reduced-motion: reduce) {
+  .switch span, .switch span::after { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="brand">
+    <h1>Peek Shield</h1>
+    <span>Keep your screen to yourself</span>
+  </div>
+  <button id="coverBtn" class="primary" type="button" aria-pressed="false">Cover all <kbd>Esc</kbd></button>
+</header>
+
+<div class="app">
+  <aside class="rail">
+    <details id="settings">
+      <summary>Settings</summary>
+      <div class="panels">
+        <section class="panel" id="peekPanel">
+          <div class="panel-head">
+            <h2>Peek window</h2>
+            <label class="switch" title="Peek window on or off"><input id="peekOn" type="checkbox" checked aria-label="Peek window"><span></span></label>
+          </div>
+          <p class="hint">Everything is blurred except a small clear window. Move your mouse to move it. On a phone, tap where you want it, then scroll the text through it.</p>
+          <div class="field">
+            <span class="lbl">Shape</span>
+            <div class="seg" role="radiogroup" aria-label="Window shape">
+              <input type="radio" name="shape" id="shapeStrip" value="strip" checked><label for="shapeStrip">Reading line</label>
+              <input type="radio" name="shape" id="shapeCircle" value="circle"><label for="shapeCircle">Circle</label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="size">Window size <output id="sizeOut"></output></label>
+            <input id="size" type="range" min="20" max="200" value="44">
+          </div>
+          <div class="field">
+            <label for="blur">Blur <output id="blurOut"></output></label>
+            <input id="blur" type="range" min="2" max="24" value="10">
+          </div>
+          <div class="field">
+            <label for="shade">Shade <output id="shadeOut"></output></label>
+            <input id="shade" type="range" min="0" max="95" value="55">
+          </div>
+          <div class="field">
+            <label for="hideAway" style="justify-content:flex-start;gap:8px;color:var(--ink)">
+              <input id="hideAway" type="checkbox" checked> Close the window when my mouse leaves
+            </label>
+          </div>
+        </section>
+
+        <section class="panel" id="patternPanel">
+          <div class="panel-head">
+            <h2>Pattern mask</h2>
+            <label class="switch" title="Pattern mask on or off"><input id="patternOn" type="checkbox" checked aria-label="Pattern mask"><span></span></label>
+          </div>
+          <p class="hint">A fine pattern plus softer text. Easy to read straight on, harder from the side. It helps, but it is not as strong as a privacy filter.</p>
+          <div class="field">
+            <span class="lbl">Pattern</span>
+            <div class="seg" role="radiogroup" aria-label="Pattern type">
+              <input type="radio" name="pattern" id="patLines" value="lines" checked><label for="patLines">Lines</label>
+              <input type="radio" name="pattern" id="patGrid" value="grid"><label for="patGrid">Grid</label>
+              <input type="radio" name="pattern" id="patWeave" value="weave"><label for="patWeave">Weave</label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="pStrength">Pattern strength <output id="pStrengthOut"></output></label>
+            <input id="pStrength" type="range" min="5" max="70" value="30">
+          </div>
+          <div class="field">
+            <label for="pSize">Pattern spacing <output id="pSizeOut"></output></label>
+            <input id="pSize" type="range" min="2" max="8" value="3">
+          </div>
+          <div class="field">
+            <label for="fade">Soften text <output id="fadeOut"></output></label>
+            <input id="fade" type="range" min="0" max="60" value="25">
+          </div>
+        </section>
+      </div>
+    </details>
+  </aside>
+
+  <main class="stage-wrap">
+    <div class="stage-tools">
+      <button id="editBtn" type="button">Edit text</button>
+      <label class="file-btn">Open .txt file<input id="fileIn" type="file" accept=".txt,.md,text/plain"></label>
+      <button id="sampleBtn" type="button">Load sample</button>
+      <span class="note">Shields text inside this page. It can't cover other apps.</span>
+    </div>
+    <div class="stage" id="stage" data-shape="strip" data-pattern="lines">
+      <div class="reader" id="reader">
+        <article id="article"></article>
+        <textarea id="editor" hidden aria-label="Your text" placeholder="Paste or type your private text here"></textarea>
+      </div>
+      <div class="veil"></div>
+      <div class="pattern"></div>
+      <div class="cover-msg" id="coverMsg" hidden><div>Covered<small>Press Esc or tap Cover all to show it again</small></div></div>
+    </div>
+  </main>
+</div>
+
+<script>
+(() => {
+  const SAMPLE = [
+    "SAMPLE TEXT. Replace it with your own using Edit text or Open .txt file.",
+    "Banking notes, Oct 10\nChequing ending 4471: rent goes out on the 1st.\nSavings ending 9023: move $200 on payday.\nNew card PIN: written on the paper in the drawer, not here.",
+    "Reminder: the bank will never text you a link and ask you to log in. If a message says your account is locked, close it and call the number on the back of your card.",
+    "Wouldn't it be nice if scammers=mosquitoes of the internet, would realize they're fighting against everything they r.",
+    "Passwords to change this week:\n- Email\n- Bank app\n- Streaming account the whole family uses",
+    "Doctor's appointment Thursday at 2:15. Bring the health card and the list of medications.",
+    "Keep scrolling. On a phone, tap the screen to place the reading line, then scroll the text up through it. On a computer, just move your mouse over the line you want to read."
+  ].join("\n\n");
+
+  const $ = id => document.getElementById(id);
+  const stage = $("stage"), reader = $("reader"), article = $("article"), editor = $("editor");
+  const store = {
+    get(k) { try { return localStorage.getItem("peekshield:" + k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem("peekshield:" + k, v); } catch {} }
+  };
+
+  // Text
+  let text = store.get("text") ?? SAMPLE;
+  function render() {
+    article.replaceChildren(...text.split(/\n\s*\n/).filter(s => s.trim()).map(block => {
+      const p = document.createElement("p");
+      block.split("\n").forEach((line, i) => {
+        if (i) p.appendChild(document.createElement("br"));
+        p.appendChild(document.createTextNode(line));
+      });
+      return p;
+    }));
+  }
+  render();
+
+  let editing = false;
+  $("editBtn").addEventListener("click", () => {
+    editing = !editing;
+    if (editing) { editor.value = text; }
+    else { text = editor.value; store.set("text", text); render(); }
+    editor.hidden = !editing; article.hidden = editing;
+    $("editBtn").textContent = editing ? "Done" : "Edit text";
+    stage.classList.toggle("editing", editing);
+    applyPeek();
+    if (editing) editor.focus();
+  });
+  editor.addEventListener("input", () => store.set("text", editor.value));
+  $("sampleBtn").addEventListener("click", () => {
+    text = SAMPLE; store.set("text", text); editor.value = text; render(); reader.scrollTop = 0;
+  });
+  $("fileIn").addEventListener("change", e => {
+    const f = e.target.files[0]; if (!f) return;
+    const fr = new FileReader();
+    fr.onload = () => { text = String(fr.result); store.set("text", text); editor.value = text; render(); reader.scrollTop = 0; };
+    fr.readAsText(f);
+    e.target.value = "";
+  });
+
+  // Settings
+  const ranges = {
+    size:      { out: "sizeOut",      fmt: v => v + " px",  apply: v => stage.style.setProperty("--r", (shape() === "strip" ? v / 2 : v) + "px") },
+    blur:      { out: "blurOut",      fmt: v => v + " px",  apply: v => stage.style.setProperty("--blur", v + "px") },
+    shade:     { out: "shadeOut",     fmt: v => v + "%",    apply: v => stage.style.setProperty("--shade", v + "%") },
+    pStrength: { out: "pStrengthOut", fmt: v => v + "%",    apply: v => stage.style.setProperty("--pattern-alpha", v / 100) },
+    pSize:     { out: "pSizeOut",     fmt: v => v + " px",  apply: v => stage.style.setProperty("--pattern-size", v + "px") },
+    fade:      { out: "fadeOut",      fmt: v => v + "%",    apply: v => stage.style.setProperty("--fade", v + "%") }
+  };
+  const shape = () => document.querySelector('input[name="shape"]:checked').value;
+
+  function restore(id, el, prop) { const v = store.get(id); if (v !== null) el[prop] = prop === "checked" ? v === "1" : v; }
+  Object.keys(ranges).forEach(id => restore(id, $(id), "value"));
+  ["peekOn", "patternOn", "hideAway"].forEach(id => restore(id, $(id), "checked"));
+  const savedShape = store.get("shape"); if (savedShape) { const r = document.querySelector(`input[name="shape"][value="${savedShape}"]`); if (r) r.checked = true; }
+  const savedPat = store.get("pattern"); if (savedPat) { const r = document.querySelector(`input[name="pattern"][value="${savedPat}"]`); if (r) r.checked = true; }
+
+  function applyRange(id) {
+    const el = $(id), cfg = ranges[id];
+    $(cfg.out).textContent = cfg.fmt(el.value);
+    cfg.apply(Number(el.value));
+  }
+  Object.keys(ranges).forEach(id => {
+    applyRange(id);
+    $(id).addEventListener("input", () => { applyRange(id); store.set(id, $(id).value); });
+  });
+
+  function applyPeek() {
+    const on = $("peekOn").checked && !editing;
+    stage.classList.toggle("no-peek", !on);
+    $("peekPanel").classList.toggle("off", !$("peekOn").checked);
+  }
+  function applyPattern() {
+    const on = $("patternOn").checked;
+    stage.classList.toggle("no-pattern", !on);
+    stage.style.setProperty("--fade", on ? $("fade").value + "%" : "0%");
+    $("patternPanel").classList.toggle("off", !on);
+  }
+  $("peekOn").addEventListener("change", () => { store.set("peekOn", $("peekOn").checked ? "1" : "0"); applyPeek(); });
+  $("patternOn").addEventListener("change", () => { store.set("patternOn", $("patternOn").checked ? "1" : "0"); applyPattern(); });
+  $("hideAway").addEventListener("change", () => store.set("hideAway", $("hideAway").checked ? "1" : "0"));
+  $("fade").addEventListener("input", applyPattern);
+  document.querySelectorAll('input[name="shape"]').forEach(r => r.addEventListener("change", () => {
+    stage.dataset.shape = shape(); store.set("shape", shape()); applyRange("size");
+  }));
+  document.querySelectorAll('input[name="pattern"]').forEach(r => r.addEventListener("change", () => {
+    stage.dataset.pattern = r.value; store.set("pattern", r.value);
+  }));
+  stage.dataset.shape = shape();
+  stage.dataset.pattern = document.querySelector('input[name="pattern"]:checked').value;
+  applyPeek(); applyPattern();
+
+  // Window position
+  function place(e) {
+    const b = stage.getBoundingClientRect();
+    stage.style.setProperty("--x", (e.clientX - b.left) + "px");
+    stage.style.setProperty("--y", (e.clientY - b.top) + "px");
+  }
+  stage.addEventListener("pointermove", e => {
+    if (e.pointerType === "mouse") { place(e); stage.classList.remove("closed"); }
+  });
+  stage.addEventListener("pointerdown", e => { place(e); stage.classList.remove("closed"); });
+  stage.addEventListener("pointerleave", e => {
+    if (e.pointerType === "mouse" && $("hideAway").checked) stage.classList.add("closed");
+  });
+  // Start with the reading line a third of the way down.
+  requestAnimationFrame(() => {
+    const b = stage.getBoundingClientRect();
+    stage.style.setProperty("--x", b.width / 2 + "px");
+    stage.style.setProperty("--y", Math.round(b.height * 0.33) + "px");
+  });
+
+  // Cover all
+  function setCovered(on) {
+    stage.classList.toggle("covered", on);
+    $("coverMsg").hidden = !on;
+    $("coverBtn").setAttribute("aria-pressed", String(on));
+    $("coverBtn").firstChild.textContent = on ? "Show " : "Cover all ";
+  }
+  $("coverBtn").addEventListener("click", () => setCovered(!stage.classList.contains("covered")));
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") { e.preventDefault(); setCovered(!stage.classList.contains("covered")); }
+  });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) setCovered(true); });
+
+  // Settings open by default on wide screens.
+  if (matchMedia("(min-width: 761px)").matches) $("settings").open = true;
+})();
+</script>
+</body>
+</html>
