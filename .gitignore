@@ -19,3 +19,6 @@ __pycache__/
 # Mission Control private data
 mission-control/data/
 mission-control/.env
+
+# scraped site mirrors (regenerable)
+relay/sites/*/mirror/

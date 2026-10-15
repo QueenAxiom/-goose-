@@ -3,7 +3,8 @@
 
 const TOKEN = window.MC_TOKEN;
 const STATUS_REFRESH_MS = 60000;
-const PANES = ["next", "sites", "council", "posts", "sales", "voice", "system"];
+const PANES = ["next", "ecc", "axiom", "sites", "files", "council", "posts", "sales", "voice", "system"];
+const PANE_LABELS = { ecc: "ECC chat", axiom: "Axiom chat" };
 const $ = (id) => document.getElementById(id);
 
 const state = { sites: {}, names: [], current: 0, view: "staging", system: null, pane: "next", mode: "text", undoSeconds: 300, councilDraft: "" };
@@ -44,6 +45,8 @@ function showPane(name) {
   PANES.forEach((p) => $("pane-" + p).classList.toggle("active", p === name));
   document.querySelectorAll("#mainNav button").forEach((b) => b.classList.toggle("active", b.dataset.pane === name));
   if (name === "next") loadNext();
+  if (name === "ecc" || name === "axiom") loadChat(name);
+  if (name === "files") loadFiles();
   if (name === "council") loadCouncil();
   if (name === "posts") loadPosts();
   if (name === "sales") loadSales();
@@ -53,7 +56,7 @@ function showPane(name) {
 
 function buildNav() {
   PANES.forEach((p) => {
-    const b = el("button", { textContent: p[0].toUpperCase() + p.slice(1), onclick: () => showPane(p) });
+    const b = el("button", { textContent: PANE_LABELS[p] || p[0].toUpperCase() + p.slice(1), onclick: () => showPane(p) });
     b.dataset.pane = p;
     $("mainNav").appendChild(b);
   });
@@ -280,7 +283,11 @@ function setMode(mode) {
 function speak(text) {
   if (state.mode !== "voice" || !text || !window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(new SpeechSynthesisUtterance(text.slice(0, 600)));
+  const u = new SpeechSynthesisUtterance(text.slice(0, 600));
+  u.onstart = () => setTalking(true);
+  u.onboundary = pulseAvatar;
+  u.onend = u.onerror = () => setTalking(false);
+  window.speechSynthesis.speak(u);
 }
 
 /** Enter submits, Shift+Enter inserts a newline. */
@@ -547,8 +554,147 @@ function renderNext(plan) {
     el("div", { class: "route-wrap" }, el("h2", { textContent: "Today's route" }), ...routeList));
 }
 
+// ---------- talking avatar ----------
+const AVATAR_NAMES = { ecc: "ECC", axiom: "Axiom" };
+
+function makeAvatar(name) {
+  const av = el("div", { class: "avatar", title: name + " is listening" },
+    el("div", { class: "orb" }, el("div", { class: "eye left" }), el("div", { class: "eye right" }), el("div", { class: "mouth" })),
+    el("div", { class: "avatar-name", textContent: name }));
+  return av;
+}
+
+function setTalking(on) {
+  document.querySelectorAll(".avatar").forEach((a) => a.classList.toggle("talking", on));
+}
+
+function pulseAvatar() {
+  document.querySelectorAll(".avatar .orb").forEach((o) => {
+    o.classList.add("pulse");
+    setTimeout(() => o.classList.remove("pulse"), 120);
+  });
+}
+
+// ---------- chat panes (ECC and Axiom) ----------
+async function copyFileOf(path, what) {
+  try {
+    const f = await api("/api/files/read", { path });
+    copyText(what === "diff" ? (f.diff || "(no diff)") : f.content, `${what === "diff" ? "Diff" : "File"} copied: ${path}`);
+  } catch (e) { toast(e.message, "err"); }
+}
+
+function fileRow(f) {
+  return el("div", { class: "frow" },
+    el("span", { class: "fstatus " + f.status, textContent: f.status }),
+    el("code", { textContent: f.path }),
+    el("button", { class: "btn small", textContent: "Copy file", onclick: () => copyFileOf(f.path, "file") }),
+    el("button", { class: "btn small", textContent: "Copy diff", onclick: () => copyFileOf(f.path, "diff") }),
+    el("button", { class: "btn small", textContent: "View", onclick: (ev) => viewFile(f.path, ev.target.closest(".frow")) }));
+}
+
+async function viewFile(path, row) {
+  const existing = row.nextElementSibling;
+  if (existing && existing.classList.contains("fview")) { existing.remove(); return; }
+  try {
+    const f = await api("/api/files/read", { path });
+    row.after(el("pre", { class: "fview", textContent: f.content }));
+  } catch (e) { toast(e.message, "err"); }
+}
+
+function bubble(role, text, files) {
+  const mine = role === "user";
+  const parts = [el("div", { class: "btext", textContent: text })];
+  if (!mine) parts.push(el("button", { class: "btn small", textContent: "Copy reply", onclick: () => copyText(text, "Reply copied.") }));
+  if (files && files.length) {
+    parts.push(el("div", { class: "files-box" }, el("div", { class: "empty", textContent: "Files changed in this reply:" }), ...files.map(fileRow)));
+  }
+  return el("div", { class: "bubble " + (mine ? "mine" : "theirs") }, ...parts);
+}
+
+async function loadChat(channel) {
+  const list = $("chatList-" + channel);
+  try {
+    const { messages } = await api("/api/chat/history", { channel });
+    list.replaceChildren(...messages.map((m) => bubble(m.role, m.text)),
+      ...(messages.length ? [] : [el("div", { class: "empty", textContent: channel === "ecc"
+        ? "Tell ECC what to build or change. It can edit files here and will list every file it touches."
+        : "Talk to Axiom. Axiom advises and decides with you; it never edits files." })]));
+    list.scrollTop = list.scrollHeight;
+  } catch (e) { list.replaceChildren(el("div", { class: "empty", textContent: "Chat unavailable: " + e.message })); }
+}
+
+function buildChatPane(channel) {
+  const list = el("div", { class: "chat-list", id: "chatList-" + channel });
+  const ta = el("textarea", { placeholder: "Message " + AVATAR_NAMES[channel] + ". Enter sends, Shift+Enter for a new line.", rows: 2, maxLength: 4000 });
+  const mic = el("button", { class: "btn mic", textContent: "🎤" });
+  const send = el("button", { class: "btn primary", textContent: "Send" });
+  const submit = async () => {
+    const message = ta.value.trim();
+    if (!message || send.disabled) return;
+    send.disabled = true;
+    list.querySelector(".empty")?.remove();
+    list.appendChild(bubble("user", message));
+    const waiting = el("div", { class: "bubble theirs waiting", textContent: AVATAR_NAMES[channel] + " is thinking… replies usually take 10 to 60 seconds." });
+    list.appendChild(waiting);
+    list.scrollTop = list.scrollHeight;
+    ta.value = "";
+    try {
+      const r = await api("/api/chat", { channel, message });
+      waiting.replaceWith(bubble("assistant", r.reply, r.files));
+      speak(r.reply);
+    } catch (e) {
+      waiting.replaceWith(el("div", { class: "bubble theirs err", textContent: e.message }));
+      ta.value = message;
+    } finally { send.disabled = false; list.scrollTop = list.scrollHeight; }
+  };
+  send.onclick = submit;
+  onEnter(ta, submit);
+  attachMic(ta, mic);
+  const clear = el("button", { class: "btn small", textContent: "Clear chat",
+    onclick: () => confirm("Clear this chat on screen? (The NotebookLM log keeps it.)") && api("/api/chat/clear", { channel }).then(() => loadChat(channel)) });
+  $("pane-" + channel).replaceChildren(
+    el("div", { class: "chat-wrap" },
+      el("div", { class: "chat-head" }, makeAvatar(AVATAR_NAMES[channel]), clear),
+      el("div", { class: "empty", textContent: "Each reply takes roughly 10 seconds, or up to a minute when ECC is editing files. It does not speed up after the first message." }),
+      list,
+      el("div", { class: "row chat-input" }, ta, mic, send)));
+}
+
+// ---------- files tab ----------
+async function loadFiles() {
+  const root = $("filesRoot");
+  try {
+    const { files } = await api("/api/files");
+    const copyAll = async () => {
+      const parts = [];
+      for (const f of files.filter((x) => x.status !== "deleted")) {
+        try { const r = await api("/api/files/read", { path: f.path }); parts.push(`===== ${r.path} =====\n${r.content}`); }
+        catch (e) { parts.push(`===== ${f.path} =====\n(not shown: ${e.message})`); }
+      }
+      copyText(parts.join("\n\n"), `Copied ${parts.length} file(s).`);
+    };
+    root.replaceChildren(
+      el("h2", { textContent: "Files changed since the last commit" }),
+      el("div", { class: "row" }, el("button", { class: "btn primary", textContent: "Copy all", onclick: copyAll }),
+        el("button", { class: "btn", textContent: "Refresh", onclick: loadFiles })),
+      ...(files.length ? files.map(fileRow) : [el("div", { class: "empty", textContent: "No uncommitted changes. Everything is saved to GitHub." })]));
+  } catch (e) { root.replaceChildren(el("div", { class: "empty", textContent: "Files unavailable: " + e.message })); }
+}
+
+// ---------- quick links ----------
+async function loadLinks() {
+  try {
+    const { links } = await api("/api/links");
+    $("quickLinks").replaceChildren(...Object.entries(links).map(([name, url]) =>
+      el("a", { class: "qlink", href: url, target: "_blank", rel: "noopener", textContent: name + " ↗" })));
+  } catch (e) { /* links are optional */ }
+}
+
 // ---------- boot ----------
 buildNav();
+buildChatPane("ecc");
+buildChatPane("axiom");
+loadLinks();
 $("modeToggle").onclick = () => setMode(state.mode === "voice" ? "text" : "voice");
 try { setMode(localStorage.getItem("mc-mode") === "voice" ? "voice" : "text"); } catch (e) { setMode("text"); }
 checkCouncilBanner();

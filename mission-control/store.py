@@ -18,6 +18,7 @@ MAX_FIELD_CHARS = 200
 MAX_NOTES_CHARS = 2000
 LEAD_FIELDS = ("business", "contact", "email", "notes")
 MAX_ANSWER_CHARS = 8000
+MAX_CHAT_MESSAGES = 200
 MAX_POST_TEXT_CHARS = 5000
 DEFAULT_SETTINGS = {"paused": False, "daily_cap": 750}
 COUNCIL_ASKERS = ("Alan", "Axiom")
@@ -278,3 +279,19 @@ class Store:
         with self._lock:
             self._write("settings.json", {**self.settings(), **patch})
         return self.settings()
+
+    # ---- chat history ----
+    def chat_history(self, channel: str) -> list:
+        return self._read("chats.json", {}).get(channel, [])
+
+    def chat_append(self, channel: str, role: str, text: str) -> dict:
+        record = {"role": role, "text": text, "ts": _now()}
+        with self._lock:
+            chats = self._read("chats.json", {})
+            chats[channel] = [*chats.get(channel, []), record][-MAX_CHAT_MESSAGES:]
+            self._write("chats.json", chats)
+        return record
+
+    def chat_clear(self, channel: str) -> None:
+        with self._lock:
+            self._write("chats.json", {**self._read("chats.json", {}), channel: []})

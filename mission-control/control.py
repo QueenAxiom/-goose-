@@ -13,6 +13,9 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+import chat
+import convlog
+import files
 import next_action
 import posting
 import status
@@ -35,6 +38,9 @@ POST_HISTORY_LIMIT = 50
 UNDO_WINDOW_SECONDS = 300
 DUPLICATE_WINDOW_SECONDS = 60
 MAX_SAY_CHARS = 500
+MAX_CHAT_CHARS = 4000
+CONVERSATIONS_DIR = Path(r"C:\Axiom Enterprises\conversations")
+N8N_URL = "https://goldengoose.app.n8n.cloud"
 CHECKOUT_SITE = "EverythingInternet.ca"
 DRAFTS_DOC = REPO / "docs" / "smb-outreach-drafts.md"
 STATIC_FILES = {"/app.js": "application/javascript; charset=utf-8", "/style.css": "text/css; charset=utf-8"}
@@ -87,12 +93,19 @@ def build_prompt(site: dict, name: str, view: str, request: str) -> str:
     return f"Mission Control request for {name} ({view}, {url}). {rule}\n\nRequest: {request.strip()}"
 
 
-def run_claude(prompt: str) -> "tuple[bool, str]":
-    """Run Claude Code in the repo. Prompt goes on stdin; failures return a fixed message."""
+def run_claude(prompt: str, edits: bool = True, tools: bool = True) -> "tuple[bool, str]":
+    """Run Claude Code in the repo. Prompt goes on stdin; failures return a fixed message.
+
+    edits=False drops the accept-edits permission; tools=False removes every tool (pure conversation).
+    """
+    argv = ["claude", "-p"]
+    if edits:
+        argv += ["--permission-mode", "acceptEdits"]
+    if not tools:
+        argv += ["--tools", ""]
     try:
         result = subprocess.run(
-            ["claude", "-p", "--permission-mode", "acceptEdits"],
-            input=prompt, capture_output=True, text=True, encoding="utf-8",
+            argv, input=prompt, capture_output=True, text=True, encoding="utf-8",
             cwd=REPO, timeout=CLAUDE_TIMEOUT_SECONDS, shell=(os.name == "nt"),
         )
     except (subprocess.SubprocessError, OSError):
@@ -149,8 +162,55 @@ def voice_reply(text: str) -> str:
 class App:
     """Everything the HTTP handler needs: config, store, voice process, poster."""
 
-    def __init__(self, token: str, sites: dict, store: Store, voice: VoiceProcess, poster: "posting.Poster"):
+    def __init__(self, token: str, sites: dict, store: Store, voice: VoiceProcess, poster: "posting.Poster",
+                 scheduler=None, conv_dir: "Path | None" = None):
         self.token, self.sites, self.store, self.voice, self.poster = token, sites, store, voice, poster
+        self.scheduler, self.conv_dir = scheduler, conv_dir
+
+    def chat_history(self, body: dict) -> dict:
+        channel = str(body.get("channel", ""))
+        if channel not in chat.CHANNELS:
+            raise ValueError("unknown channel")
+        return {"messages": self.store.chat_history(channel)}
+
+    def chat_clear(self, body: dict) -> dict:
+        channel = str(body.get("channel", ""))
+        if channel not in chat.CHANNELS:
+            raise ValueError("unknown channel")
+        self.store.chat_clear(channel)
+        return {"ok": True}
+
+    def chat(self, body: dict) -> dict:
+        """One chat turn. ECC may edit files in the repo (and reports which); Axiom only talks."""
+        channel, message = str(body.get("channel", "")), body.get("message")
+        if channel not in chat.CHANNELS:
+            raise ValueError("unknown channel")
+        if not isinstance(message, str) or not message.strip() or len(message) > MAX_CHAT_CHARS:
+            raise ValueError(f"message must be 1-{MAX_CHAT_CHARS} characters")
+        message = message.strip()
+        is_ecc = channel == "ecc"
+        prompt = chat.build_chat_prompt(channel, self.store.chat_history(channel), message, chat.load_persona())
+        before = files.snapshot(REPO) if is_ecc else {}
+        ok, reply = run_claude(prompt, edits=is_ecc, tools=is_ecc)
+        if not ok:
+            raise ValueError(reply)
+        changed = files.changed_since(REPO, before) if is_ecc else []
+        for role, text in (("user", message), ("assistant", reply)):
+            self.store.chat_append(channel, role, text)
+            convlog.log_turn(self.conv_dir, channel, role, text)
+        return {"reply": reply, "files": changed}
+
+    def files_info(self) -> dict:
+        return {"files": files.changed_files(REPO)}
+
+    def file_read(self, body: dict) -> dict:
+        return files.read_file(REPO, str(body.get("path", "")))
+
+    def links_info(self) -> dict:
+        remote = subprocess.run(["git", "remote", "get-url", "origin"], cwd=REPO, capture_output=True,
+                                text=True, encoding="utf-8").stdout.strip()
+        github = remote[:-4] if remote.endswith(".git") else remote
+        return {"links": {"GitHub": github, "n8n": N8N_URL}}
 
     def posts_info(self) -> dict:
         platforms = [{**p, "configured": self.poster.configured(p["id"])} for p in posting.platform_info()]
@@ -391,7 +451,8 @@ def make_handler(app: App):
                 return self._json(200, app.sites)
             getters = {"/api/status": app.system_status, "/api/sales": app.sales, "/api/posts": app.posts_info,
                "/api/council": app.council_info,
-               "/api/next": app.next_plan}
+               "/api/next": app.next_plan,
+               "/api/files": app.files_info, "/api/links": app.links_info}
             if self.path in getters:
                 if not self._guard():
                     return
@@ -416,6 +477,10 @@ def make_handler(app: App):
                 "/api/council/delete": app.council_delete,
                 "/api/council/dismiss": app.council_dismiss,
                 "/api/council/ecc": app.council_ecc,
+                "/api/chat": app.chat,
+                "/api/chat/history": app.chat_history,
+                "/api/chat/clear": app.chat_clear,
+                "/api/files/read": app.file_read,
                 "/api/next/done": app.next_done,
                 "/api/next/skip": app.next_skip,
                 "/api/next/doubt": app.next_doubt,
@@ -452,7 +517,8 @@ def make_handler(app: App):
 
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
-    app = App(secrets.token_urlsafe(24), load_sites(), Store(HERE / "data"), VoiceProcess(), posting.Poster())
+    app = App(secrets.token_urlsafe(24), load_sites(), Store(HERE / "data"), VoiceProcess(), posting.Poster(),
+              conv_dir=CONVERSATIONS_DIR)
     server = ThreadingHTTPServer((HOST, PORT), make_handler(app))
     print(f"Mission Control: http://{HOST}:{PORT}  (Ctrl+C to stop)")
     try:
