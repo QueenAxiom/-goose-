@@ -19,7 +19,7 @@ import sounddevice as sd
 from faster_whisper import WhisperModel
 from openwakeword.model import Model
 
-from router import handle, load_config
+from router import handle_stream, load_config
 
 WAKE_MODEL = "hey_jarvis"
 WAKE_THRESHOLD = 0.5
@@ -95,7 +95,9 @@ def main() -> int:
             text = transcribe(whisper, record_command(audio_q))
             print(f"Heard: {text or '(nothing)'}")
             if text:
-                speak(handle(f"{config['wake_words'][0]} {text}", config) or "Sorry, I missed that.")
+                # Speak each sentence as the model produces it; generation continues while we talk.
+                for sentence in handle_stream(f"{config['wake_words'][0]} {text}", config):
+                    speak(sentence)
             while not audio_q.empty():
                 audio_q.get_nowait()
 

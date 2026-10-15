@@ -147,6 +147,64 @@ def dispatch(matched: Route, command: str, config: dict) -> str:
         return f"{matched.name} failed."
 
 
+SENTENCE_END_RE = re.compile(r"(?<=[.!?])\s+")
+SSE_PREFIX = "data: "
+SSE_DONE = "[DONE]"
+
+
+def iter_sentences(tokens):
+    """Group a token stream into sentences, yielding each as soon as it completes."""
+    buffer = ""
+    for token in tokens:
+        buffer += token
+        *done, buffer = SENTENCE_END_RE.split(buffer)
+        yield from (s.strip() for s in done if s.strip())
+    if buffer.strip():
+        yield buffer.strip()
+
+
+def _stream_tokens(command: str, config: dict):
+    with requests.post(
+        config["local_model_url"],
+        json={
+            "model": config["local_model"],
+            "max_tokens": LOCAL_MODEL_MAX_TOKENS,
+            "stream": True,
+            "messages": [
+                {"role": "system", "content": SPOKEN_STYLE_PROMPT},
+                {"role": "user", "content": command},
+            ],
+        },
+        timeout=LOCAL_MODEL_TIMEOUT_SECONDS,
+        allow_redirects=False,
+        stream=True,
+    ) as resp:
+        resp.raise_for_status()
+        for raw in resp.iter_lines():
+            line = raw.decode("utf-8") if isinstance(raw, bytes) else raw
+            if not line.startswith(SSE_PREFIX) or line[len(SSE_PREFIX):] == SSE_DONE:
+                continue
+            delta = json.loads(line[len(SSE_PREFIX):])["choices"][0]["delta"]
+            yield delta.get("content") or ""
+
+
+def handle_stream(text: str, config: dict):
+    """Like handle(), but yields the reply sentence by sentence so speech can start early."""
+    command = extract_command(text, config["wake_words"])
+    if command is None:
+        return
+    matched = route(command, config["routes"])
+    if matched.action != "local_model":
+        yield dispatch(matched, command, config)
+        return
+    try:
+        for sentence in iter_sentences(_stream_tokens(command, config)):
+            yield sanitize_reply(sentence)
+    except (requests.RequestException, OSError, LookupError, TypeError, AttributeError, ValueError):
+        log.exception("route %s failed", matched.name)
+        yield f"{matched.name} failed."
+
+
 def handle(text: str, config: dict) -> "str | None":
     """Full pipeline for one utterance. Returns reply text, or None if no wake word."""
     command = extract_command(text, config["wake_words"])

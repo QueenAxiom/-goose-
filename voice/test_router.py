@@ -7,7 +7,8 @@ from unittest import mock
 
 import requests
 
-from router import extract_command, route, Route, dispatch, load_config, sanitize_reply
+from router import (extract_command, route, Route, dispatch, load_config, sanitize_reply,
+                    iter_sentences, handle_stream)
 
 ROUTES = (
     Route(name="status", keywords=("status", "what's running"), action="reply", target="All systems nominal."),
@@ -128,6 +129,36 @@ class LoadConfigTests(unittest.TestCase):
 
     def test_shipped_config_is_valid(self):
         self.assertTrue(load_config()["routes"])
+
+
+class StreamingTests(unittest.TestCase):
+    def test_iter_sentences_yields_each_sentence_as_it_completes(self):
+        tokens = ["Hello", " there.", " How", " are", " you?", " Fine"]
+        self.assertEqual(list(iter_sentences(iter(tokens))), ["Hello there.", "How are you?", "Fine"])
+
+    def _stream_response(self, tokens):
+        lines = [("data: " + json.dumps({"choices": [{"delta": {"content": t}}]})).encode() for t in tokens]
+        lines += [b"", b"data: [DONE]"]
+        return mock.MagicMock(iter_lines=lambda: iter(lines), __enter__=lambda s: s, __exit__=lambda *a: False)
+
+    def test_handle_stream_speaks_model_sentences_incrementally(self):
+        cfg = {**CFG, "wake_words": ("jarvis",), "routes": ()}
+        with mock.patch("router.requests.post", return_value=self._stream_response(["Hi.", " Bye."])):
+            self.assertEqual(list(handle_stream("jarvis tell me something", cfg)), ["Hi.", "Bye."])
+
+    def test_handle_stream_yields_nothing_without_wake_word(self):
+        cfg = {**CFG, "wake_words": ("jarvis",), "routes": ROUTES}
+        self.assertEqual(list(handle_stream("status", cfg)), [])
+
+    def test_handle_stream_non_model_route_yields_single_reply(self):
+        cfg = {**CFG, "wake_words": ("jarvis",), "routes": ROUTES}
+        self.assertEqual(list(handle_stream("jarvis status", cfg)), ["All systems nominal."])
+
+    def test_handle_stream_model_failure_yields_fixed_message(self):
+        cfg = {**CFG, "wake_words": ("jarvis",), "routes": ()}
+        with mock.patch("router.requests.post", side_effect=requests.ConnectionError("http://secret")):
+            out = list(handle_stream("jarvis hi", cfg))
+        self.assertEqual(out, ["fallback failed."])
 
 
 if __name__ == "__main__":
