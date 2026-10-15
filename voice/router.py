@@ -4,6 +4,7 @@ import logging
 import os
 import re
 import subprocess
+from functools import lru_cache
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlparse
@@ -15,7 +16,7 @@ log = logging.getLogger(__name__)
 CONFIG_PATH = Path(__file__).with_name("routes.json")
 REQUEST_TIMEOUT_SECONDS = 30
 LOCAL_MODEL_TIMEOUT_SECONDS = 180  # olmoe-colibri runs ~2 tokens/s
-LOCAL_MODEL_MAX_TOKENS = 80
+LOCAL_MODEL_MAX_TOKENS = 60
 CLAUDE_TIMEOUT_SECONDS = 120
 MAX_REPLY_CHARS = 600
 VALID_ACTIONS = ("reply", "webhook", "local_model", "claude")
@@ -39,6 +40,7 @@ class Route:
     target: str = ""
 
 
+@lru_cache(maxsize=None)
 def _phrase_re(phrase: str) -> "re.Pattern[str]":
     return re.compile(rf"(?<!\w){re.escape(phrase)}(?!\w)", re.IGNORECASE)
 

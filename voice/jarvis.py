@@ -10,9 +10,11 @@ import os
 import queue
 import subprocess
 import sys
+import threading
 
 import numpy as np
 import openwakeword
+import requests
 import sounddevice as sd
 from faster_whisper import WhisperModel
 from openwakeword.model import Model
@@ -24,9 +26,10 @@ WAKE_THRESHOLD = 0.5
 SAMPLE_RATE = 16000
 CHUNK = 1280  # 80 ms, the frame size openWakeWord expects
 SILENCE_RMS = 500
-SILENCE_CHUNKS = 15  # ~1.2 s of quiet ends the command
+SILENCE_CHUNKS = 10  # ~0.8 s of quiet ends the command
 MAX_CHUNKS = 375  # ~30 s hard cap
 WHISPER_SIZE = "base.en"
+LOCAL_WARMUP_TIMEOUT_SECONDS = 180
 
 
 def record_command(audio_q: "queue.Queue[np.ndarray]") -> np.ndarray:
@@ -57,11 +60,22 @@ def speak(text: str) -> None:
     )
 
 
+def warm_local_model(config: dict) -> None:
+    """Fire one tiny request at startup so the first real answer isn't a cold start."""
+    try:
+        requests.post(config["local_model_url"], timeout=LOCAL_WARMUP_TIMEOUT_SECONDS,
+                      json={"model": config["local_model"], "max_tokens": 1,
+                            "messages": [{"role": "user", "content": "hi"}]})
+    except requests.RequestException:
+        pass
+
+
 def main() -> int:
     openwakeword.utils.download_models([WAKE_MODEL])
     wake = Model(wakeword_models=[WAKE_MODEL], inference_framework="onnx")
     whisper = WhisperModel(WHISPER_SIZE, device="cpu", compute_type="int8")
     config = load_config()
+    threading.Thread(target=warm_local_model, args=(config,), daemon=True).start()
     audio_q: "queue.Queue[np.ndarray]" = queue.Queue()
 
     def on_audio(indata, frames, time_info, status):
