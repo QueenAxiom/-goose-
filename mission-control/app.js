@@ -1,0 +1,410 @@
+"use strict";
+// Mission Control front end. All data is rendered with textContent / DOM nodes, never innerHTML.
+
+const TOKEN = window.MC_TOKEN;
+const STATUS_REFRESH_MS = 60000;
+const PANES = ["sites", "posts", "sales", "voice", "system"];
+const $ = (id) => document.getElementById(id);
+
+const state = { sites: {}, names: [], current: 0, view: "staging", system: null, pane: "sites", mode: "text", undoSeconds: 300 };
+
+function el(tag, props = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else node[k] = v;
+  }
+  node.append(...children.filter((c) => c !== null && c !== undefined));
+  return node;
+}
+
+async function api(path, body) {
+  const opts = { headers: { "X-MC-Token": TOKEN } };
+  if (body !== undefined) {
+    opts.method = "POST";
+    opts.headers["Content-Type"] = "application/json";
+    opts.body = JSON.stringify(body);
+  }
+  const res = await fetch(path, opts);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+  return data;
+}
+
+function setBadge(id, text, cls) {
+  const b = $(id);
+  b.textContent = text;
+  b.className = "badge " + (cls || "");
+}
+
+// ---------- navigation ----------
+function showPane(name) {
+  state.pane = name;
+  PANES.forEach((p) => $("pane-" + p).classList.toggle("active", p === name));
+  document.querySelectorAll("#mainNav button").forEach((b) => b.classList.toggle("active", b.dataset.pane === name));
+  if (name === "posts") loadPosts();
+  if (name === "sales") loadSales();
+  if (name === "voice") renderVoice();
+  if (name === "system") loadSystem();
+}
+
+function buildNav() {
+  PANES.forEach((p) => {
+    const b = el("button", { textContent: p[0].toUpperCase() + p.slice(1), onclick: () => showPane(p) });
+    b.dataset.pane = p;
+    $("mainNav").appendChild(b);
+  });
+}
+
+// ---------- sites + command box ----------
+function currentSite() { return state.sites[state.names[state.current]]; }
+
+function renderSites() {
+  const name = state.names[state.current], s = currentSite();
+  document.querySelectorAll(".tab").forEach((t, i) => t.classList.toggle("active", i === state.current));
+  $("btnLive").classList.toggle("active", state.view === "live");
+  $("btnStaging").classList.toggle("active", state.view === "staging");
+  $("btnStaging").style.opacity = s.staging ? "1" : "0.35";
+  const url = state.view === "staging" ? (s.staging || s.live) : s.live;
+  const frameOk = frameAllowed(name, state.view === "staging" && s.staging ? "staging" : "live");
+  $("blocked").style.display = frameOk ? "none" : "flex";
+  $("frame").src = frameOk ? url : "about:blank";
+  $("openSite").href = url;
+  $("adminLink").href = url.replace(/\/$/, "") + "/wp-admin";
+  const noStaging = state.view === "staging" && !s.staging;
+  $("target").textContent = "Target: " + name + " (" + (noStaging ? "no staging" : state.view) + ")";
+  $("liveConfirmRow").style.display = state.view === "live" ? "" : "none";
+  $("confirmLive").checked = false;
+}
+
+function frameAllowed(name, view) {
+  const r = state.system && state.system.sites[name] && state.system.sites[name][view];
+  return !r || r.frame_ok !== false;
+}
+
+function showOut(text, isErr) {
+  const out = $("out");
+  out.style.display = "block";
+  out.className = "out" + (isErr ? " err" : "");
+  out.style.display = "block";
+  out.textContent = text;
+}
+
+async function sendCommand() {
+  const name = state.names[state.current], prompt = $("prompt").value.trim();
+  if (!prompt) return;
+  if (state.view === "staging" && !currentSite().staging) {
+    showOut("This site has no staging. Switch to Live and confirm, or pick another site.", true);
+    return;
+  }
+  $("send").disabled = true;
+  showOut("Working… this can take a minute.", false);
+  try {
+    const res = await fetch("/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: TOKEN, site: name, view: state.view, prompt, confirm_live: $("confirmLive").checked }),
+    });
+    const data = await res.json();
+    showOut(data.reply || data.error || "No response.", !res.ok);
+    if (res.ok) speak(data.reply);
+    if (res.ok) { $("prompt").value = ""; $("frame").src = $("frame").src; }
+  } catch (e) {
+    showOut("Could not reach the helper. Is start-mission-control.cmd running?", true);
+  } finally {
+    $("send").disabled = false;
+  }
+}
+
+function initSites(data) {
+  state.sites = data;
+  state.names = Object.keys(data);
+  state.names.forEach((n, i) => {
+    $("tabs").appendChild(el("button", { class: "tab", textContent: n, onclick: () => { state.current = i; renderSites(); } }));
+  });
+  $("btnLive").onclick = () => { state.view = "live"; renderSites(); };
+  $("btnStaging").onclick = () => { state.view = "staging"; renderSites(); };
+  $("send").onclick = sendCommand;
+  onEnter($("prompt"), sendCommand);
+  attachMic($("prompt"), $("micPrompt"));
+  renderSites();
+}
+
+// ---------- system status ----------
+async function loadSystem() {
+  try {
+    state.system = await api("/api/status");
+  } catch (e) {
+    $("systemRoot").replaceChildren(el("div", { class: "empty", textContent: "Status unavailable: " + e.message }));
+    return;
+  }
+  renderBadges();
+  renderSystem();
+}
+
+function stripeSummary(stripe) {
+  const modes = Object.values(stripe || {});
+  if (!modes.length) return { text: "Stripe: unknown", cls: "" };
+  if (modes.includes("mixed")) return { text: "Stripe: MIXED keys", cls: "bad" };
+  if (modes.includes("live")) return { text: "Stripe: LIVE", cls: "bad" };
+  if (modes.every((m) => m === "test")) return { text: "Stripe: test mode", cls: "ok" };
+  return { text: "Stripe: unknown", cls: "warn" };
+}
+
+function renderBadges() {
+  const sys = state.system;
+  const s = stripeSummary(sys.stripe);
+  setBadge("badgeStripe", s.text, s.cls);
+  const cells = Object.values(sys.sites).flatMap((v) => Object.values(v));
+  const down = cells.filter((c) => !c.up).length;
+  setBadge("badgeSites", down ? `Sites: ${down} down` : "Sites: all up", down ? "bad" : "ok");
+  setBadge("badgeVoice", sys.voice.running ? "Voice: on" : "Voice: off", sys.voice.running ? "ok" : "");
+  if (state.pane === "sites") renderSites();
+}
+
+function renderSystem() {
+  const sys = state.system, root = $("systemRoot");
+  const rows = [];
+  for (const [name, views] of Object.entries(sys.sites)) {
+    for (const [view, r] of Object.entries(views)) {
+      rows.push(el("tr", {},
+        el("td", {}, el("span", { class: "dot " + (r.up ? "ok" : "bad") }), name),
+        el("td", { textContent: view }),
+        el("td", { textContent: r.status === null ? "unreachable" : String(r.status) }),
+        el("td", { textContent: r.ms === null ? "—" : r.ms + " ms" }),
+        el("td", { textContent: r.frame_ok ? "yes" : "blocked" })));
+    }
+  }
+  const git = sys.git.error ? sys.git.error
+    : `${sys.git.branch} · ${sys.git.uncommitted} uncommitted · ${sys.git.unpushed} unpushed · last: ${sys.git.last_commit}`;
+  root.replaceChildren(
+    el("h2", { textContent: "Sites" }),
+    el("table", {}, el("thead", {}, el("tr", {}, ...["Site", "View", "HTTP", "Speed", "Embeddable"].map((h) => el("th", { textContent: h })))),
+      el("tbody", {}, ...rows)),
+    el("h2", { textContent: "Stripe mode (checkout page)" }),
+    el("div", { textContent: Object.entries(sys.stripe || {}).map(([v, m]) => `${v}: ${m}`).join("   ") || "unknown" }),
+    el("h2", { textContent: "Repo" }), el("div", { textContent: git }),
+    el("h2", { textContent: "Backup log" }), el("div", { textContent: sys.backup.last_line || "no backup log found" }),
+    el("div", { class: "row", style: "margin-top:16px" }, el("button", { class: "btn", textContent: "Refresh", onclick: loadSystem })));
+}
+
+// ---------- sales ----------
+async function loadSales() {
+  const root = $("salesRoot");
+  try {
+    renderSales(await api("/api/sales"));
+  } catch (e) {
+    root.replaceChildren(el("div", { class: "empty", textContent: "Sales data unavailable: " + e.message }));
+  }
+}
+
+function card(n, label) {
+  return el("div", { class: "card" }, el("div", { class: "n", textContent: String(n) }), el("div", { class: "l", textContent: label }));
+}
+
+function renderSales(data) {
+  const b = data.scoreboard, root = $("salesRoot");
+  const mrr = el("input", { type: "number", min: "0", value: String(b.mrr), size: 8 });
+  const cash = el("input", { type: "number", min: "0", value: String(b.cash), size: 8 });
+  const saveMoney = () => api("/api/money", { mrr: Number(mrr.value), cash: Number(cash.value) }).then(loadSales).catch((e) => alert(e.message));
+
+  const newLead = { business: el("input", { placeholder: "Business" }), contact: el("input", { placeholder: "Contact" }),
+    email: el("input", { placeholder: "Email" }) };
+  const addLead = () => api("/api/leads", { action: "add", ...Object.fromEntries(Object.entries(newLead).map(([k, i]) => [k, i.value])) })
+    .then(loadSales).catch((e) => alert(e.message));
+
+  const leadRows = data.leads.map((l) => {
+    const sel = el("select", { onchange: () => api("/api/leads", { action: "update", id: l.id, status: sel.value }).then(loadSales).catch((e) => alert(e.message)) },
+      ...data.statuses.map((s) => el("option", { value: s, textContent: s, selected: s === l.status })));
+    return el("tr", {}, el("td", { textContent: l.business }), el("td", { textContent: l.contact }), el("td", { textContent: l.email }),
+      el("td", {}, sel),
+      el("td", {}, el("button", { class: "btn", textContent: "Delete", onclick: () => confirm("Delete " + l.business + "?") && api("/api/leads", { action: "delete", id: l.id }).then(loadSales) })));
+  });
+
+  const templates = data.templates.map((t) => el("div", { class: "tpl" },
+    el("strong", { textContent: t.title }),
+    el("pre", { textContent: t.body }),
+    el("label", {}, el("input", { type: "checkbox", checked: t.approved, onchange: (e) => api("/api/approval", { id: t.id, approved: e.target.checked }).catch((err) => alert(err.message)) }),
+      " Alan approves this draft (nothing is sent from here)")));
+
+  root.replaceChildren(
+    el("div", { class: "cards" }, card(b.leads, "Leads"), card(b.conversations, "Conversations"), card(b.calls, "Calls booked"),
+      card(b.sales, "Sales"), card("$" + b.mrr, "MRR"), card("$" + b.cash, "Cash")),
+    el("div", { class: "row" }, "MRR $", mrr, "Cash $", cash, el("button", { class: "btn", textContent: "Save", onclick: saveMoney })),
+    el("h2", { textContent: "Leads" }),
+    leadRows.length ? el("table", {}, el("thead", {}, el("tr", {}, ...["Business", "Contact", "Email", "Status", ""].map((h) => el("th", { textContent: h })))), el("tbody", {}, ...leadRows))
+      : el("div", { class: "empty", textContent: "No leads yet. Add the first one below." }),
+    el("div", { class: "row", style: "margin-top:10px" }, newLead.business, newLead.contact, newLead.email,
+      el("button", { class: "btn primary", textContent: "Add lead", onclick: addLead })),
+    el("h2", { textContent: "Outreach drafts" }),
+    ...(templates.length ? templates : [el("div", { class: "empty", textContent: "No drafts found in docs/smb-outreach-drafts.md" })]));
+}
+
+// ---------- voice ----------
+function renderVoice() {
+  const running = state.system && state.system.voice.running;
+  const act = (action) => api("/api/voice", { action }).then(() => loadSystem().then(renderVoice)).catch((e) => alert(e.message));
+  $("voiceRoot").replaceChildren(
+    el("h2", { textContent: "Jarvis voice assistant" }),
+    el("div", { textContent: running ? "Running — listening for “Hey Jarvis”." : "Stopped." }),
+    el("div", { class: "row", style: "margin-top:12px" },
+      el("button", { class: "btn primary", textContent: "Start", disabled: !!running, onclick: () => act("start") }),
+      el("button", { class: "btn", textContent: "Stop", disabled: !running, onclick: () => act("stop") })),
+    el("h2", { textContent: "Talk to Jarvis by text" }),
+    jarvisTextBox(),
+    el("h2", { textContent: "Things to say" }),
+    el("div", { textContent: "“Hey Jarvis, status” · “Hey Jarvis, run a backup” · “Hey Jarvis, ask Claude …” · anything else goes to the free local model." }),
+    el("div", { class: "empty", textContent: "Jarvis opens a microphone window on this PC. Stop it here when you're done." }));
+}
+
+// ---------- input mode, mic, speech ----------
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+function toast(msg, kind) {
+  const t = el("div", { class: "toast " + (kind || ""), textContent: msg });
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 6000);
+}
+
+function setMode(mode) {
+  state.mode = mode;
+  document.body.classList.toggle("mode-voice", mode === "voice");
+  $("modeToggle").textContent = "Input: " + (mode === "voice" ? "Voice" : "Text");
+  try { localStorage.setItem("mc-mode", mode); } catch (e) { /* storage unavailable */ }
+  if (mode === "voice" && !SpeechRec) toast("This browser has no speech recognition. Use Chrome or Edge, or stay in Text mode.", "err");
+}
+
+function speak(text) {
+  if (state.mode !== "voice" || !text || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(new SpeechSynthesisUtterance(text.slice(0, 600)));
+}
+
+/** Enter submits, Shift+Enter inserts a newline. */
+function onEnter(textarea, submit) {
+  textarea.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); submit(); }
+  });
+}
+
+/** Dictation fills the box only; the human still presses Enter to send or post. */
+function attachMic(textarea, button) {
+  let rec = null;
+  button.addEventListener("click", () => {
+    if (!SpeechRec) { toast("Speech recognition isn't available in this browser.", "err"); return; }
+    if (rec) { rec.stop(); return; }
+    rec = new SpeechRec();
+    rec.lang = "en-US";
+    rec.interimResults = true;
+    rec.continuous = true;
+    const base = textarea.value ? textarea.value.trimEnd() + " " : "";
+    rec.onresult = (ev) => {
+      textarea.value = base + Array.from(ev.results).map((r) => r[0].transcript).join(" ").trim();
+      textarea.dispatchEvent(new Event("input"));
+    };
+    rec.onend = () => { rec = null; button.classList.remove("listening"); };
+    rec.onerror = (ev) => toast("Mic error: " + ev.error, "err");
+    button.classList.add("listening");
+    rec.start();
+  });
+}
+
+function jarvisTextBox() {
+  const ta = el("textarea", { placeholder: "Type what you'd say, e.g. “status” or “ask Claude …”. Enter sends.", maxLength: 500, rows: 2 });
+  const out = el("div", { class: "out" });
+  const mic = el("button", { class: "btn mic", textContent: "🎤" });
+  const send = async () => {
+    const text = ta.value.trim();
+    if (!text) return;
+    out.style.display = "block"; out.className = "out"; out.textContent = "Thinking… the local model can take a minute.";
+    try {
+      const data = await api("/api/say", { text });
+      out.textContent = data.reply; ta.value = ""; speak(data.reply);
+    } catch (e) { out.className = "out err"; out.textContent = e.message; }
+  };
+  onEnter(ta, send);
+  attachMic(ta, mic);
+  return el("div", {}, el("div", { class: "row" }, ta, mic, el("button", { class: "btn primary", textContent: "Send", onclick: send })), out);
+}
+
+// ---------- posts ----------
+async function loadPosts() {
+  try { renderPosts(await api("/api/posts")); }
+  catch (e) { $("postsRoot").replaceChildren(el("div", { class: "empty", textContent: "Posts unavailable: " + e.message })); }
+}
+
+function renderPosts(data) {
+  state.undoSeconds = data.undo_seconds;
+  const usable = data.platforms.filter((p) => p.available && p.configured);
+  const select = el("select", {}, ...data.platforms.map((p) =>
+    el("option", { value: p.id, textContent: p.label + (p.available ? (p.configured ? "" : " (not set up)") : " (unavailable)"), disabled: !(p.available && p.configured) })));
+  const ta = el("textarea", { placeholder: "Type your post. Enter publishes immediately. Shift+Enter for a new line.", maxLength: 5000 });
+  const flags = el("div", { class: "flags" });
+  const mic = el("button", { class: "btn mic", textContent: "🎤 Dictate" });
+  const counter = el("span", { class: "empty" });
+  let timer = null;
+
+  ta.addEventListener("input", () => {
+    counter.textContent = ta.value.length + " chars";
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      if (!ta.value.trim()) { flags.textContent = ""; return; }
+      try {
+        const r = await api("/api/preflight", { platform: select.value, text: ta.value });
+        flags.textContent = r.flags.length ? "Heads up (won't block): " + r.flags.join(" · ") : "";
+      } catch (e) { flags.textContent = ""; }
+    }, 400);
+  });
+
+  let busy = false;
+  const publish = async () => {
+    const text = ta.value;
+    if (busy || !text.trim()) return;
+    busy = true;
+    try {
+      await api("/api/post", { platform: select.value, text });
+      ta.value = ""; flags.textContent = ""; counter.textContent = "";
+      toast("Posted ✓ — you can undo it below for a few minutes.", "ok");
+      speak("Posted.");
+      await loadPosts();
+    } catch (e) {
+      toast(e.message, "err");
+    } finally { busy = false; }
+  };
+  onEnter(ta, publish);
+  attachMic(ta, mic);
+
+  const hist = data.posts.length ? data.posts.map((p) => {
+    const age = (Date.now() - new Date(p.created).getTime()) / 1000;
+    const canUndo = !p.deleted && age < state.undoSeconds;
+    return el("div", { class: "item" + (p.deleted ? " deleted" : "") },
+      el("div", { class: "meta", textContent: `${p.platform} · ${new Date(p.created).toLocaleString()}${p.deleted ? " · removed" : ""}` }),
+      el("div", { textContent: p.text }),
+      canUndo ? el("button", { class: "btn", style: "margin-top:6px", textContent: "Undo (remove from Facebook)",
+        onclick: () => confirm("Remove this post from the Page?") && api("/api/post/undo", { id: p.id }).then(loadPosts).catch((e) => toast(e.message, "err")) }) : null);
+  }) : [el("div", { class: "empty", textContent: "Nothing posted from here yet." })];
+
+  const unavailable = data.platforms.filter((p) => !p.available).map((p) => el("div", { class: "empty", textContent: `${p.label}: ${p.reason}` }));
+  const notReady = data.platforms.filter((p) => p.available && !p.configured);
+
+  $("postsRoot").replaceChildren(
+    el("h2", { textContent: "Post now" }),
+    usable.length ? null : el("div", { class: "flags", textContent: "Posting isn't set up yet: add MC_FB_PAGE_ID and MC_FB_PAGE_TOKEN to mission-control/.env and restart the helper." }),
+    el("div", { class: "postbox" }, el("div", { class: "row" }, "Post to", select, mic, counter), ta, flags),
+    el("div", { class: "row", style: "margin-top:8px" }, el("button", { class: "btn primary", textContent: "Post", onclick: publish }),
+      el("span", { class: "empty", textContent: "Enter also posts. Dictation only fills the box; you still press Enter." })),
+    ...notReady.map((p) => el("div", { class: "empty", textContent: p.label + ": credentials not added yet." })),
+    ...unavailable,
+    el("h2", { textContent: "Posted from here" }),
+    el("div", { class: "hist" }, ...hist));
+  const firstUsable = Array.from(select.options).find((o) => !o.disabled);
+  if (firstUsable) select.value = firstUsable.value;
+}
+
+// ---------- boot ----------
+buildNav();
+$("modeToggle").onclick = () => setMode(state.mode === "voice" ? "text" : "voice");
+try { setMode(localStorage.getItem("mc-mode") === "voice" ? "voice" : "text"); } catch (e) { setMode("text"); }
+fetch("/sites.json").then((r) => r.json()).then((data) => { initSites(data); showPane("sites"); loadSystem(); });
+setInterval(() => { if (state.pane !== "system") loadSystem(); }, STATUS_REFRESH_MS);

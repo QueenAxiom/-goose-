@@ -15,3 +15,7 @@ Thumbs.db
 .claude/settings.local.json
 .claude/state/
 __pycache__/
+
+# Mission Control private data
+mission-control/data/
+mission-control/.env

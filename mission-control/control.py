@@ -1,7 +1,7 @@
-"""Mission Control helper: serves the dashboard and relays commands to Claude Code.
+"""Mission Control helper: serves the dashboard, status/sales APIs, and relays commands to Claude Code.
 
 Run: python mission-control/control.py   (or start-mission-control.cmd)
-Binds to 127.0.0.1 only. Every command needs the per-run token embedded in the page.
+Binds to 127.0.0.1 only. Every request needs the per-run token embedded in the page.
 """
 import json
 import logging
@@ -11,6 +11,11 @@ import subprocess
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+
+import posting
+import status
+from store import STATUSES, Store
+from voice_ctl import VoiceProcess
 
 log = logging.getLogger("mission-control")
 
@@ -22,23 +27,39 @@ MAX_PROMPT_CHARS = 2000
 MAX_BODY_BYTES = 16 * 1024
 CLAUDE_TIMEOUT_SECONDS = 300
 TOKEN_PLACEHOLDER = "__MC_TOKEN__"
+TOKEN_HEADER = "X-MC-Token"
 VIEWS = ("staging", "live")
+POST_HISTORY_LIMIT = 50
+UNDO_WINDOW_SECONDS = 300
+DUPLICATE_WINDOW_SECONDS = 60
+MAX_SAY_CHARS = 500
+CHECKOUT_SITE = "EverythingInternet.ca"
+DRAFTS_DOC = REPO / "docs" / "smb-outreach-drafts.md"
+STATIC_FILES = {"/app.js": "application/javascript; charset=utf-8", "/style.css": "text/css; charset=utf-8"}
 
 
 def load_sites(path: Path = HERE / "sites.json") -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def validate_request(payload, token: str, sites: dict, host: str, origin: "str | None") -> "str | None":
-    """Return an error message, or None if the request is acceptable."""
-    if not isinstance(payload, dict):
-        return "bad payload"
+def guard(host: str, origin: "str | None", supplied_token: "str | None", token: str) -> "str | None":
+    """Shared request checks: local host, same origin, correct token."""
     if host not in (f"{HOST}:{PORT}", f"localhost:{PORT}"):
         return "bad host"
     if origin is not None and origin not in (f"http://{HOST}:{PORT}", f"http://localhost:{PORT}"):
         return "bad origin"
-    if not secrets.compare_digest(str(payload.get("token", "")), token):
+    if not isinstance(supplied_token, str) or not secrets.compare_digest(supplied_token, token):
         return "bad token"
+    return None
+
+
+def validate_request(payload, token: str, sites: dict, host: str, origin: "str | None") -> "str | None":
+    """Return an error message for a /ask payload, or None if acceptable."""
+    if not isinstance(payload, dict):
+        return "bad payload"
+    error = guard(host, origin, payload.get("token"), token)
+    if error:
+        return error
     site = sites.get(payload.get("site"))
     if site is None:
         return "unknown site"
@@ -81,8 +102,113 @@ def run_claude(prompt: str) -> "tuple[bool, str]":
     return True, result.stdout.strip() or "(no reply)"
 
 
-def make_handler(token: str, sites: dict):
-    page = (HERE / "index.html").read_text(encoding="utf-8").replace(TOKEN_PLACEHOLDER, token)
+def voice_reply(text: str) -> str:
+    """Run text through the Jarvis router (wake word implied) and return the full reply."""
+    voice_dir = str(REPO / "voice")
+    if voice_dir not in sys.path:
+        sys.path.insert(0, voice_dir)
+    import router  # noqa: E402  (lives in voice/, imported lazily so tests don't need it)
+
+    config = router.load_config()
+    sentences = list(router.handle_stream(f"{config['wake_words'][0]} {text}", config))
+    return " ".join(sentences) or "No reply."
+
+
+class App:
+    """Everything the HTTP handler needs: config, store, voice process, poster."""
+
+    def __init__(self, token: str, sites: dict, store: Store, voice: VoiceProcess, poster: "posting.Poster"):
+        self.token, self.sites, self.store, self.voice, self.poster = token, sites, store, voice, poster
+
+    def posts_info(self) -> dict:
+        platforms = [{**p, "configured": self.poster.configured(p["id"])} for p in posting.platform_info()]
+        return {"platforms": platforms, "posts": self.store.posts()[:POST_HISTORY_LIMIT], "undo_seconds": UNDO_WINDOW_SECONDS}
+
+    def preflight(self, body: dict) -> dict:
+        return {"flags": posting.preflight(str(body.get("platform", "")), str(body.get("text", "")))}
+
+    def post(self, body: dict) -> dict:
+        platform, text = str(body.get("platform", "")), body.get("text", "")
+        error = posting.validate_post(platform, text)
+        if error:
+            raise ValueError(error)
+        if not self.poster.configured(platform):
+            raise ValueError(f"{platform} isn't set up yet. Add MC_FB_PAGE_ID and MC_FB_PAGE_TOKEN to mission-control/.env, then restart.")
+        if self.store.recent_duplicate(platform, text, DUPLICATE_WINDOW_SECONDS):
+            raise ValueError("That exact post went out less than a minute ago. Undo it first if you want to repost.")
+        try:
+            result = self.poster.publish(platform, text.strip())
+        except posting.PostingError as exc:
+            raise ValueError(str(exc)) from None
+        record = self.store.add_post({"platform": platform, "text": text.strip(), "post_id": result["post_id"]})
+        log.info("posted to %s (%s)", platform, result["post_id"])
+        return {"post": record, "flags": posting.preflight(platform, text)}
+
+    def undo(self, body: dict) -> dict:
+        record = next((p for p in self.store.posts() if p["id"] == str(body.get("id", ""))), None)
+        if record is None:
+            raise KeyError("post")
+        try:
+            self.poster.delete(record["platform"], record["post_id"])
+        except posting.PostingError as exc:
+            raise ValueError(str(exc)) from None
+        self.store.mark_post_deleted(record["id"])
+        log.info("undid post %s", record["post_id"])
+        return {"ok": True}
+
+    def say(self, body: dict) -> dict:
+        """Type-to-Jarvis for noisy rooms: same router as the voice loop, text in, text out."""
+        text = body.get("text")
+        if not isinstance(text, str) or not text.strip() or len(text) > MAX_SAY_CHARS:
+            raise ValueError(f"say 1-{MAX_SAY_CHARS} characters")
+        return {"reply": voice_reply(text.strip())}
+
+    def system_status(self) -> dict:
+        checkout = self.sites.get(CHECKOUT_SITE, {})
+        return {
+            "sites": status.check_all_sites(self.sites),
+            "stripe": {view: status.stripe_mode_for(url) for view, url in checkout.items() if url},
+            "git": status.git_summary(REPO),
+            "backup": status.backup_summary(REPO),
+            "voice": {"running": self.voice.running()},
+        }
+
+    def sales(self) -> dict:
+        try:
+            templates = status.parse_templates(DRAFTS_DOC.read_text(encoding="utf-8"))
+        except OSError:
+            templates = []
+        approvals = self.store.approvals()
+        return {
+            "scoreboard": self.store.scoreboard(),
+            "leads": self.store.leads(),
+            "templates": [{**t, "approved": approvals.get(t["id"], {}).get("approved", False)} for t in templates],
+            "statuses": list(STATUSES),
+        }
+
+    def lead_action(self, body: dict) -> dict:
+        action = body.get("action")
+        if action == "add":
+            return {"lead": self.store.add_lead(body)}
+        if action == "update":
+            return {"lead": self.store.update_lead(str(body.get("id", "")), body)}
+        if action == "delete":
+            self.store.delete_lead(str(body.get("id", "")))
+            return {"ok": True}
+        raise ValueError("unknown action")
+
+    def voice_action(self, body: dict) -> dict:
+        action = body.get("action")
+        if action == "start":
+            return {"changed": self.voice.start(), "running": self.voice.running()}
+        if action == "stop":
+            return {"changed": self.voice.stop(), "running": self.voice.running()}
+        raise ValueError("unknown action")
+
+
+def make_handler(app: App):
+    page = (HERE / "index.html").read_text(encoding="utf-8").replace(TOKEN_PLACEHOLDER, app.token)
+    static = {path: ((HERE / path.lstrip("/")).read_bytes(), ctype) for path, ctype in STATIC_FILES.items()}
 
     class Handler(BaseHTTPRequestHandler):
         def _send(self, code: int, body: bytes, ctype: str) -> None:
@@ -90,36 +216,85 @@ def make_handler(token: str, sites: dict):
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(body)))
             self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff")
             self.end_headers()
             self.wfile.write(body)
 
         def _json(self, code: int, obj: dict) -> None:
             self._send(code, json.dumps(obj).encode("utf-8"), "application/json")
 
-        def do_GET(self):
-            if self.path == "/":
-                self._send(200, page.encode("utf-8"), "text/html; charset=utf-8")
-            elif self.path == "/sites.json":
-                self._json(200, sites)
-            else:
-                self._json(404, {"error": "not found"})
+        def _guard(self, supplied_token=None) -> bool:
+            token = supplied_token if supplied_token is not None else self.headers.get(TOKEN_HEADER)
+            error = guard(self.headers.get("Host", ""), self.headers.get("Origin"), token, app.token)
+            if error:
+                self._json(403, {"error": error})
+            return error is None
 
-        def do_POST(self):
-            if self.path != "/ask":
-                return self._json(404, {"error": "not found"})
+        def _read_json(self):
             length = int(self.headers.get("Content-Length") or 0)
             if length > MAX_BODY_BYTES:
-                return self._json(413, {"error": "too large"})
+                self._json(413, {"error": "too large"})
+                return None
             try:
-                payload = json.loads(self.rfile.read(length))
+                body = json.loads(self.rfile.read(length) or b"{}")
             except ValueError:
-                return self._json(400, {"error": "bad json"})
-            error = validate_request(payload, token, sites, self.headers.get("Host", ""), self.headers.get("Origin"))
+                self._json(400, {"error": "bad json"})
+                return None
+            if not isinstance(body, dict):
+                self._json(400, {"error": "bad payload"})
+                return None
+            return body
+
+        def do_GET(self):
+            if self.path == "/":
+                return self._send(200, page.encode("utf-8"), "text/html; charset=utf-8")
+            if self.path in static:
+                body, ctype = static[self.path]
+                return self._send(200, body, ctype)
+            if self.path == "/sites.json":
+                return self._json(200, app.sites)
+            getters = {"/api/status": app.system_status, "/api/sales": app.sales, "/api/posts": app.posts_info}
+            if self.path in getters:
+                if not self._guard():
+                    return
+                return self._json(200, getters[self.path]())
+            self._json(404, {"error": "not found"})
+
+        def do_POST(self):
+            body = self._read_json()
+            if body is None:
+                return
+            if self.path == "/ask":
+                return self._ask(body)
+            handlers = {
+                "/api/leads": app.lead_action,
+                "/api/voice": app.voice_action,
+                "/api/post": app.post,
+                "/api/post/undo": app.undo,
+                "/api/preflight": app.preflight,
+                "/api/say": app.say,
+                "/api/money": lambda b: app.store.set_money(b.get("mrr"), b.get("cash")) or {"ok": True},
+                "/api/approval": lambda b: app.store.set_approval(str(b.get("id", "")), b.get("approved") is True) or {"ok": True},
+            }
+            handler = handlers.get(self.path)
+            if handler is None:
+                return self._json(404, {"error": "not found"})
+            if not self._guard():
+                return
+            try:
+                self._json(200, handler(body))
+            except KeyError:
+                self._json(404, {"error": "not found"})
+            except ValueError as exc:
+                self._json(400, {"error": str(exc)})
+
+        def _ask(self, body: dict) -> None:
+            error = validate_request(body, app.token, app.sites, self.headers.get("Host", ""), self.headers.get("Origin"))
             if error:
                 return self._json(403, {"error": error})
-            site_name = payload["site"]
-            prompt = build_prompt(sites[site_name], site_name, payload["view"], payload["prompt"])
-            log.info("ask %s (%s): %s", site_name, payload["view"], payload["prompt"][:200])
+            site_name = body["site"]
+            prompt = build_prompt(app.sites[site_name], site_name, body["view"], body["prompt"])
+            log.info("ask %s (%s): %s", site_name, body["view"], body["prompt"][:200])
             ok, reply = run_claude(prompt)
             self._json(200 if ok else 502, {"ok": ok, "reply": reply})
 
@@ -131,13 +306,13 @@ def make_handler(token: str, sites: dict):
 
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
-    token = secrets.token_urlsafe(24)
-    server = ThreadingHTTPServer((HOST, PORT), make_handler(token, load_sites()))
+    app = App(secrets.token_urlsafe(24), load_sites(), Store(HERE / "data"), VoiceProcess(), posting.Poster())
+    server = ThreadingHTTPServer((HOST, PORT), make_handler(app))
     print(f"Mission Control: http://{HOST}:{PORT}  (Ctrl+C to stop)")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        pass
+        app.voice.stop()
     return 0
 
 
