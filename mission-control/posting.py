@@ -25,8 +25,15 @@ PLATFORMS = {
 RECOMMENDED_CHARS = {"facebook": 500}
 
 
+RATE_LIMIT_CODES = (4, 17, 32, 341, 368, 613, 80001)  # Graph API throttling / spam-block error codes
+
+
 class PostingError(Exception):
     """A posting failure whose message is safe to show the user."""
+
+    def __init__(self, message: str, rate_limited: bool = False):
+        super().__init__(message)
+        self.rate_limited = rate_limited
 
 
 def parse_env(text: str) -> dict:
@@ -100,6 +107,13 @@ class Poster:
             message = ""
         return f"Facebook rejected the request ({resp.status_code}): {message[:200] or 'no details'}"
 
+    @staticmethod
+    def _graph_code(resp) -> "int | None":
+        try:
+            return resp.json().get("error", {}).get("code")
+        except ValueError:
+            return None
+
     def publish(self, platform: str, text: str) -> dict:
         if platform != "facebook":
             raise PostingError(f"{platform} posting isn't available.")
@@ -111,7 +125,7 @@ class Poster:
             log.exception("facebook publish failed")
             raise PostingError("Could not reach Facebook. Nothing was posted.") from None
         if resp.status_code != 200:
-            raise PostingError(self._graph_error(resp))
+            raise PostingError(self._graph_error(resp), rate_limited=self._graph_code(resp) in RATE_LIMIT_CODES)
         post_id = resp.json().get("id")
         if not post_id:
             raise PostingError("Facebook returned no post id; check the Page before retrying.")

@@ -68,3 +68,35 @@ Every post goes through a Guardian interim check, then **Alan-controlled** exter
 ## Guardian review scope
 
 Guardian reviews every draft from: Automation Engineer, Website Manager, Research Analyst, Content Agent, Marketing Director, Media Studio, Sales Manager, Recorder, Operations Manager — before it reaches Sophia or Alan. Nothing ships without passing this first.
+
+## Platform rules on posting volume — Meta / Facebook (researched 2026-10-15)
+
+Read the originals before raising posting volume. Nothing below is legal advice; it is what Meta's own pages say.
+
+**Meta publishes no numeric daily cap for Page posts.** The limits that exist are a spam policy (judged by behavior) and API call budgets.
+
+### 1. Spam policy — the one that matters for 750 posts/day
+Source: https://transparency.meta.com/policies/community-standards/spam/
+
+- Posting, sharing or engaging "either manually or automatically, at very high frequencies" is treated as spam.
+- "We may place restrictions on accounts that are acting at lower frequencies" when "other indicators of Spam (e.g., posting repetitive content)" are present.
+- The policy does not name bots, but covers automated behavior through the "manually or automatically" wording.
+- Enforcement is restrictions on the account/Page; Meta's restriction and appeals process: https://transparency.meta.com/enforcement/taking-action/restricting-accounts/
+
+What this means in practice: the risk is not the API refusing the post, it is Meta judging the *pattern* (very high frequency, repetitive text) and restricting the Page. Varied content and spreading volume across several channels lowers that risk; it does not remove it.
+
+### 2. Graph API rate limits — technical throttling, not a posting cap
+Source: https://developers.facebook.com/docs/graph-api/overview/rate-limiting/
+
+- Pages API calls made with a Page or system-user token use: "Calls within 24 hours = 4800 * Number of Engaged Users."
+- Page/system-token throttling returns error code **80001**: "There have been too many calls to this Page account. Wait a bit and try again."
+- User-token throttling returns error code **32**.
+- Throttled responses carry an `X-Business-Use-Case-Usage` header whose `estimated_time_to_regain_access` gives minutes until calls are allowed again.
+- Mission Control pauses a platform for 60 minutes when it sees a throttle code (4, 17, 32, 341, 368, 613, 80001).
+
+### 3. Related terms
+- Page Feed publishing reference: https://developers.facebook.com/docs/graph-api/reference/page/feed/
+- Automated Data Collection Terms (scraping, not publishing): https://www.facebook.com/legal/automated_data_collection_terms
+
+### Decision log
+- 2026-10-15: Alan wants maximum promotion across as many channels as possible ("promote, promote, promote"). Meta's spam rules were shown to Alan before enabling a high-volume queue. Mission Control ships with a kill switch, a per-platform daily cap and automatic pause on throttling.

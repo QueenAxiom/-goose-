@@ -18,6 +18,8 @@ MAX_FIELD_CHARS = 200
 MAX_NOTES_CHARS = 2000
 LEAD_FIELDS = ("business", "contact", "email", "notes")
 MAX_ANSWER_CHARS = 8000
+MAX_POST_TEXT_CHARS = 5000
+DEFAULT_SETTINGS = {"paused": False, "daily_cap": 750}
 COUNCIL_ASKERS = ("Alan", "Axiom")
 # topic -> gstack plan-review skill that suits it
 COUNCIL_TOPICS = {"general": "/autoplan", "strategy": "/plan-ceo-review", "engineering": "/plan-eng-review",
@@ -232,3 +234,47 @@ class Store:
             merged = [*current, *({"key": k, "title": t} for k, t in stops if k not in known)]
             self._write("route.json", {"date": today, "stops": merged})
         return merged
+
+    # ---- promotion queue + settings ----
+    def queue(self) -> list:
+        return self._read("queue.json", [])
+
+    def enqueue_many(self, items: list) -> list:
+        """items: (platform, text, due_iso). Returns the new queue records."""
+        records = []
+        for platform, text, due in items:
+            clean = _clean_text(text, MAX_POST_TEXT_CHARS)
+            if not clean:
+                raise ValueError("queued post is empty")
+            records.append({"id": uuid.uuid4().hex[:10], "platform": str(platform), "text": clean, "due": due,
+                            "status": "queued", "attempts": 0, "error": "", "post_id": "", "posted_at": "", "created": _now()})
+        with self._lock:
+            self._write("queue.json", [*self.queue(), *records])
+        return records
+
+    def update_queue_item(self, item_id: str, patch: dict) -> None:
+        with self._lock:
+            self._write("queue.json", [{**q, **patch} if q["id"] == item_id else q for q in self.queue()])
+
+    def clear_finished_queue(self) -> int:
+        with self._lock:
+            current = self.queue()
+            keep = [q for q in current if q["status"] == "queued"]
+            self._write("queue.json", keep)
+        return len(current) - len(keep)
+
+    def settings(self) -> dict:
+        return {**DEFAULT_SETTINGS, **self._read("settings.json", {})}
+
+    def update_settings(self, changes: dict) -> dict:
+        patch = {}
+        if "paused" in changes:
+            patch["paused"] = bool(changes["paused"])
+        if "daily_cap" in changes:
+            cap = changes["daily_cap"]
+            if isinstance(cap, bool) or not isinstance(cap, int) or cap < 0:
+                raise ValueError("daily_cap must be a whole number, 0 or more")
+            patch["daily_cap"] = cap
+        with self._lock:
+            self._write("settings.json", {**self.settings(), **patch})
+        return self.settings()
