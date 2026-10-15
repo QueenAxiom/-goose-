@@ -1,0 +1,7 @@
+{
+  "Supergrok.ca": {"live": "https://supergrok.ca", "staging": "https://1291308.us8.myftpupload.com"},
+  "EverythingInternet.ca": {"live": "https://everythinginternet.ca", "staging": "https://1248767.us8.myftpupload.com"},
+  "SchmucksDebate.com": {"live": "https://schmucksdebate.com", "staging": "https://1246804.us8.myftpupload.com"},
+  "EverythingClaude.ca": {"live": "https://everythingclaude.ca", "staging": "https://1299322.us8.myftpupload.com"},
+  "alangooding.ca": {"live": "https://alangooding.ca", "staging": null}
+}

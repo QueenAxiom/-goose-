@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Axiom Mission Control</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0a; color: #eee; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; height: 100vh; display: flex; flex-direction: column; }
+  header { padding: 12px 20px; border-bottom: 1px solid #2a2a2a; display: flex; align-items: center; gap: 16px; }
+  header h1 { font-size: 18px; letter-spacing: 2px; color: #c00; }
+  header span { font-size: 12px; color: #888; }
+  .tabs { display: flex; gap: 6px; padding: 10px 20px 0; flex-wrap: wrap; }
+  .tab { background: #1a1a1a; border: 1px solid #333; color: #ccc; padding: 8px 16px; cursor: pointer; border-radius: 6px 6px 0 0; font-size: 14px; }
+  .tab.active { background: #2a2a2a; color: #fff; border-bottom-color: #c00; }
+  .tab:hover { background: #222; }
+  .toolbar { display: flex; gap: 8px; align-items: center; padding: 8px 20px; background: #111; border-bottom: 1px solid #2a2a2a; font-size: 13px; }
+  .toolbar button { background: #1a1a1a; border: 1px solid #444; color: #ddd; padding: 5px 12px; cursor: pointer; border-radius: 4px; }
+  .toolbar button.active { background: #c00; border-color: #c00; color: #fff; }
+  .toolbar a { color: #c66; text-decoration: none; margin-left: auto; }
+  .toolbar a:hover { text-decoration: underline; }
+  iframe { flex: 1; width: 100%; border: none; background: #fff; min-height: 0; }
+  .cmd { background: #111; border-top: 1px solid #2a2a2a; padding: 10px 20px; display: flex; flex-direction: column; gap: 8px; }
+  .cmd .row { display: flex; gap: 8px; align-items: center; font-size: 13px; }
+  .cmd textarea { flex: 1; background: #1a1a1a; color: #eee; border: 1px solid #444; border-radius: 4px; padding: 8px; font: inherit; height: 52px; resize: vertical; }
+  .cmd button { background: #c00; border: none; color: #fff; padding: 10px 18px; border-radius: 4px; cursor: pointer; }
+  .cmd button:disabled { opacity: .5; cursor: wait; }
+  #out { white-space: pre-wrap; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 4px; padding: 8px; max-height: 160px; overflow: auto; font-size: 13px; display: none; }
+  #out.err { border-color: #c00; color: #f99; }
+  .warn { color: #fc6; }
+</style>
+</head>
+<body>
+<header>
+  <h1>AXIOM</h1><span>Mission Control — private. For your eyes only.</span>
+</header>
+<div class="tabs" id="tabs"></div>
+<div class="toolbar">
+  <button id="btnLive" onclick="setView('live')">Live</button>
+  <button id="btnStaging" class="active" onclick="setView('staging')">Staging</button>
+  <a id="adminLink" href="#" target="_blank" rel="noopener">open wp-admin ↗</a>
+</div>
+<iframe id="frame" src=""></iframe>
+<div class="cmd">
+  <div id="out"></div>
+  <div class="row">
+    <textarea id="prompt" maxlength="2000" placeholder="Tell ECC what to change on this site, e.g. &quot;make the hero headline shorter&quot;"></textarea>
+    <button id="send" onclick="send()">Send</button>
+  </div>
+  <div class="row">
+    <span id="target"></span>
+    <label id="liveConfirmRow" class="warn" style="display:none"><input type="checkbox" id="confirmLive"> I confirm this change goes to the LIVE site</label>
+  </div>
+</div>
+
+<script>
+const TOKEN = "__MC_TOKEN__";
+let sites = {}, names = [], current = 0, view = "staging";
+const $ = (id) => document.getElementById(id);
+
+function urlFor(s) { return view === "staging" ? (s.staging || s.live) : s.live; }
+
+function render() {
+  const name = names[current], s = sites[name];
+  document.querySelectorAll(".tab").forEach((t, i) => t.classList.toggle("active", i === current));
+  $("btnLive").classList.toggle("active", view === "live");
+  $("btnStaging").classList.toggle("active", view === "staging");
+  $("btnStaging").style.opacity = s.staging ? "1" : "0.35";
+  const url = urlFor(s);
+  $("frame").src = url;
+  $("adminLink").href = url.replace(/\/$/, "") + "/wp-admin";
+  $("target").textContent = "Target: " + name + " (" + (view === "staging" && !s.staging ? "no staging" : view) + ")";
+  $("liveConfirmRow").style.display = view === "live" ? "" : "none";
+  $("confirmLive").checked = false;
+}
+
+function setView(v) { view = v; render(); }
+
+function showOut(text, isErr) {
+  const out = $("out");
+  out.style.display = "block";
+  out.className = isErr ? "err" : "";
+  out.textContent = text;
+}
+
+async function send() {
+  const name = names[current];
+  const prompt = $("prompt").value.trim();
+  if (!prompt) return;
+  if (view === "staging" && !sites[name].staging) { showOut("This site has no staging. Switch to Live and confirm, or pick another site.", true); return; }
+  $("send").disabled = true;
+  showOut("Working… this can take a minute.", false);
+  try {
+    const res = await fetch("/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: TOKEN, site: name, view, prompt, confirm_live: $("confirmLive").checked }),
+    });
+    const data = await res.json();
+    showOut(data.reply || data.error || "No response.", !res.ok);
+    if (res.ok) { $("prompt").value = ""; $("frame").src = $("frame").src; }
+  } catch (e) {
+    showOut("Could not reach the helper. Is start-mission-control.cmd running?", true);
+  } finally {
+    $("send").disabled = false;
+  }
+}
+
+fetch("/sites.json").then((r) => r.json()).then((data) => {
+  sites = data; names = Object.keys(data);
+  names.forEach((n, i) => {
+    const b = document.createElement("button");
+    b.className = "tab";
+    b.textContent = n;
+    b.onclick = () => { current = i; render(); };
+    $("tabs").appendChild(b);
+  });
+  render();
+});
+</script>
+</body>
+</html>
