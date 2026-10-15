@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+  <title>Axiom Daily</title>
+  <link>https://supergrok.ca</link>
+  <description>Big-picture daily snapshots from Axiom Enterprises. 7:00, 12:30 and 18:00 Mountain.</description>
+  <copyright>&#169; Axiom Enterprises</copyright>
+  <!-- STAGING DRAFT. Not published. Items are added per snapshot after Sofia's yes and Alan's yes. -->
+</channel>
+</rss>
