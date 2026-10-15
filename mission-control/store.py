@@ -15,6 +15,11 @@ CALLED = ("call", "won")
 MAX_FIELD_CHARS = 200
 MAX_NOTES_CHARS = 2000
 LEAD_FIELDS = ("business", "contact", "email", "notes")
+MAX_ANSWER_CHARS = 8000
+COUNCIL_ASKERS = ("Alan", "Axiom")
+# topic -> gstack plan-review skill that suits it
+COUNCIL_TOPICS = {"general": "/autoplan", "strategy": "/plan-ceo-review", "engineering": "/plan-eng-review",
+                  "design": "/plan-design-review", "devex": "/plan-devex-review"}
 
 
 def _now() -> str:
@@ -144,3 +149,51 @@ class Store:
             and datetime.fromisoformat(p["created"]).timestamp() >= cutoff
             for p in self.posts()
         )
+
+    # ---- council questions ----
+    def questions(self) -> list:
+        return self._read("council.json", [])
+
+    def add_question(self, fields: dict) -> dict:
+        question = _clean_text(fields.get("question"), MAX_NOTES_CHARS)
+        if not question:
+            raise ValueError("question is required")
+        if fields.get("asked_by") not in COUNCIL_ASKERS:
+            raise ValueError("asked_by must be Alan or Axiom")
+        if fields.get("topic") not in COUNCIL_TOPICS:
+            raise ValueError("unknown topic")
+        record = {
+            "id": uuid.uuid4().hex[:10], "question": question, "asked_by": fields["asked_by"],
+            "topic": fields["topic"], "status": "open", "answer": "", "answer_source": "", "created": _now(),
+        }
+        with self._lock:
+            self._write("council.json", [record, *self.questions()])
+        return record
+
+    def answer_question(self, question_id: str, answer: str, source: str) -> dict:
+        text = _clean_text(answer, MAX_ANSWER_CHARS)
+        if not text:
+            raise ValueError("answer is required")
+        with self._lock:
+            current = self.questions()
+            if not any(q["id"] == question_id for q in current):
+                raise KeyError(question_id)
+            updated = [{**q, "status": "answered", "answer": text, "answer_source": _clean_text(source, 40), "answered": _now()}
+                       if q["id"] == question_id else q for q in current]
+            self._write("council.json", updated)
+        return next(q for q in updated if q["id"] == question_id)
+
+    def delete_question(self, question_id: str) -> None:
+        with self._lock:
+            self._write("council.json", [q for q in self.questions() if q["id"] != question_id])
+
+    def asked_today(self) -> bool:
+        today = datetime.now(timezone.utc).date().isoformat()
+        return any(q["created"].startswith(today) for q in self.questions())
+
+    def dismissed_today(self) -> bool:
+        return self._read("council_prompt.json", {}).get("date") == datetime.now(timezone.utc).date().isoformat()
+
+    def dismiss_today(self) -> None:
+        with self._lock:
+            self._write("council_prompt.json", {"date": datetime.now(timezone.utc).date().isoformat()})

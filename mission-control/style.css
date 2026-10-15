@@ -66,3 +66,5 @@ body.mode-voice button.badge.mode { color: var(--blue); border-color: var(--blue
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 8px; padding: 10px 16px; z-index: 9; max-width: 90vw; }
 .toast.err { border-color: var(--red); color: var(--red-text); }
 .toast.ok { border-color: var(--green); }
+
+.banner { display: flex; gap: 10px; align-items: center; padding: 8px 20px; background: #221a00; border-bottom: 1px solid var(--amber); color: var(--amber); font-size: 14px; }

@@ -3,7 +3,7 @@
 
 const TOKEN = window.MC_TOKEN;
 const STATUS_REFRESH_MS = 60000;
-const PANES = ["sites", "posts", "sales", "voice", "system"];
+const PANES = ["sites", "council", "posts", "sales", "voice", "system"];
 const $ = (id) => document.getElementById(id);
 
 const state = { sites: {}, names: [], current: 0, view: "staging", system: null, pane: "sites", mode: "text", undoSeconds: 300 };
@@ -43,6 +43,7 @@ function showPane(name) {
   state.pane = name;
   PANES.forEach((p) => $("pane-" + p).classList.toggle("active", p === name));
   document.querySelectorAll("#mainNav button").forEach((b) => b.classList.toggle("active", b.dataset.pane === name));
+  if (name === "council") loadCouncil();
   if (name === "posts") loadPosts();
   if (name === "sales") loadSales();
   if (name === "voice") renderVoice();
@@ -402,9 +403,85 @@ function renderPosts(data) {
   if (firstUsable) select.value = firstUsable.value;
 }
 
+// ---------- council ----------
+async function loadCouncil() {
+  try { renderCouncil(await api("/api/council")); }
+  catch (e) { $("councilRoot").replaceChildren(el("div", { class: "empty", textContent: "Council unavailable: " + e.message })); }
+}
+
+async function checkCouncilBanner() {
+  try {
+    const data = await api("/api/council");
+    const banner = $("councilBanner");
+    if (data.asked_today || data.dismissed_today) { banner.style.display = "none"; return; }
+    banner.replaceChildren(
+      el("span", { textContent: "Does Axiom or you have a question for the council today?" }),
+      el("button", { class: "btn primary", textContent: "Ask now", onclick: () => { banner.style.display = "none"; showPane("council"); } }),
+      el("button", { class: "btn", textContent: "Not today", onclick: () => api("/api/council/dismiss", {}).then(() => { banner.style.display = "none"; }) }));
+    banner.style.display = "flex";
+  } catch (e) { /* banner is optional */ }
+}
+
+function copyText(text, okMsg) {
+  navigator.clipboard.writeText(text).then(() => toast(okMsg, "ok"), () => toast("Copy failed. Select the text and copy it by hand.", "err"));
+}
+
+function renderCouncil(data) {
+  const who = el("select", {}, el("option", { value: "Alan", textContent: "Alan asks" }), el("option", { value: "Axiom", textContent: "Axiom asks" }));
+  const topic = el("select", {}, ...Object.entries(data.topics).map(([t, skill]) => el("option", { value: t, textContent: `${t} → ${skill}` })));
+  const ta = el("textarea", { placeholder: "Your question for the council. Enter submits, Shift+Enter for a new line.", maxLength: 2000, rows: 3 });
+  const mic = el("button", { class: "btn mic", textContent: "🎤" });
+  const ask = async () => {
+    if (!ta.value.trim()) return;
+    try {
+      await api("/api/council/ask", { question: ta.value, asked_by: who.value, topic: topic.value });
+      toast("Question logged for the council.", "ok");
+      checkCouncilBanner();
+      loadCouncil();
+    } catch (e) { toast(e.message, "err"); }
+  };
+  onEnter(ta, ask);
+  attachMic(ta, mic);
+
+  const open = data.questions.filter((q) => q.status === "open");
+  const done = data.questions.filter((q) => q.status !== "open");
+
+  const questionCard = (q) => {
+    const answerBox = el("textarea", { placeholder: "Paste or type the council's answer", rows: 3, maxLength: 8000 });
+    const source = el("select", {}, ...["Alan", "ECC", "GPT", "Claude", "DeepSeek", "Kimi", "Other"].map((s) => el("option", { value: s, textContent: s })));
+    const save = () => api("/api/council/answer", { id: q.id, answer: answerBox.value, source: source.value }).then(loadCouncil).catch((e) => toast(e.message, "err"));
+    return el("div", { class: "tpl" },
+      el("div", { class: "meta", textContent: `${q.asked_by} · ${q.topic} · ${new Date(q.created).toLocaleString()} · in-repo reviewer ${q.reviewer}` }),
+      el("div", { textContent: q.question }),
+      q.status === "open" ? el("div", {},
+        el("div", { class: "row", style: "margin:8px 0" },
+          el("button", { class: "btn", textContent: "Copy package for other models", onclick: () => copyText(q.package, "Package copied. Paste it into GPT, Claude, DeepSeek or Kimi.") }),
+          el("button", { class: "btn primary", textContent: "Ask ECC now",
+            onclick: (ev) => { if (!confirm("ECC will answer using your Claude plan. Continue?")) return;
+              ev.target.disabled = true; ev.target.textContent = "ECC is thinking…";
+              api("/api/council/ecc", { id: q.id }).then(loadCouncil).catch((e) => { toast(e.message, "err"); ev.target.disabled = false; ev.target.textContent = "Ask ECC now"; }); } })),
+        el("div", { class: "row" }, answerBox, source, el("button", { class: "btn", textContent: "Record answer", onclick: save })))
+        : el("div", {}, el("div", { class: "meta", style: "margin-top:8px", textContent: `Answered by ${q.answer_source}` }), el("pre", { textContent: q.answer })),
+      el("button", { class: "btn", style: "margin-top:6px", textContent: "Delete",
+        onclick: () => confirm("Delete this question?") && api("/api/council/delete", { id: q.id }).then(loadCouncil) }));
+  };
+
+  $("councilRoot").replaceChildren(
+    el("h2", { textContent: "Ask the council" }),
+    el("div", { class: "row" }, who, topic, mic),
+    ta,
+    el("div", { class: "row", style: "margin-top:8px" }, el("button", { class: "btn primary", textContent: "Submit question", onclick: ask }),
+      el("span", { class: "empty", textContent: "Pick a topic and I'll suggest the matching review skill." })),
+    el("h2", { textContent: `Open (${open.length})` }),
+    ...(open.length ? open.map(questionCard) : [el("div", { class: "empty", textContent: "No open questions." })]),
+    el("h2", { textContent: `Answered (${done.length})` }),
+    ...(done.length ? done.map(questionCard) : [el("div", { class: "empty", textContent: "Nothing answered yet." })]));
+}
+
 // ---------- boot ----------
 buildNav();
 $("modeToggle").onclick = () => setMode(state.mode === "voice" ? "text" : "voice");
 try { setMode(localStorage.getItem("mc-mode") === "voice" ? "voice" : "text"); } catch (e) { setMode("text"); }
+checkCouncilBanner();
 fetch("/sites.json").then((r) => r.json()).then((data) => { initSites(data); showPane("sites"); loadSystem(); });
 setInterval(() => { if (state.pane !== "system") loadSystem(); }, STATUS_REFRESH_MS);

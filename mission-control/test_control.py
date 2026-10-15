@@ -178,6 +178,50 @@ class AppSayTests(unittest.TestCase):
             with mock.patch("control.voice_reply", return_value="Voice router online."):
                 self.assertEqual(app.say({"text": "status"}), {"reply": "Voice router online."})
 
+class CouncilTests(unittest.TestCase):
+    def make_app(self):
+        import tempfile
+        from pathlib import Path
+        from store import Store
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        return control.App(TOKEN, SITES, Store(Path(tmp.name)), mock.Mock(), FakePoster())
+
+    def test_ask_then_info_lists_question_with_suggested_reviewer(self):
+        app = self.make_app()
+        app.council_ask({"question": "Is the checkout safe?", "asked_by": "Alan", "topic": "engineering"})
+        info = app.council_info()
+        self.assertEqual(info["questions"][0]["reviewer"], "/plan-eng-review")
+        self.assertTrue(info["asked_today"])
+
+    def test_package_contains_question_context_and_reply_format(self):
+        q = {"question": "Raise price?", "asked_by": "Alan", "topic": "strategy"}
+        pkg = control.build_council_package(q)
+        self.assertIn("Raise price?", pkg)
+        self.assertIn("VERDICT", pkg)
+
+    def test_ecc_answer_is_stored_with_source(self):
+        app = self.make_app()
+        q = app.council_ask({"question": "Raise price?", "asked_by": "Alan", "topic": "strategy"})["question"]
+        with mock.patch("control.run_claude", return_value=(True, "Hold at $499.")):
+            out = app.council_ecc({"id": q["id"]})
+        self.assertEqual(out["question"]["answer"], "Hold at $499.")
+        self.assertEqual(out["question"]["answer_source"], "ECC")
+
+    def test_ecc_failure_is_value_error_and_leaves_question_open(self):
+        app = self.make_app()
+        q = app.council_ask({"question": "x?", "asked_by": "Alan", "topic": "general"})["question"]
+        with mock.patch("control.run_claude", return_value=(False, "Claude could not be run.")):
+            with self.assertRaises(ValueError):
+                app.council_ecc({"id": q["id"]})
+        self.assertEqual(app.store.questions()[0]["status"], "open")
+
+    def test_manual_answer_recorded(self):
+        app = self.make_app()
+        q = app.council_ask({"question": "x?", "asked_by": "Axiom", "topic": "general"})["question"]
+        app.council_answer({"id": q["id"], "answer": "Do it.", "source": "GPT"})
+        self.assertEqual(app.store.questions()[0]["answer_source"], "GPT")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -14,7 +14,7 @@ from pathlib import Path
 
 import posting
 import status
-from store import STATUSES, Store
+from store import COUNCIL_TOPICS, STATUSES, Store
 from voice_ctl import VoiceProcess
 
 log = logging.getLogger("mission-control")
@@ -102,6 +102,36 @@ def run_claude(prompt: str) -> "tuple[bool, str]":
     return True, result.stdout.strip() or "(no reply)"
 
 
+COUNCIL_ANGLES = ("Factual reviewer: are the premises true? What is unverified?",
+                  "Senior engineer: what is the simplest approach that works, and what breaks?",
+                  "Security and risk: what could go wrong or leak?",
+                  "Consistency reviewer: does it conflict with Axiom's earlier decisions (docs/decisions-log.md)?",
+                  "Redundancy checker: is any of this already built or unnecessary?")
+
+
+def build_council_package(question: dict) -> str:
+    """Copy-paste package for an outside model: the question, context and the required reply format."""
+    reviewer = COUNCIL_TOPICS.get(question["topic"], "/autoplan")
+    return (
+        f"Question for the Axiom Enterprises council (asked by {question['asked_by']}, topic: {question['topic']}).\n\n"
+        f"{question['question']}\n\n"
+        "Context: Axiom Enterprises runs EmpoweredAtHome.com, EverythingInternet.ca and SchmucksDebate.com; "
+        "goal is first customers for a $499 website + automation offer for Canadian small businesses. "
+        "Rules: say \"SI\", never \"AI\"; keep it practical; flag risks but don't stall.\n\n"
+        f"Suggested in-repo reviewer: {reviewer}\n\n"
+        "Reply with: VERDICT: AGREE, CHANGES or NEEDS-INFO, then your reasoning in under 200 words."
+    )
+
+
+def build_council_prompt(question: dict) -> str:
+    angles = "\n".join(f"- {a}" for a in COUNCIL_ANGLES)
+    return (
+        f"Council question from {question['asked_by']} (topic: {question['topic']}): {question['question']}\n\n"
+        f"Answer it from these angles, briefly, then give one clear recommendation:\n{angles}\n"
+        "Check docs/decisions-log.md before contradicting an earlier decision. Do not change any files or sites."
+    )
+
+
 def voice_reply(text: str) -> str:
     """Run text through the Jarvis router (wake word implied) and return the full reply."""
     voice_dir = str(REPO / "voice")
@@ -155,6 +185,41 @@ class App:
         self.store.mark_post_deleted(record["id"])
         log.info("undid post %s", record["post_id"])
         return {"ok": True}
+
+    def council_info(self) -> dict:
+        questions = [{**q, "reviewer": COUNCIL_TOPICS.get(q["topic"], "/autoplan"), "package": build_council_package(q)}
+                     for q in self.store.questions()]
+        return {
+            "questions": questions,
+            "topics": {k: v for k, v in COUNCIL_TOPICS.items()},
+            "asked_today": self.store.asked_today(),
+            "dismissed_today": self.store.dismissed_today(),
+        }
+
+    def council_ask(self, body: dict) -> dict:
+        return {"question": self.store.add_question(body)}
+
+    def council_answer(self, body: dict) -> dict:
+        source = str(body.get("source") or "Alan")
+        return {"question": self.store.answer_question(str(body.get("id", "")), str(body.get("answer", "")), source)}
+
+    def council_delete(self, body: dict) -> dict:
+        self.store.delete_question(str(body.get("id", "")))
+        return {"ok": True}
+
+    def council_dismiss(self, body: dict) -> dict:
+        self.store.dismiss_today()
+        return {"ok": True}
+
+    def council_ecc(self, body: dict) -> dict:
+        """Have ECC (Claude Code) give the council's answer. Uses the Claude plan, so it is an explicit action."""
+        question = next((q for q in self.store.questions() if q["id"] == str(body.get("id", ""))), None)
+        if question is None:
+            raise KeyError("question")
+        ok, reply = run_claude(build_council_prompt(question))
+        if not ok:
+            raise ValueError(reply)
+        return {"question": self.store.answer_question(question["id"], reply, "ECC")}
 
     def say(self, body: dict) -> dict:
         """Type-to-Jarvis for noisy rooms: same router as the voice loop, text in, text out."""
@@ -253,7 +318,8 @@ def make_handler(app: App):
                 return self._send(200, body, ctype)
             if self.path == "/sites.json":
                 return self._json(200, app.sites)
-            getters = {"/api/status": app.system_status, "/api/sales": app.sales, "/api/posts": app.posts_info}
+            getters = {"/api/status": app.system_status, "/api/sales": app.sales, "/api/posts": app.posts_info,
+               "/api/council": app.council_info}
             if self.path in getters:
                 if not self._guard():
                     return
@@ -273,6 +339,11 @@ def make_handler(app: App):
                 "/api/post/undo": app.undo,
                 "/api/preflight": app.preflight,
                 "/api/say": app.say,
+                "/api/council/ask": app.council_ask,
+                "/api/council/answer": app.council_answer,
+                "/api/council/delete": app.council_delete,
+                "/api/council/dismiss": app.council_dismiss,
+                "/api/council/ecc": app.council_ecc,
                 "/api/money": lambda b: app.store.set_money(b.get("mrr"), b.get("cash")) or {"ok": True},
                 "/api/approval": lambda b: app.store.set_approval(str(b.get("id", "")), b.get("approved") is True) or {"ok": True},
             }

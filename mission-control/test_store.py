@@ -90,6 +90,40 @@ class StoreTests(unittest.TestCase):
         self.s.mark_post_deleted(rec["id"])
         self.assertFalse(self.s.recent_duplicate("facebook", "Oops", seconds=60))
 
+    def test_council_question_lifecycle(self):
+        q = self.s.add_question({"question": "Should we price at $499?", "asked_by": "Alan", "topic": "strategy"})
+        self.assertEqual((q["status"], q["asked_by"], q["topic"]), ("open", "Alan", "strategy"))
+        done = self.s.answer_question(q["id"], "Yes, keep $499.", "ECC")
+        self.assertEqual((done["status"], done["answer"], done["answer_source"]), ("answered", "Yes, keep $499.", "ECC"))
+        self.assertEqual(len(self.s.questions()), 1)
+
+    def test_council_rejects_blank_unknown_asker_and_unknown_topic(self):
+        with self.assertRaises(ValueError):
+            self.s.add_question({"question": " ", "asked_by": "Alan", "topic": "general"})
+        with self.assertRaises(ValueError):
+            self.s.add_question({"question": "q", "asked_by": "Bob", "topic": "general"})
+        with self.assertRaises(ValueError):
+            self.s.add_question({"question": "q", "asked_by": "Alan", "topic": "weather"})
+
+    def test_answer_unknown_question_raises_key_error(self):
+        with self.assertRaises(KeyError):
+            self.s.answer_question("nope", "x", "Alan")
+
+    def test_asked_today_detects_todays_question(self):
+        self.assertFalse(self.s.asked_today())
+        self.s.add_question({"question": "q", "asked_by": "Axiom", "topic": "general"})
+        self.assertTrue(self.s.asked_today())
+
+    def test_dismiss_today_hides_prompt(self):
+        self.assertFalse(self.s.dismissed_today())
+        self.s.dismiss_today()
+        self.assertTrue(self.s.dismissed_today())
+
+    def test_delete_question(self):
+        q = self.s.add_question({"question": "q", "asked_by": "Alan", "topic": "general"})
+        self.s.delete_question(q["id"])
+        self.assertEqual(self.s.questions(), [])
+
 
 if __name__ == "__main__":
     unittest.main()
