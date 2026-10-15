@@ -11,6 +11,8 @@ import queue
 import subprocess
 import sys
 import threading
+import winsound
+from collections import deque
 
 import numpy as np
 import openwakeword
@@ -19,29 +21,35 @@ import sounddevice as sd
 from faster_whisper import WhisperModel
 from openwakeword.model import Model
 
+from endpointing import Endpointer, noise_floor, threshold_for
 from router import handle_stream, load_config
 
 WAKE_MODEL = "hey_jarvis"
 WAKE_THRESHOLD = 0.5
 SAMPLE_RATE = 16000
 CHUNK = 1280  # 80 ms, the frame size openWakeWord expects
-SILENCE_RMS = 500
-SILENCE_CHUNKS = 10  # ~0.8 s of quiet ends the command
-MAX_CHUNKS = 375  # ~30 s hard cap
+END_QUIET_CHUNKS = 10  # ~0.8 s of quiet after speech ends the command
+ONSET_LIMIT_CHUNKS = 50  # ~4 s to start speaking after the wake word before giving up
+MAX_CHUNKS = 150  # ~12 s hard cap on one command
+NOISE_WINDOW_CHUNKS = 62  # ~5 s of recent audio used to judge room noise
+BEEP_HZ, BEEP_MS = 880, 120
 WHISPER_SIZE = "base.en"
 LOCAL_WARMUP_TIMEOUT_SECONDS = 180
 
 
-def record_command(audio_q: "queue.Queue[np.ndarray]") -> np.ndarray:
-    chunks, quiet = [], 0
-    while len(chunks) < MAX_CHUNKS:
+def chunk_rms(chunk: np.ndarray) -> float:
+    return float(np.sqrt(np.mean(chunk.astype(np.float32) ** 2)))
+
+
+def record_command(audio_q: "queue.Queue[np.ndarray]", threshold: float) -> np.ndarray:
+    """Record until the speaker finishes, using a threshold tuned to the room's noise."""
+    ep = Endpointer(threshold, END_QUIET_CHUNKS, ONSET_LIMIT_CHUNKS, MAX_CHUNKS)
+    chunks = []
+    while True:
         chunk = audio_q.get()
         chunks.append(chunk)
-        rms = float(np.sqrt(np.mean(chunk.astype(np.float32) ** 2)))
-        quiet = quiet + 1 if rms < SILENCE_RMS else 0
-        if quiet >= SILENCE_CHUNKS and len(chunks) > SILENCE_CHUNKS:
-            break
-    return np.concatenate(chunks)
+        if ep.feed(chunk_rms(chunk)) == "done":
+            return np.concatenate(chunks)
 
 
 def transcribe(whisper: WhisperModel, audio: np.ndarray) -> str:
@@ -86,20 +94,29 @@ def main() -> int:
     print("Listening for 'Hey Jarvis'... (Ctrl+C to quit)")
     with sd.InputStream(samplerate=SAMPLE_RATE, channels=1, dtype="int16",
                         blocksize=CHUNK, callback=on_audio):
+        recent_rms: "deque[float]" = deque(maxlen=NOISE_WINDOW_CHUNKS)
         while True:
-            scores = wake.predict(audio_q.get())
-            if scores.get(WAKE_MODEL, 0) < WAKE_THRESHOLD:
+            chunk = audio_q.get()
+            recent_rms.append(chunk_rms(chunk))
+            if wake.predict(chunk).get(WAKE_MODEL, 0) < WAKE_THRESHOLD:
                 continue
             wake.reset()
-            print("Jarvis: yes?")
-            text = transcribe(whisper, record_command(audio_q))
+            threshold = threshold_for(noise_floor(list(recent_rms)))
+            winsound.Beep(BEEP_HZ, BEEP_MS)  # tells you it is listening
+            while not audio_q.empty():
+                audio_q.get_nowait()  # drop the beep and the wake phrase itself
+            print(f"Jarvis: listening (speech threshold {threshold:.0f})")
+            text = transcribe(whisper, record_command(audio_q, threshold))
             print(f"Heard: {text or '(nothing)'}")
             if text:
                 # Speak each sentence as the model produces it; generation continues while we talk.
                 for sentence in handle_stream(f"{config['wake_words'][0]} {text}", config):
                     speak(sentence)
+            else:
+                speak("Sorry, I didn't catch that.")
             while not audio_q.empty():
                 audio_q.get_nowait()
+            recent_rms.clear()
 
 
 if __name__ == "__main__":
