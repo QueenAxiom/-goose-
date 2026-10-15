@@ -100,3 +100,13 @@ Source: https://developers.facebook.com/docs/graph-api/overview/rate-limiting/
 
 ### Decision log
 - 2026-10-15: Alan wants maximum promotion across as many channels as possible ("promote, promote, promote"). Meta's spam rules were shown to Alan before enabling a high-volume queue. Mission Control ships with a kill switch, a per-platform daily cap and automatic pause on throttling.
+
+## Platform rules on posting volume — LinkedIn (researched 2026-10-15)
+
+**LinkedIn publishes no numeric posts-per-day number either.** Limits exist at three levels:
+
+1. **API quotas (technical).** Per-endpoint daily limits that "are not published in documentation"; look up your app's own numbers in the Developer Portal under Analytics > Quotas and usage. Two layers: an application-wide daily total and a per-member total per app; both reset at midnight UTC. Developer Admins get an email at 75% of quota. Source: https://learn.microsoft.com/en-us/linkedin/shared/api-guide/concepts/rate-limits
+2. **Per-author share limit.** A 429 response means the author "has reached a maximum daily share limit" (number not published). A 422 on duplicate content means wait 10 minutes or change the text. Sources: https://learn.microsoft.com/en-us/linkedin/shared/api-guide/concepts/error-handling and https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/ugc-post-api
+3. **Behavior rules.** The Professional Community Policies ban "gratuitously repetitive messages or similar content" and spam; repeated violations lead to account restriction: https://www.linkedin.com/legal/professional-community-policies and https://www.linkedin.com/help/linkedin/answer/a1338787. The User Agreement prohibits bots or other unauthorized automated methods to share or drive engagement: https://www.linkedin.com/legal/user-agreement. LinkedIn's page on automated activity says suspensions can become permanent after repeats: https://www.linkedin.com/help/linkedin/answer/a1340567
+
+**For Axiom specifically:** our LinkedIn developer app only supports personal posting (`w_member_social`), so Mission Control keeps LinkedIn greyed out. Posting through the official API with your own app is authorized; third-party automation tools driving your personal profile are what LinkedIn calls a User Agreement violation. A personal profile is also the one account you can't afford to lose, so it is the worst place to test volume.
