@@ -1,9 +1,11 @@
 {
-  "wake_words": ["hey axiom", "ok axiom"],
+  "wake_words": ["hey jarvis", "jarvis", "hey axiom", "ok axiom"],
   "local_model_url": "http://127.0.0.1:8000/v1/chat/completions",
   "local_model": "olmoe-colibri",
   "routes": [
+    {"name": "claude", "keywords": ["ask claude"], "action": "claude"},
     {"name": "status", "keywords": ["status", "what's running"], "action": "reply", "target": "Voice router online."},
-    {"name": "backup", "keywords": ["backup", "back up"], "action": "webhook", "target": "http://localhost:5678/webhook/backup"}
+    {"name": "backup", "keywords": ["run backup", "run a backup", "back up now"], "action": "webhook", "target": "http://localhost:5678/webhook/backup"},
+    {"name": "automation", "keywords": ["automate", "run workflow", "n8n"], "action": "webhook", "target": "http://localhost:5678/webhook/jarvis"}
   ]
 }

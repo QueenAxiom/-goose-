@@ -1,13 +1,34 @@
 """Command router: wake word extraction, keyword routing, action dispatch."""
 import json
+import logging
+import os
 import re
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 
+log = logging.getLogger(__name__)
+
 CONFIG_PATH = Path(__file__).with_name("routes.json")
 REQUEST_TIMEOUT_SECONDS = 30
+LOCAL_MODEL_TIMEOUT_SECONDS = 180  # olmoe-colibri runs ~2 tokens/s
+LOCAL_MODEL_MAX_TOKENS = 80
+CLAUDE_TIMEOUT_SECONDS = 120
+MAX_REPLY_CHARS = 600
+VALID_ACTIONS = ("reply", "webhook", "local_model", "claude")
+ALLOWED_HOSTS = ("localhost", "127.0.0.1")
+SECRET_HEADER = "X-Axiom-Secret"
+SECRET_ENV = "AXIOM_WEBHOOK_SECRET"
+ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]")
+CONTROL_RE = re.compile(r"[\x00-\x08\x0b-\x1f\x7f]")
+SPOKEN_STYLE_PROMPT = (
+    "You are Jarvis, a spoken assistant for Alan at Axiom Enterprises. Reply in one to "
+    "three short plain sentences, no markdown or lists. Be direct and warm. "
+    "If you do not know, say so."
+)
 
 
 @dataclass(frozen=True)
@@ -18,59 +39,113 @@ class Route:
     target: str = ""
 
 
-def extract_command(text, wake_words):
-    """Return the text after the first wake word, or None if absent."""
-    lowered = text.lower()
+def _phrase_re(phrase: str) -> "re.Pattern[str]":
+    return re.compile(rf"(?<!\w){re.escape(phrase)}(?!\w)", re.IGNORECASE)
+
+
+def extract_command(text: str, wake_words: tuple) -> "str | None":
+    """Return the text after a wake word that opens the utterance, else None."""
+    stripped = text.lstrip()
     for wake in wake_words:
-        idx = lowered.find(wake.lower())
-        if idx != -1:
-            return text[idx + len(wake):].strip(" ,.!?:;")
+        match = _phrase_re(wake).match(stripped)
+        if match:
+            return stripped[match.end():].strip(" ,.!?:;")
     return None
 
 
-def route(command, routes):
-    """First route whose keyword appears in the command wins."""
+def route(command: str, routes: tuple) -> Route:
+    """First route whose keyword appears as a whole phrase in the command wins."""
     if not command.strip():
         return Route(name="empty", action="reply", target="Yes?")
-    lowered = command.lower()
     for r in routes:
-        if any(k in lowered for k in r.keywords):
+        if any(_phrase_re(k).search(command) for k in r.keywords):
             return r
     return Route(name="fallback", action="local_model")
 
 
-def load_config(path=CONFIG_PATH):
+def sanitize_reply(text: str) -> str:
+    """Strip ANSI/control characters and cap length before speaking or printing."""
+    cleaned = CONTROL_RE.sub("", ANSI_RE.sub("", text))
+    return cleaned[:MAX_REPLY_CHARS]
+
+
+def _is_local_url(url: str) -> bool:
+    parsed = urlparse(url)
+    return parsed.scheme in ("http", "https") and parsed.hostname in ALLOWED_HOSTS
+
+
+def load_config(path: Path = CONFIG_PATH) -> dict:
     raw = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not raw.get("wake_words"):
+        raise ValueError("wake_words must not be empty")
+    if not _is_local_url(raw["local_model_url"]):
+        raise ValueError("local_model_url must point at localhost")
     routes = tuple(
         Route(r["name"], tuple(r["keywords"]), r["action"], r.get("target", ""))
         for r in raw["routes"]
     )
+    for r in routes:
+        if r.action not in VALID_ACTIONS:
+            raise ValueError(f"route {r.name!r}: unknown action {r.action!r}")
+        if r.action == "webhook" and not _is_local_url(r.target):
+            raise ValueError(f"route {r.name!r}: webhook must point at localhost")
     return {**raw, "routes": routes}
 
 
-def dispatch(matched, command, config):
-    """Execute a route's action and return the reply text. Errors become messages, not crashes."""
+def _run_action(matched: Route, command: str, config: dict) -> str:
+    if matched.action == "reply":
+        return matched.target
+    if matched.action == "webhook":
+        secret = os.environ.get(SECRET_ENV, "")
+        resp = requests.post(
+            matched.target,
+            json={"command": command},
+            headers={SECRET_HEADER: secret} if secret else {},
+            timeout=REQUEST_TIMEOUT_SECONDS,
+            allow_redirects=False,
+        )
+        resp.raise_for_status()
+        return f"{matched.name} triggered."
+    if matched.action == "local_model":
+        resp = requests.post(
+            config["local_model_url"],
+            json={
+                "model": config["local_model"],
+                "max_tokens": LOCAL_MODEL_MAX_TOKENS,
+                "messages": [
+                    {"role": "system", "content": SPOKEN_STYLE_PROMPT},
+                    {"role": "user", "content": command},
+                ],
+            },
+            timeout=LOCAL_MODEL_TIMEOUT_SECONDS,
+            allow_redirects=False,
+        )
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"].strip()
+    if matched.action == "claude":
+        result = subprocess.run(
+            ["claude", "-p", "--tools", "", "--strict-mcp-config",
+             "--append-system-prompt", SPOKEN_STYLE_PROMPT],
+            input=command, capture_output=True, text=True, encoding="utf-8",
+            timeout=CLAUDE_TIMEOUT_SECONDS, shell=(os.name == "nt"),
+        )
+        if result.returncode != 0:
+            raise RuntimeError(f"claude exited {result.returncode}")
+        return result.stdout.strip() or "Claude had nothing to add."
+    raise ValueError(f"unknown action {matched.action!r}")
+
+
+def dispatch(matched: Route, command: str, config: dict) -> str:
+    """Execute a route's action and return a safe reply. Failures become a fixed message."""
     try:
-        if matched.action == "reply":
-            return matched.target
-        if matched.action == "webhook":
-            resp = requests.post(matched.target, json={"command": command}, timeout=REQUEST_TIMEOUT_SECONDS)
-            resp.raise_for_status()
-            return f"{matched.name} triggered."
-        if matched.action == "local_model":
-            resp = requests.post(
-                config["local_model_url"],
-                json={"model": config["local_model"], "messages": [{"role": "user", "content": command}]},
-                timeout=REQUEST_TIMEOUT_SECONDS,
-            )
-            resp.raise_for_status()
-            return resp.json()["choices"][0]["message"]["content"].strip()
-        return f"Unknown action: {matched.action}"
-    except (requests.RequestException, KeyError, ValueError) as exc:
-        return f"{matched.name} failed: {exc}"
+        return sanitize_reply(_run_action(matched, command, config))
+    except (requests.RequestException, subprocess.SubprocessError, OSError,
+            LookupError, TypeError, AttributeError, ValueError, RuntimeError):
+        log.exception("route %s failed", matched.name)
+        return f"{matched.name} failed."
 
 
-def handle(text, config):
+def handle(text: str, config: dict) -> "str | None":
     """Full pipeline for one utterance. Returns reply text, or None if no wake word."""
     command = extract_command(text, config["wake_words"])
     if command is None:
