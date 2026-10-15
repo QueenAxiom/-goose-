@@ -293,6 +293,57 @@ class RouteProgressTests(unittest.TestCase):
                 self.assertEqual(second["delivered"][0]["title"], "Daily council check-in")
                 self.assertEqual(second["total_stops"], total)
 
+class MultiPostTests(unittest.TestCase):
+    def make_app(self, poster=None):
+        import tempfile
+        from pathlib import Path
+        from store import Store
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        return control.App(TOKEN, SITES, Store(Path(tmp.name)), mock.Mock(), poster or FakePoster())
+
+    def test_posts_to_every_checked_platform_and_reports_each(self):
+        app = self.make_app()
+        with mock.patch("control.posting.PLATFORMS", {**control.posting.PLATFORMS, "threads": ("Threads", True, "")}):
+            out = app.post_multi({"platforms": ["facebook", "threads"], "text": "Hello"})
+        self.assertEqual([(r["platform"], r["ok"]) for r in out["results"]], [("facebook", True), ("threads", True)])
+        self.assertEqual(len(app.store.posts()), 2)
+
+    def test_one_platform_failing_does_not_stop_the_others(self):
+        class Flaky(FakePoster):
+            def publish(self, platform, text):
+                if platform == "facebook":
+                    raise control.posting.PostingError("Facebook is down")
+                return super().publish(platform, text)
+
+        app = self.make_app(Flaky())
+        with mock.patch("control.posting.PLATFORMS", {**control.posting.PLATFORMS, "threads": ("Threads", True, "")}):
+            out = app.post_multi({"platforms": ["facebook", "threads"], "text": "Hello"})
+        by = {r["platform"]: r for r in out["results"]}
+        self.assertFalse(by["facebook"]["ok"])
+        self.assertIn("down", by["facebook"]["error"])
+        self.assertTrue(by["threads"]["ok"])
+
+    def test_no_platforms_checked_is_an_error(self):
+        with self.assertRaises(ValueError):
+            self.make_app().post_multi({"platforms": [], "text": "Hello"})
+
+    def test_blank_text_is_an_error_before_anything_is_sent(self):
+        app = self.make_app()
+        with self.assertRaises(ValueError):
+            app.post_multi({"platforms": ["facebook"], "text": "  "})
+        self.assertEqual(app.poster.published, [])
+
+    def test_duplicate_platforms_are_posted_once(self):
+        app = self.make_app()
+        app.post_multi({"platforms": ["facebook", "facebook"], "text": "Once"})
+        self.assertEqual(len(app.poster.published), 1)
+
+    def test_legacy_single_platform_field_still_works(self):
+        app = self.make_app()
+        out = app.post_multi({"platform": "facebook", "text": "Legacy"})
+        self.assertTrue(out["results"][0]["ok"])
+
 
 if __name__ == "__main__":
     unittest.main()

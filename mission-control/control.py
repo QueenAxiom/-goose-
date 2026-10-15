@@ -176,6 +176,25 @@ class App:
         log.info("posted to %s (%s)", platform, result["post_id"])
         return {"post": record, "flags": posting.preflight(platform, text)}
 
+    def post_multi(self, body: dict) -> dict:
+        """Post the same text to every checked platform. Each platform succeeds or fails on its own."""
+        requested = body.get("platforms")
+        if requested is None and body.get("platform"):
+            requested = [body["platform"]]
+        platforms = list(dict.fromkeys(str(p) for p in (requested or [])))
+        if not platforms:
+            raise ValueError("Tick at least one place to post to.")
+        text = body.get("text")
+        if not isinstance(text, str) or not text.strip():
+            raise ValueError("post is empty")
+        results = []
+        for platform in platforms:
+            try:
+                results.append({"platform": platform, "ok": True, **self.post({"platform": platform, "text": text})})
+            except ValueError as exc:
+                results.append({"platform": platform, "ok": False, "error": str(exc)})
+        return {"results": results}
+
     def undo(self, body: dict) -> dict:
         record = next((p for p in self.store.posts() if p["id"] == str(body.get("id", ""))), None)
         if record is None:
@@ -388,7 +407,7 @@ def make_handler(app: App):
             handlers = {
                 "/api/leads": app.lead_action,
                 "/api/voice": app.voice_action,
-                "/api/post": app.post,
+                "/api/post": app.post_multi,
                 "/api/post/undo": app.undo,
                 "/api/preflight": app.preflight,
                 "/api/say": app.say,

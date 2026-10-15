@@ -339,8 +339,20 @@ async function loadPosts() {
 function renderPosts(data) {
   state.undoSeconds = data.undo_seconds;
   const usable = data.platforms.filter((p) => p.available && p.configured);
-  const select = el("select", {}, ...data.platforms.map((p) =>
-    el("option", { value: p.id, textContent: p.label + (p.available ? (p.configured ? "" : " (not set up)") : " (unavailable)"), disabled: !(p.available && p.configured) })));
+  let remembered = [];
+  try { remembered = JSON.parse(localStorage.getItem("mc-platforms") || "[]"); } catch (e) { /* storage unavailable */ }
+  const boxes = data.platforms.map((p) => {
+    const ready = p.available && p.configured;
+    const preTick = ready && (usable.length === 1 || remembered.includes(p.id));
+    const cb = el("input", { type: "checkbox", value: p.id, disabled: !ready, checked: preTick });
+    const note = p.available ? (p.configured ? "" : " (not set up)") : " (unavailable)";
+    const label = el("label", { class: "pcheck" + (ready ? "" : " off"), title: p.reason || "" }, cb, " " + p.label + note);
+    return { id: p.id, cb, label };
+  });
+  const picked = () => boxes.filter((b) => b.cb.checked).map((b) => b.id);
+  boxes.forEach((b) => b.cb.addEventListener("change", () => {
+    try { localStorage.setItem("mc-platforms", JSON.stringify(picked())); } catch (e) { /* storage unavailable */ }
+  }));
   const ta = el("textarea", { placeholder: "Type your post. Enter publishes immediately. Shift+Enter for a new line.", maxLength: 5000 });
   const flags = el("div", { class: "flags" });
   const mic = el("button", { class: "btn mic", textContent: "🎤 Dictate" });
@@ -353,7 +365,7 @@ function renderPosts(data) {
     timer = setTimeout(async () => {
       if (!ta.value.trim()) { flags.textContent = ""; return; }
       try {
-        const r = await api("/api/preflight", { platform: select.value, text: ta.value });
+        const r = await api("/api/preflight", { platform: picked()[0] || "facebook", text: ta.value });
         flags.textContent = r.flags.length ? "Heads up (won't block): " + r.flags.join(" · ") : "";
       } catch (e) { flags.textContent = ""; }
     }, 400);
@@ -363,12 +375,16 @@ function renderPosts(data) {
   const publish = async () => {
     const text = ta.value;
     if (busy || !text.trim()) return;
+    const platforms = picked();
+    if (!platforms.length) { toast("Tick at least one place to post to.", "err"); return; }
     busy = true;
     try {
-      await api("/api/post", { platform: select.value, text });
-      ta.value = ""; flags.textContent = ""; counter.textContent = "";
-      toast("Posted ✓ — you can undo it below for a few minutes.", "ok");
-      speak("Posted.");
+      const { results } = await api("/api/post", { platforms, text });
+      const ok = results.filter((r) => r.ok).map((r) => r.platform);
+      const failed = results.filter((r) => !r.ok);
+      if (ok.length) { ta.value = ""; flags.textContent = ""; counter.textContent = ""; }
+      if (!failed.length) { toast("Posted ✓ to " + ok.join(", ") + " — you can undo it below for a few minutes.", "ok"); speak("Posted."); }
+      else toast((ok.length ? "Posted to " + ok.join(", ") + ". " : "") + "Failed: " + failed.map((r) => `${r.platform} (${r.error})`).join("; "), "err");
       await loadPosts();
     } catch (e) {
       toast(e.message, "err");
@@ -383,8 +399,8 @@ function renderPosts(data) {
     return el("div", { class: "item" + (p.deleted ? " deleted" : "") },
       el("div", { class: "meta", textContent: `${p.platform} · ${new Date(p.created).toLocaleString()}${p.deleted ? " · removed" : ""}` }),
       el("div", { textContent: p.text }),
-      canUndo ? el("button", { class: "btn", style: "margin-top:6px", textContent: "Undo (remove from Facebook)",
-        onclick: () => confirm("Remove this post from the Page?") && api("/api/post/undo", { id: p.id }).then(loadPosts).catch((e) => toast(e.message, "err")) }) : null);
+      canUndo ? el("button", { class: "btn", style: "margin-top:6px", textContent: "Undo (remove from " + p.platform + ")",
+        onclick: () => confirm("Remove this post from " + p.platform + "?") && api("/api/post/undo", { id: p.id }).then(loadPosts).catch((e) => toast(e.message, "err")) }) : null);
   }) : [el("div", { class: "empty", textContent: "Nothing posted from here yet." })];
 
   const unavailable = data.platforms.filter((p) => !p.available).map((p) => el("div", { class: "empty", textContent: `${p.label}: ${p.reason}` }));
@@ -393,15 +409,14 @@ function renderPosts(data) {
   $("postsRoot").replaceChildren(
     el("h2", { textContent: "Post now" }),
     usable.length ? null : el("div", { class: "flags", textContent: "Posting isn't set up yet: add MC_FB_PAGE_ID and MC_FB_PAGE_TOKEN to mission-control/.env and restart the helper." }),
-    el("div", { class: "postbox" }, el("div", { class: "row" }, "Post to", select, mic, counter), ta, flags),
+    el("div", { class: "postbox" }, el("div", { class: "row" }, el("strong", { textContent: "Post to (tick as many as you like):" }), ...boxes.map((b) => b.label)),
+      el("div", { class: "row", style: "margin:8px 0" }, mic, counter), ta, flags),
     el("div", { class: "row", style: "margin-top:8px" }, el("button", { class: "btn primary", textContent: "Post", onclick: publish }),
       el("span", { class: "empty", textContent: "Enter also posts. Dictation only fills the box; you still press Enter." })),
     ...notReady.map((p) => el("div", { class: "empty", textContent: p.label + ": credentials not added yet." })),
     ...unavailable,
     el("h2", { textContent: "Posted from here" }),
     el("div", { class: "hist" }, ...hist));
-  const firstUsable = Array.from(select.options).find((o) => !o.disabled);
-  if (firstUsable) select.value = firstUsable.value;
 }
 
 // ---------- council ----------

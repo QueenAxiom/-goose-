@@ -88,3 +88,6 @@ button.go { font-size: 22px; padding: 16px 40px; border-radius: 8px; }
 .stop.skipped { color: var(--muted); }
 .stop.current { color: #fff; font-weight: 600; }
 .stop.current .mark { color: var(--red); }
+
+.pcheck { display: inline-flex; align-items: center; gap: 4px; background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+.pcheck.off { opacity: .45; cursor: not-allowed; }
