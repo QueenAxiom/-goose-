@@ -2,6 +2,7 @@
   "wake_words": ["hey jarvis", "jarvis", "hey axiom", "ok axiom"],
   "local_model_url": "http://127.0.0.1:8000/v1/chat/completions",
   "local_model": "olmoe-colibri",
+  "fallback_action": "local_model",
   "routes": [
     {"name": "claude", "keywords": ["ask claude"], "action": "claude"},
     {"name": "status", "keywords": ["status", "what's running"], "action": "reply", "target": "Voice router online."},

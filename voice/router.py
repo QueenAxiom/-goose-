@@ -20,6 +20,7 @@ LOCAL_MODEL_MAX_TOKENS = 60
 CLAUDE_TIMEOUT_SECONDS = 120
 MAX_REPLY_CHARS = 600
 VALID_ACTIONS = ("reply", "webhook", "local_model", "claude")
+FALLBACK_ACTIONS = ("local_model", "claude")  # what free-form speech goes to; never a webhook
 ALLOWED_HOSTS = ("localhost", "127.0.0.1")
 SECRET_HEADER = "X-Axiom-Secret"
 SECRET_ENV = "AXIOM_WEBHOOK_SECRET"
@@ -55,14 +56,14 @@ def extract_command(text: str, wake_words: tuple) -> "str | None":
     return None
 
 
-def route(command: str, routes: tuple) -> Route:
-    """First route whose keyword appears as a whole phrase in the command wins."""
+def route(command: str, routes: tuple, fallback_action: str = "local_model") -> Route:
+    """First route whose keyword appears as a whole phrase wins; anything else goes to the fallback."""
     if not command.strip():
         return Route(name="empty", action="reply", target="Yes?")
     for r in routes:
         if any(_phrase_re(k).search(command) for k in r.keywords):
             return r
-    return Route(name="fallback", action="local_model")
+    return Route(name="fallback", action=fallback_action)
 
 
 def sanitize_reply(text: str) -> str:
@@ -82,6 +83,8 @@ def load_config(path: Path = CONFIG_PATH) -> dict:
         raise ValueError("wake_words must not be empty")
     if not _is_local_url(raw["local_model_url"]):
         raise ValueError("local_model_url must point at localhost")
+    if raw.get("fallback_action", "local_model") not in FALLBACK_ACTIONS:
+        raise ValueError(f"fallback_action must be one of {FALLBACK_ACTIONS}")
     routes = tuple(
         Route(r["name"], tuple(r["keywords"]), r["action"], r.get("target", ""))
         for r in raw["routes"]
@@ -193,7 +196,7 @@ def handle_stream(text: str, config: dict):
     command = extract_command(text, config["wake_words"])
     if command is None:
         return
-    matched = route(command, config["routes"])
+    matched = route(command, config["routes"], config.get("fallback_action", "local_model"))
     if matched.action != "local_model":
         yield dispatch(matched, command, config)
         return
@@ -210,4 +213,4 @@ def handle(text: str, config: dict) -> "str | None":
     command = extract_command(text, config["wake_words"])
     if command is None:
         return None
-    return dispatch(route(command, config["routes"]), command, config)
+    return dispatch(route(command, config["routes"], config.get("fallback_action", "local_model")), command, config)

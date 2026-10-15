@@ -160,6 +160,34 @@ class StreamingTests(unittest.TestCase):
             out = list(handle_stream("jarvis hi", cfg))
         self.assertEqual(out, ["fallback failed."])
 
+class FallbackActionTests(unittest.TestCase):
+    def test_route_uses_configured_fallback_action(self):
+        r = route("tell me anything", ROUTES, fallback_action="claude")
+        self.assertEqual((r.name, r.action), ("fallback", "claude"))
+
+    def test_default_fallback_stays_local_model(self):
+        self.assertEqual(route("tell me anything", ROUTES).action, "local_model")
+
+    def test_handle_stream_routes_free_speech_to_claude_when_configured(self):
+        cfg = {**CFG, "wake_words": ("jarvis",), "routes": ROUTES, "fallback_action": "claude"}
+        done = subprocess.CompletedProcess([], 0, stdout="Sure thing.\n")
+        with mock.patch("router.subprocess.run", return_value=done):
+            self.assertEqual(list(handle_stream("jarvis what should I do today", cfg)), ["Sure thing."])
+
+    def _load(self, fallback):
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "c.json"
+            p.write_text(json.dumps({"wake_words": ["x"], "local_model_url": CFG["local_model_url"], "local_model": "m",
+                                     "fallback_action": fallback, "routes": []}), encoding="utf-8")
+            return load_config(p)
+
+    def test_load_config_accepts_claude_fallback(self):
+        self.assertEqual(self._load("claude")["fallback_action"], "claude")
+
+    def test_load_config_rejects_dangerous_fallback(self):
+        with self.assertRaises(ValueError):
+            self._load("webhook")
+
 
 if __name__ == "__main__":
     unittest.main()
