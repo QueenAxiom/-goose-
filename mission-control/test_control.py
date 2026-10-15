@@ -222,6 +222,77 @@ class CouncilTests(unittest.TestCase):
         app.council_answer({"id": q["id"], "answer": "Do it.", "source": "GPT"})
         self.assertEqual(app.store.questions()[0]["answer_source"], "GPT")
 
+class NextActionAppTests(unittest.TestCase):
+    def make_app(self, git=None):
+        import tempfile
+        from pathlib import Path
+        from store import Store
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        app = control.App(TOKEN, SITES, Store(Path(tmp.name)), mock.Mock(), FakePoster())
+        app.voice.running.return_value = False
+        return app
+
+    def patched(self):
+        return mock.patch.multiple(
+            "control.status",
+            check_all_sites=mock.Mock(return_value={"EverythingInternet.ca": {"live": {"up": True}, "staging": {"up": True}},
+                                                    "alangooding.ca": {"live": {"up": True}}}),
+            git_summary=mock.Mock(return_value={"uncommitted": 0, "unpushed": 0}),
+        )
+
+    def test_first_action_today_is_council_checkin(self):
+        with self.patched():
+            out = self.make_app().next_plan()
+        self.assertEqual(out["now"]["id"], "council-checkin")
+
+    def test_done_advances_to_next_action(self):
+        app = self.make_app()
+        with self.patched():
+            app.council_dismiss({})
+            self.assertEqual(app.next_plan()["now"]["id"], "pay-link")
+            app.next_done({"id": "pay-link"})
+            self.assertEqual(app.next_plan()["now"]["id"], "test-purchase")
+
+    def test_skip_snoozes_the_action(self):
+        app = self.make_app()
+        with self.patched():
+            app.next_skip({"id": "council-checkin"})
+            self.assertNotEqual(app.next_plan()["now"]["id"], "council-checkin")
+
+    def test_down_site_is_reported(self):
+        app = self.make_app()
+        down = {"EverythingInternet.ca": {"live": {"up": False}, "staging": {"up": True}}}
+        with mock.patch("control.status.check_all_sites", return_value=down),                 mock.patch("control.status.git_summary", return_value={"uncommitted": 0, "unpushed": 0}):
+            app.council_dismiss({})
+            self.assertEqual(app.next_plan()["now"]["id"], "site-down")
+
+    def test_doubt_creates_council_question_prefilled(self):
+        app = self.make_app()
+        with self.patched():
+            out = app.next_doubt({"id": "pay-link"})
+        self.assertIn("Stripe Payment Link", out["draft"])
+
+class RouteProgressTests(unittest.TestCase):
+    def test_route_progress_counts_delivered_stops(self):
+        import tempfile
+        from pathlib import Path
+        from store import Store
+        with tempfile.TemporaryDirectory() as tmp:
+            app = control.App(TOKEN, SITES, Store(Path(tmp)), mock.Mock(), FakePoster())
+            app.voice.running.return_value = False
+            ok_sites = {"EverythingInternet.ca": {"live": {"up": True}, "staging": {"up": True}}}
+            git = {"uncommitted": 0, "unpushed": 0}
+            with mock.patch("control.status.check_all_sites", return_value=ok_sites),                     mock.patch("control.status.git_summary", return_value=git):
+                first = app.next_plan()
+                self.assertEqual((first["stop_number"], first["delivered"]), (1, []))
+                total = first["total_stops"]
+                app.council_dismiss({})  # delivers the council check-in stop
+                second = app.next_plan()
+                self.assertEqual(second["stop_number"], 2)
+                self.assertEqual(second["delivered"][0]["title"], "Daily council check-in")
+                self.assertEqual(second["total_stops"], total)
+
 
 if __name__ == "__main__":
     unittest.main()

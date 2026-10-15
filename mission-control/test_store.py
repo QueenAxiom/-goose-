@@ -124,6 +124,31 @@ class StoreTests(unittest.TestCase):
         self.s.delete_question(q["id"])
         self.assertEqual(self.s.questions(), [])
 
+    def test_next_done_persists_and_validates_ids(self):
+        self.s.mark_next_done("pay-link")
+        self.assertEqual(self.s.next_done(), {"pay-link"})
+        with self.assertRaises(ValueError):
+            self.s.mark_next_done("not-a-real-action")
+
+    def test_snooze_hides_for_today_only(self):
+        self.s.snooze("council-checkin")
+        self.assertEqual(self.s.snoozed_today(), {"council-checkin"})
+        old = {"council-checkin": "2000-01-01"}
+        (Path(self._tmp.name) / "snoozed.json").write_text(__import__("json").dumps(old), encoding="utf-8")
+        self.assertEqual(self.s.snoozed_today(), set())
+
+    def test_route_snapshot_starts_the_day_and_appends_new_stops(self):
+        first = self.s.merge_route([("a", "Stop A"), ("b", "Stop B")])
+        self.assertEqual([x["key"] for x in first], ["a", "b"])
+        second = self.s.merge_route([("b", "Stop B"), ("c", "Stop C")])
+        self.assertEqual([x["key"] for x in second], ["a", "b", "c"])  # nothing dropped, c appended
+
+    def test_route_snapshot_resets_on_a_new_day(self):
+        self.s.merge_route([("a", "Stop A")])
+        stale = {"date": "2000-01-01", "stops": [{"key": "a", "title": "Stop A"}]}
+        (Path(self._tmp.name) / "route.json").write_text(__import__("json").dumps(stale), encoding="utf-8")
+        self.assertEqual([x["key"] for x in self.s.merge_route([("z", "Stop Z")])], ["z"])
+
 
 if __name__ == "__main__":
     unittest.main()

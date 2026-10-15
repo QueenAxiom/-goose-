@@ -7,6 +7,8 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+from next_action import ACTION_IDS
+
 log = logging.getLogger("mission-control.store")
 
 STATUSES = ("new", "contacted", "replied", "call", "won", "lost")
@@ -197,3 +199,36 @@ class Store:
     def dismiss_today(self) -> None:
         with self._lock:
             self._write("council_prompt.json", {"date": datetime.now(timezone.utc).date().isoformat()})
+
+    # ---- next-action bookkeeping ----
+    def next_done(self) -> set:
+        return set(self._read("next_done.json", []))
+
+    def mark_next_done(self, action_id: str) -> None:
+        if action_id not in ACTION_IDS:
+            raise ValueError("unknown action")
+        with self._lock:
+            self._write("next_done.json", sorted(self.next_done() | {action_id}))
+
+    def snooze(self, action_id: str) -> None:
+        if action_id not in ACTION_IDS:
+            raise ValueError("unknown action")
+        today = datetime.now(timezone.utc).date().isoformat()
+        with self._lock:
+            self._write("snoozed.json", {**self._read("snoozed.json", {}), action_id: today})
+
+    def snoozed_today(self) -> set:
+        today = datetime.now(timezone.utc).date().isoformat()
+        return {k for k, v in self._read("snoozed.json", {}).items() if v == today}
+
+    # ---- daily route ----
+    def merge_route(self, stops: list) -> list:
+        """Today's route snapshot: starts with the first plan of the day, new stops are appended, none dropped."""
+        today = datetime.now(timezone.utc).date().isoformat()
+        with self._lock:
+            saved = self._read("route.json", {})
+            current = saved.get("stops", []) if saved.get("date") == today else []
+            known = {s["key"] for s in current}
+            merged = [*current, *({"key": k, "title": t} for k, t in stops if k not in known)]
+            self._write("route.json", {"date": today, "stops": merged})
+        return merged

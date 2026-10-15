@@ -9,9 +9,11 @@ import os
 import secrets
 import subprocess
 import sys
+from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+import next_action
 import posting
 import status
 from store import COUNCIL_TOPICS, STATUSES, Store
@@ -186,6 +188,56 @@ class App:
         log.info("undid post %s", record["post_id"])
         return {"ok": True}
 
+    def _facts(self) -> dict:
+        now = datetime.now(timezone.utc)
+        sites_status = status.check_all_sites(self.sites)
+        down = [f"{name} ({view})" for name, views in sites_status.items() for view, r in views.items() if not r.get("up")]
+        git = status.git_summary(REPO)
+        questions = self.store.questions()
+        today = now.date().isoformat()
+        checkout = self.sites.get(CHECKOUT_SITE, {})
+        return {
+            "asked_today": self.store.asked_today(), "dismissed_today": self.store.dismissed_today(),
+            "open_questions": sum(q["status"] == "open" for q in questions),
+            "fb_configured": self.poster.configured("facebook"),
+            "leads": self.store.leads(),
+            "approved_templates": sum(a.get("approved", False) for a in self.store.approvals().values()),
+            "posts_today": sum(p["created"].startswith(today) and not p["deleted"] for p in self.store.posts()),
+            "sites_down": down,
+            "uncommitted": git.get("uncommitted", 0), "unpushed": git.get("unpushed", 0),
+            "manual_done": self.store.next_done(), "snoozed": self.store.snoozed_today(),
+            "staging_checkout": (checkout.get("staging") or checkout.get("live", "")).rstrip("/") + "/checkout/",
+            "now": now,
+        }
+
+    def next_plan(self) -> dict:
+        """Dispatcher view: the next stop, the rest of the route, and what has been delivered today."""
+        facts = self._facts()
+        everything = next_action.candidates(facts)
+        snapshot = self.store.merge_route([(a["key"], a["title"]) for a in everything if a["id"] != "idle"])
+        remaining = {a["key"] for a in everything}
+        snoozed = {a["key"] for a in everything if a["id"] in facts["snoozed"]}
+        delivered = [s for s in snapshot if s["key"] not in remaining]
+        skipped = [s for s in snapshot if s["key"] in snoozed]
+        return {**next_action.plan(facts), "delivered": delivered, "skipped": skipped,
+                "total_stops": len(snapshot), "stop_number": len(delivered) + len(skipped) + 1}
+
+    def next_done(self, body: dict) -> dict:
+        self.store.mark_next_done(str(body.get("id", "")))
+        return {"ok": True}
+
+    def next_skip(self, body: dict) -> dict:
+        self.store.snooze(str(body.get("id", "")))
+        return {"ok": True}
+
+    def next_doubt(self, body: dict) -> dict:
+        """Prefill a council question about a suggested step; the human decides whether to submit it."""
+        match = next((a for a in next_action.candidates(self._facts()) if a["id"] == str(body.get("id", ""))), None)
+        if match is None:
+            raise ValueError("that step isn't suggested right now")
+        return {"draft": f'Mission Control suggested my next step: "{match["title"]}" (reason given: {match["why"]}). '
+                         "Is this the right thing to do next, or should something else come first?"}
+
     def council_info(self) -> dict:
         questions = [{**q, "reviewer": COUNCIL_TOPICS.get(q["topic"], "/autoplan"), "package": build_council_package(q)}
                      for q in self.store.questions()]
@@ -319,7 +371,8 @@ def make_handler(app: App):
             if self.path == "/sites.json":
                 return self._json(200, app.sites)
             getters = {"/api/status": app.system_status, "/api/sales": app.sales, "/api/posts": app.posts_info,
-               "/api/council": app.council_info}
+               "/api/council": app.council_info,
+               "/api/next": app.next_plan}
             if self.path in getters:
                 if not self._guard():
                     return
@@ -344,6 +397,9 @@ def make_handler(app: App):
                 "/api/council/delete": app.council_delete,
                 "/api/council/dismiss": app.council_dismiss,
                 "/api/council/ecc": app.council_ecc,
+                "/api/next/done": app.next_done,
+                "/api/next/skip": app.next_skip,
+                "/api/next/doubt": app.next_doubt,
                 "/api/money": lambda b: app.store.set_money(b.get("mrr"), b.get("cash")) or {"ok": True},
                 "/api/approval": lambda b: app.store.set_approval(str(b.get("id", "")), b.get("approved") is True) or {"ok": True},
             }

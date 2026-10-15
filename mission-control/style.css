@@ -68,3 +68,23 @@ body.mode-voice button.badge.mode { color: var(--blue); border-color: var(--blue
 .toast.ok { border-color: var(--green); }
 
 .banner { display: flex; gap: 10px; align-items: center; padding: 8px 20px; background: #221a00; border-bottom: 1px solid var(--amber); color: var(--amber); font-size: 14px; }
+
+.next-card { max-width: 760px; margin: 40px auto 0; background: var(--panel-2); border: 1px solid var(--red); border-radius: 12px; padding: 32px; }
+.next-label { color: var(--red); letter-spacing: 3px; font-size: 12px; margin-bottom: 12px; }
+.next-title { font-size: 30px; font-weight: 600; line-height: 1.25; }
+.next-why { color: var(--muted); margin: 12px 0 24px; font-size: 15px; }
+button.go { font-size: 22px; padding: 16px 40px; border-radius: 8px; }
+.upnext { color: #bbb; padding: 3px 0; font-size: 14px; max-width: 760px; margin: 0 auto; }
+#nextRoot h2 { max-width: 760px; margin-left: auto; margin-right: auto; }
+
+.route-wrap { max-width: 760px; margin: 18px auto 0; }
+.route-head { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; }
+.bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--red); transition: width .3s; }
+.stop { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; color: #bbb; }
+.stop .mark { width: 22px; text-align: center; color: var(--muted); }
+.stop.delivered { color: var(--muted); text-decoration: line-through; }
+.stop.delivered .mark { color: var(--green); text-decoration: none; }
+.stop.skipped { color: var(--muted); }
+.stop.current { color: #fff; font-weight: 600; }
+.stop.current .mark { color: var(--red); }

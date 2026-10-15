@@ -3,10 +3,10 @@
 
 const TOKEN = window.MC_TOKEN;
 const STATUS_REFRESH_MS = 60000;
-const PANES = ["sites", "council", "posts", "sales", "voice", "system"];
+const PANES = ["next", "sites", "council", "posts", "sales", "voice", "system"];
 const $ = (id) => document.getElementById(id);
 
-const state = { sites: {}, names: [], current: 0, view: "staging", system: null, pane: "sites", mode: "text", undoSeconds: 300 };
+const state = { sites: {}, names: [], current: 0, view: "staging", system: null, pane: "next", mode: "text", undoSeconds: 300, councilDraft: "" };
 
 function el(tag, props = {}, ...children) {
   const node = document.createElement(tag);
@@ -43,6 +43,7 @@ function showPane(name) {
   state.pane = name;
   PANES.forEach((p) => $("pane-" + p).classList.toggle("active", p === name));
   document.querySelectorAll("#mainNav button").forEach((b) => b.classList.toggle("active", b.dataset.pane === name));
+  if (name === "next") loadNext();
   if (name === "council") loadCouncil();
   if (name === "posts") loadPosts();
   if (name === "sales") loadSales();
@@ -440,6 +441,7 @@ function renderCouncil(data) {
       loadCouncil();
     } catch (e) { toast(e.message, "err"); }
   };
+  if (state.councilDraft) { ta.value = state.councilDraft; state.councilDraft = ""; }
   onEnter(ta, ask);
   attachMic(ta, mic);
 
@@ -478,10 +480,62 @@ function renderCouncil(data) {
     ...(done.length ? done.map(questionCard) : [el("div", { class: "empty", textContent: "Nothing answered yet." })]));
 }
 
+// ---------- next click ----------
+async function loadNext() {
+  const root = $("nextRoot");
+  root.replaceChildren(el("div", { class: "empty", textContent: "Working out your next step…" }));
+  try { renderNext(await api("/api/next")); }
+  catch (e) { root.replaceChildren(el("div", { class: "empty", textContent: "Couldn't work out the next step: " + e.message })); }
+}
+
+function goTo(go) {
+  if (go.type === "url") window.open(go.target, "_blank", "noopener");
+  else showPane(go.target);
+}
+
+function renderNext(plan) {
+  const a = plan.now;
+  const complete = a.id === "idle";
+  const act = (path, extra) => api(path, { id: a.id }).then(loadNext).catch((e) => toast(e.message, extra || "err"));
+  const doubt = () => api("/api/next/doubt", { id: a.id })
+    .then((r) => { state.councilDraft = r.draft; showPane("council"); toast("Your question is filled in. Press Enter to send it to the council.", "ok"); })
+    .catch((e) => toast(e.message, "err"));
+
+  const done = plan.delivered.length + plan.skipped.length;
+  const pct = plan.total_stops ? Math.round((done / plan.total_stops) * 100) : 100;
+  const header = el("div", { class: "route-head" },
+    el("span", { textContent: complete ? "Route complete" : `Stop ${plan.stop_number} of ${plan.total_stops}` }),
+    el("span", { class: "empty", textContent: `${plan.delivered.length} delivered${plan.skipped.length ? " · " + plan.skipped.length + " rerouted" : ""}` }));
+  const bar = el("div", { class: "bar" }, el("div", { class: "bar-fill", style: `width:${pct}%` }));
+
+  const stopRow = (cls, mark, title) => el("div", { class: "stop " + cls }, el("span", { class: "mark", textContent: mark }), el("span", { textContent: title }));
+  const routeList = [
+    ...plan.delivered.map((s) => stopRow("delivered", "✓", s.title)),
+    ...plan.skipped.map((s) => stopRow("skipped", "↷", s.title)),
+    ...(complete ? [] : [stopRow("current", "▶", a.title)]),
+    ...plan.upcoming.map((u, i) => stopRow("upcoming", String(plan.stop_number + 1 + i), u.title)),
+  ];
+  const hidden = plan.route.length - 1 - plan.upcoming.length;
+  if (hidden > 0) routeList.push(el("div", { class: "stop upcoming" }, el("span", { class: "mark", textContent: "…" }), el("span", { textContent: `${hidden} more stop(s) on today's route` })));
+
+  $("nextRoot").replaceChildren(
+    el("div", { class: "route-wrap" }, header, bar),
+    el("div", { class: "next-card" },
+      el("div", { class: "next-label", textContent: complete ? "ALL DELIVERED" : "YOUR NEXT STOP" }),
+      el("div", { class: "next-title", textContent: a.title }),
+      el("div", { class: "next-why", textContent: a.why }),
+      el("button", { class: "btn primary go", textContent: a.go.type === "url" ? "GO →  (opens in a new tab)" : "GO →", onclick: () => goTo(a.go) }),
+      complete ? null : el("div", { class: "row", style: "margin-top:14px" },
+        a.manual ? el("button", { class: "btn", textContent: "✓ Delivered", onclick: () => act("/api/next/done") }) : null,
+        el("button", { class: "btn", textContent: "Skip (reroute)", onclick: () => act("/api/next/skip") }),
+        el("button", { class: "btn", textContent: "Doesn't seem right → call dispatch (ask the council)", onclick: doubt }))),
+    el("div", { class: "route-wrap" }, el("h2", { textContent: "Today's route" }), ...routeList));
+}
+
 // ---------- boot ----------
 buildNav();
 $("modeToggle").onclick = () => setMode(state.mode === "voice" ? "text" : "voice");
 try { setMode(localStorage.getItem("mc-mode") === "voice" ? "voice" : "text"); } catch (e) { setMode("text"); }
 checkCouncilBanner();
-fetch("/sites.json").then((r) => r.json()).then((data) => { initSites(data); showPane("sites"); loadSystem(); });
+fetch("/sites.json").then((r) => r.json()).then((data) => { initSites(data); showPane("next"); loadSystem(); });
 setInterval(() => { if (state.pane !== "system") loadSystem(); }, STATUS_REFRESH_MS);
