@@ -3,8 +3,9 @@
 
 const TOKEN = window.MC_TOKEN;
 const STATUS_REFRESH_MS = 60000;
-const PANES = ["next", "ecc", "axiom", "sites", "files", "council", "posts", "sales", "voice", "system"];
-const PANE_LABELS = { ecc: "ECC chat", axiom: "Axiom chat" };
+const CHAT_CHANNELS = ["ecc", "axiom", "gpt", "deepseek", "claude"];
+const PANES = ["next", "ecc", "axiom", "gpt", "deepseek", "claude", "sites", "files", "council", "posts", "sales", "voice", "system"];
+const PANE_LABELS = { ecc: "ECC chat", axiom: "Axiom chat", gpt: "GPT chat", deepseek: "DeepSeek chat", claude: "Claude chat" };
 const $ = (id) => document.getElementById(id);
 
 const state = { sites: {}, names: [], current: 0, view: "staging", system: null, pane: "next", mode: "text", undoSeconds: 300, councilDraft: "" };
@@ -45,7 +46,7 @@ function showPane(name) {
   PANES.forEach((p) => $("pane-" + p).classList.toggle("active", p === name));
   document.querySelectorAll("#mainNav button").forEach((b) => b.classList.toggle("active", b.dataset.pane === name));
   if (name === "next") loadNext();
-  if (name === "ecc" || name === "axiom") loadChat(name);
+  if (CHAT_CHANNELS.includes(name)) loadChat(name);
   if (name === "files") loadFiles();
   if (name === "council") loadCouncil();
   if (name === "posts") loadPosts();
@@ -555,13 +556,82 @@ function renderNext(plan) {
 }
 
 // ---------- talking avatar ----------
-const AVATAR_NAMES = { ecc: "ECC", axiom: "Axiom" };
+const AVATAR_NAMES = { ecc: "ECC", axiom: "Axiom", gpt: "GPT", deepseek: "DeepSeek", claude: "Claude" };
+const CHAT_HINTS = {
+  ecc: "Tell ECC what to build or change. It can edit files here and will list every file it touches.",
+  axiom: "Talk to Axiom. Axiom advises and decides with you; it never edits files.",
+};
+const outsideHint = (channel) => "Ask " + AVATAR_NAMES[channel] + " for an outside opinion. It advises only; it cannot edit files or act.";
+const RELAY_CHANNELS = ["gpt", "deepseek", "claude"];
 
+// Axiom is Sofia: her daytime private-mode portrait replaces the orb face; talking still glows and pulses via .orb.
 function makeAvatar(name) {
+  const face = name === "Axiom"
+    ? el("div", { class: "orb portrait", role: "img", ariaLabel: "Sofia, daytime private mode" })
+    : el("div", { class: "orb" }, el("div", { class: "eye left" }), el("div", { class: "eye right" }), el("div", { class: "mouth" }));
   const av = el("div", { class: "avatar", title: name + " is listening" },
-    el("div", { class: "orb" }, el("div", { class: "eye left" }), el("div", { class: "eye right" }), el("div", { class: "mouth" })),
+    face,
     el("div", { class: "avatar-name", textContent: name }));
   return av;
+}
+
+// Sofia's look: professional secretary during work hours, private anime otherwise. Clicking her cycles auto/private/professional.
+const LOOKS = {
+  private: { img: "/assets/sofia-day.webp", y: "0%", label: "PRIVATE" },
+  professional: { img: "/assets/sofia-pro.webp", y: "0%", label: "PROFESSIONAL" },
+  horned: { img: "/assets/sofia-horned.webp", y: "15%", label: "HORNED" },
+};
+// Typing or dictating this phrase in any chat switches her portrait to the horned look. Picture only; replies are unchanged.
+const HORNED_TRIGGER = /\byou animal\b/i;
+let hornedOn = false;
+const PRO_START_HOUR = 8, PRO_END_HOUR = 17;
+const MUSE_URL = "https://muse.ai/";
+const LOOK_CYCLE = ["auto", "private", "professional"];
+
+function autoLook(now = new Date()) {
+  const h = now.getHours();
+  return h >= PRO_START_HOUR && h < PRO_END_HOUR ? "professional" : "private";
+}
+
+function storedLookChoice() {
+  try { const v = localStorage.getItem("mc-look"); return LOOK_CYCLE.includes(v) ? v : "auto"; } catch (e) { return "auto"; }
+}
+
+function applySofiaLook() {
+  const choice = storedLookChoice();
+  const look = hornedOn ? "horned" : choice === "auto" ? autoLook() : choice;
+  const root = document.documentElement.style;
+  root.setProperty("--sofia-img", `url("${LOOKS[look].img}")`);
+  root.setProperty("--sofia-y", LOOKS[look].y);
+  const label = document.querySelector(".sofia-look");
+  if (label) label.textContent = LOOKS[look].label + (choice === "auto" || hornedOn ? "" : " (manual)");
+}
+
+function buildSofiaDock() {
+  const cycleLook = (ev) => {
+    ev.stopPropagation();
+    if (hornedOn) { hornedOn = false; applySofiaLook(); return; }
+    const next = LOOK_CYCLE[(LOOK_CYCLE.indexOf(storedLookChoice()) + 1) % LOOK_CYCLE.length];
+    try { localStorage.setItem("mc-look", next); } catch (e) { /* choice just won't persist */ }
+    applySofiaLook();
+  };
+  const dock = el("div", { class: "sofia-dock avatar", title: "Sofia. Click her picture to open Muse. Click the label to switch look.",
+    onclick: () => window.open(MUSE_URL, "_blank", "noopener") },
+    el("div", { class: "orb portrait", role: "img", ariaLabel: "Sofia, opens Muse" }),
+    el("div", { class: "sofia-look", title: "Switch look: auto, private, professional", onclick: cycleLook }));
+  document.body.appendChild(dock);
+  // She turns toward the cursor, so she always seems to be looking at whoever is operating the screen.
+  document.addEventListener("mousemove", (ev) => {
+    const r = dock.getBoundingClientRect();
+    const dx = Math.max(-1, Math.min(1, (ev.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2)));
+    const dy = Math.max(-1, Math.min(1, (ev.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2)));
+    dock.style.setProperty("--ry", (dx * 14).toFixed(1) + "deg");
+    dock.style.setProperty("--rx", (-dy * 8).toFixed(1) + "deg");
+    dock.style.setProperty("--px", (dx * 4).toFixed(1) + "%");
+    dock.style.setProperty("--py", (Math.max(0, dy) * 3).toFixed(1) + "%");
+  });
+  applySofiaLook();
+  setInterval(applySofiaLook, 60000);
 }
 
 function setTalking(on) {
@@ -614,11 +684,12 @@ function bubble(role, text, files) {
 async function loadChat(channel) {
   const list = $("chatList-" + channel);
   try {
-    const { messages } = await api("/api/chat/history", { channel });
+    const { messages, mode, url } = await api("/api/chat/history", { channel });
+    const pane = $("pane-" + channel);
+    pane.dataset.mode = mode || "api";
+    if (url) pane.dataset.url = url;
     list.replaceChildren(...messages.map((m) => bubble(m.role, m.text)),
-      ...(messages.length ? [] : [el("div", { class: "empty", textContent: channel === "ecc"
-        ? "Tell ECC what to build or change. It can edit files here and will list every file it touches."
-        : "Talk to Axiom. Axiom advises and decides with you; it never edits files." })]));
+      ...(messages.length ? [] : [el("div", { class: "empty", textContent: CHAT_HINTS[channel] || outsideHint(channel) })]));
     list.scrollTop = list.scrollHeight;
   } catch (e) { list.replaceChildren(el("div", { class: "empty", textContent: "Chat unavailable: " + e.message })); }
 }
@@ -631,6 +702,7 @@ function buildChatPane(channel) {
   const submit = async () => {
     const message = ta.value.trim();
     if (!message || send.disabled) return;
+    if (HORNED_TRIGGER.test(message)) { hornedOn = true; applySofiaLook(); }
     send.disabled = true;
     list.querySelector(".empty")?.remove();
     list.appendChild(bubble("user", message));
@@ -652,12 +724,44 @@ function buildChatPane(channel) {
   attachMic(ta, mic);
   const clear = el("button", { class: "btn small", textContent: "Clear chat",
     onclick: () => confirm("Clear this chat on screen? (The NotebookLM log keeps it.)") && api("/api/chat/clear", { channel }).then(() => loadChat(channel)) });
-  $("pane-" + channel).replaceChildren(
+  const apiRow = el("div", { class: "row chat-input api-row" }, ta, mic, send);
+  const relayRow = RELAY_CHANNELS.includes(channel) ? buildRelayRow(channel, ta, list) : null;
+  const pane = $("pane-" + channel);
+  pane.dataset.mode = "api";
+  pane.replaceChildren(
     el("div", { class: "chat-wrap" },
       el("div", { class: "chat-head" }, makeAvatar(AVATAR_NAMES[channel]), clear),
       el("div", { class: "empty", textContent: "Each reply takes roughly 10 seconds, or up to a minute when ECC is editing files. It does not speed up after the first message." }),
-      list,
-      el("div", { class: "row chat-input" }, ta, mic, send)));
+      list, apiRow, ...(relayRow ? [relayRow] : [])));
+}
+
+// Free paste relay: copy a ready prompt, answer on the model's own website, paste the reply back.
+function buildRelayRow(channel, ta, list) {
+  const name = AVATAR_NAMES[channel];
+  const reply = el("textarea", { placeholder: "Paste " + name + "'s reply here, then Save reply.", rows: 3, maxLength: 16000 });
+  const copy = el("button", { class: "btn primary", textContent: "Copy prompt and open " + name });
+  const save = el("button", { class: "btn", textContent: "Save reply" });
+  copy.onclick = async () => {
+    const message = ta.value.trim();
+    if (!message) { toast("Type your message first.", "err"); return; }
+    try {
+      const { prompt } = await api("/api/chat/prompt", { channel, message });
+      copyText(prompt, "Prompt copied. Paste it into " + name + ", then paste its reply below.");
+      window.open($("pane-" + channel).dataset.url, "_blank", "noopener");
+    } catch (e) { toast(e.message, "err"); }
+  };
+  save.onclick = async () => {
+    const message = ta.value.trim(), text = reply.value.trim();
+    if (!message || !text) { toast("Need your message above and the pasted reply.", "err"); return; }
+    try {
+      await api("/api/chat/record", { channel, message, reply: text });
+      ta.value = ""; reply.value = "";
+      loadChat(channel);
+    } catch (e) { toast(e.message, "err"); }
+  };
+  return el("div", { class: "chat-input relay-row" },
+    el("div", { class: "empty", textContent: "Free mode: no API key. Type your message in the box above, copy the prompt, answer it on " + name + "'s site, paste the reply here." }),
+    el("div", { class: "row" }, copy), el("div", { class: "row" }, reply, save));
 }
 
 // ---------- files tab ----------
@@ -692,8 +796,8 @@ async function loadLinks() {
 
 // ---------- boot ----------
 buildNav();
-buildChatPane("ecc");
-buildChatPane("axiom");
+CHAT_CHANNELS.forEach(buildChatPane);
+buildSofiaDock();
 loadLinks();
 $("modeToggle").onclick = () => setMode(state.mode === "voice" ? "text" : "voice");
 try { setMode(localStorage.getItem("mc-mode") === "voice" ? "voice" : "text"); } catch (e) { setMode("text"); }

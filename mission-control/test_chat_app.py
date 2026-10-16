@@ -100,6 +100,65 @@ class ChatAppTests(unittest.TestCase):
         self.assertTrue(links["links"]["GitHub"].startswith("https://github.com/"))
         self.assertIn("n8n", links["links"]["n8n"])
 
+    def test_links_include_email_and_godaddy(self):
+        links = self.make_app().links_info()["links"]
+        self.assertTrue(links["Email"].startswith("https://"))
+        self.assertIn("godaddy.com", links["GoDaddy"])
+        self.assertEqual(links["Grok"], "https://grok.com/")
+
+    def test_model_channels_use_providers_not_claude_cli(self):
+        app = self.make_app()
+        with mock.patch("control.providers.ask", return_value=(True, "GPT says hi")) as ask, \
+                mock.patch("control.run_claude") as cli:
+            out = app.chat({"channel": "gpt", "message": "hello"})
+        self.assertEqual(out, {"reply": "GPT says hi", "files": []})
+        cli.assert_not_called()
+        self.assertEqual(ask.call_args.args[0], "gpt")
+        self.assertEqual([m["role"] for m in app.store.chat_history("gpt")], ["user", "assistant"])
+
+    def test_history_reports_relay_mode_without_key_and_api_mode_with_key(self):
+        app = self.make_app()
+        with mock.patch("control.posting.load_env", return_value={}):
+            out = app.chat_history({"channel": "gpt"})
+        self.assertEqual(out["mode"], "relay")
+        self.assertTrue(out["url"].startswith("https://"))
+        with mock.patch("control.posting.load_env", return_value={"OPENAI_API_KEY": "k"}):
+            self.assertEqual(app.chat_history({"channel": "gpt"})["mode"], "api")
+        self.assertNotIn("mode", app.chat_history({"channel": "ecc"}))
+
+    def test_relay_prompt_includes_history_and_ends_with_the_message(self):
+        app = self.make_app()
+        app.store.chat_append("claude", "user", "earlier")
+        app.store.chat_append("claude", "assistant", "answer")
+        prompt = app.chat_prompt({"channel": "claude", "message": "new question"})["prompt"]
+        self.assertIn("Alan: earlier", prompt)
+        self.assertTrue(prompt.endswith("Alan: new question"))
+
+    def test_relay_record_saves_both_turns_and_logs_them(self):
+        with tempfile.TemporaryDirectory() as conv:
+            app = self.make_app(conv_dir=Path(conv))
+            app.chat_record({"channel": "deepseek", "message": "q", "reply": "pasted answer"})
+            self.assertEqual([m["text"] for m in app.store.chat_history("deepseek")], ["q", "pasted answer"])
+            [f] = list(Path(conv).glob("mission-control-chats-*.md"))
+            self.assertIn("**DeepSeek:** pasted answer", f.read_text(encoding="utf-8"))
+
+    def test_relay_only_for_model_channels_and_needs_both_texts(self):
+        app = self.make_app()
+        for call, body in ((app.chat_prompt, {"channel": "ecc", "message": "x"}),
+                           (app.chat_record, {"channel": "axiom", "message": "x", "reply": "y"}),
+                           (app.chat_record, {"channel": "gpt", "message": "x", "reply": "  "}),
+                           (app.chat_record, {"channel": "gpt", "message": "", "reply": "y"}),
+                           (app.chat_record, {"channel": "gpt", "message": "x", "reply": "y" * (control.MAX_RELAY_REPLY_CHARS + 1)})):
+            with self.subTest(body=body), self.assertRaises(ValueError):
+                call(body)
+
+    def test_unconfigured_model_is_a_value_error_and_keeps_history_clean(self):
+        app = self.make_app()
+        with mock.patch("control.posting.load_env", return_value={}):
+            with self.assertRaises(ValueError):
+                app.chat({"channel": "claude", "message": "hello"})
+        self.assertEqual(app.store.chat_history("claude"), [])
+
 
 class RunClaudeFlagsTests(unittest.TestCase):
     def test_default_keeps_accept_edits(self):

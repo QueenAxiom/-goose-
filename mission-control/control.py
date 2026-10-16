@@ -18,6 +18,7 @@ import convlog
 import files
 import next_action
 import posting
+import providers
 import status
 from store import COUNCIL_TOPICS, STATUSES, Store
 from voice_ctl import VoiceProcess
@@ -29,7 +30,7 @@ REPO = HERE.parent
 HOST = "127.0.0.1"
 PORT = 8765
 MAX_PROMPT_CHARS = 2000
-MAX_BODY_BYTES = 16 * 1024
+MAX_BODY_BYTES = 80 * 1024
 CLAUDE_TIMEOUT_SECONDS = 300
 TOKEN_PLACEHOLDER = "__MC_TOKEN__"
 TOKEN_HEADER = "X-MC-Token"
@@ -39,11 +40,17 @@ UNDO_WINDOW_SECONDS = 300
 DUPLICATE_WINDOW_SECONDS = 60
 MAX_SAY_CHARS = 500
 MAX_CHAT_CHARS = 4000
+MAX_RELAY_REPLY_CHARS = 16000
 CONVERSATIONS_DIR = Path(r"C:\Axiom Enterprises\conversations")
 N8N_URL = "https://goldengoose.app.n8n.cloud"
+EMAIL_URL = "https://mail.google.com/"
+GODADDY_URL = "https://www.godaddy.com/"
+GROK_URL = "https://grok.com/"
 CHECKOUT_SITE = "EverythingInternet.ca"
 DRAFTS_DOC = REPO / "docs" / "smb-outreach-drafts.md"
-STATIC_FILES = {"/app.js": "application/javascript; charset=utf-8", "/style.css": "text/css; charset=utf-8"}
+STATIC_FILES = {"/app.js": "application/javascript; charset=utf-8", "/style.css": "text/css; charset=utf-8",
+                "/assets/sofia-day.webp": "image/webp", "/assets/sofia-pro.webp": "image/webp",
+                "/assets/sofia-horned.webp": "image/webp"}
 
 
 def load_sites(path: Path = HERE / "sites.json") -> dict:
@@ -171,7 +178,39 @@ class App:
         channel = str(body.get("channel", ""))
         if channel not in chat.CHANNELS:
             raise ValueError("unknown channel")
-        return {"messages": self.store.chat_history(channel)}
+        out = {"messages": self.store.chat_history(channel)}
+        if channel in chat.MODEL_CHANNELS:
+            api = providers.configured(channel, posting.load_env())
+            out.update(mode="api" if api else "relay", url=providers.RELAY_URLS[channel])
+        return out
+
+    def _relay_channel(self, body: dict) -> str:
+        channel = str(body.get("channel", ""))
+        if channel not in chat.MODEL_CHANNELS:
+            raise ValueError("paste relay is only for GPT, DeepSeek and Claude")
+        return channel
+
+    @staticmethod
+    def _relay_text(value, limit: int, what: str) -> str:
+        if not isinstance(value, str) or not value.strip() or len(value) > limit:
+            raise ValueError(f"{what} must be 1-{limit} characters")
+        return value.strip()
+
+    def chat_prompt(self, body: dict) -> dict:
+        """Prompt to paste into the model's own website (free paste relay)."""
+        channel = self._relay_channel(body)
+        message = self._relay_text(body.get("message"), MAX_CHAT_CHARS, "message")
+        return {"prompt": chat.build_chat_prompt(channel, self.store.chat_history(channel), message, chat.load_persona())}
+
+    def chat_record(self, body: dict) -> dict:
+        """Save Alan's message and the reply he pasted back from the model's website."""
+        channel = self._relay_channel(body)
+        message = self._relay_text(body.get("message"), MAX_CHAT_CHARS, "message")
+        reply = self._relay_text(body.get("reply"), MAX_RELAY_REPLY_CHARS, "reply")
+        for role, text in (("user", message), ("assistant", reply)):
+            self.store.chat_append(channel, role, text)
+            convlog.log_turn(self.conv_dir, channel, role, text)
+        return {"ok": True}
 
     def chat_clear(self, body: dict) -> dict:
         channel = str(body.get("channel", ""))
@@ -191,7 +230,10 @@ class App:
         is_ecc = channel == "ecc"
         prompt = chat.build_chat_prompt(channel, self.store.chat_history(channel), message, chat.load_persona())
         before = files.snapshot(REPO) if is_ecc else {}
-        ok, reply = run_claude(prompt, edits=is_ecc, tools=is_ecc)
+        if channel in chat.MODEL_CHANNELS:
+            ok, reply = providers.ask(channel, prompt, posting.load_env())
+        else:
+            ok, reply = run_claude(prompt, edits=is_ecc, tools=is_ecc)
         if not ok:
             raise ValueError(reply)
         changed = files.changed_since(REPO, before) if is_ecc else []
@@ -210,7 +252,7 @@ class App:
         remote = subprocess.run(["git", "remote", "get-url", "origin"], cwd=REPO, capture_output=True,
                                 text=True, encoding="utf-8").stdout.strip()
         github = remote[:-4] if remote.endswith(".git") else remote
-        return {"links": {"GitHub": github, "n8n": N8N_URL}}
+        return {"links": {"GitHub": github, "n8n": N8N_URL, "Email": EMAIL_URL, "GoDaddy": GODADDY_URL, "Grok": GROK_URL}}
 
     def posts_info(self) -> dict:
         platforms = [{**p, "configured": self.poster.configured(p["id"])} for p in posting.platform_info()]
@@ -479,6 +521,8 @@ def make_handler(app: App):
                 "/api/council/ecc": app.council_ecc,
                 "/api/chat": app.chat,
                 "/api/chat/history": app.chat_history,
+                "/api/chat/prompt": app.chat_prompt,
+                "/api/chat/record": app.chat_record,
                 "/api/chat/clear": app.chat_clear,
                 "/api/files/read": app.file_read,
                 "/api/next/done": app.next_done,

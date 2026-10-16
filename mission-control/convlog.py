@@ -4,14 +4,16 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import chat
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
 from export_conversations import redact  # noqa: E402
 
 log = logging.getLogger("mission-control.convlog")
 
-LABELS = {("ecc", "user"): "Alan", ("ecc", "assistant"): "ECC",
-          ("axiom", "user"): "Alan", ("axiom", "assistant"): "Axiom"}
-CHANNEL_TITLES = {"ecc": "Chat with ECC", "axiom": "Chat with Axiom"}
+LABELS = {(c, role): ("Alan" if role == "user" else name)
+          for c, name in chat.NAMES.items() for role in ("user", "assistant")}
+CHANNEL_TITLES = {c: f"Chat with {name}" for c, name in chat.NAMES.items()}
 
 
 def log_turn(directory: "Path | None", channel: str, role: str, text: str) -> None:

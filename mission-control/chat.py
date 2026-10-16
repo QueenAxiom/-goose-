@@ -1,7 +1,9 @@
 """Chat helpers for Mission Control: prompt building and the editable Axiom persona."""
 from pathlib import Path
 
-CHANNELS = ("ecc", "axiom")
+MODEL_CHANNELS = ("gpt", "deepseek", "claude")
+CHANNELS = ("ecc", "axiom", *MODEL_CHANNELS)
+NAMES = {"ecc": "ECC", "axiom": "Axiom", "gpt": "GPT", "deepseek": "DeepSeek", "claude": "Claude"}
 HISTORY_TURNS = 12
 MAX_TURN_CHARS = 1500
 PERSONA_FILE = Path(__file__).with_name("axiom-persona.md")
@@ -18,6 +20,12 @@ ECC_PREAMBLE = (
     "You are ECC, the execution and advisory layer for Alan at Axiom Enterprises (repo in the current directory). "
     "Alan and Axiom make the decisions; you carry out Alan's instructions and say plainly what you did, including "
     "which files you created or edited. Be direct and concise. Production changes need explicit confirmation."
+)
+
+MODEL_PREAMBLE = (
+    "You are {name}, an outside advisor Alan consults while running Axiom Enterprises. You are not Axiom or ECC and you "
+    "cannot edit files or act. Alan and Axiom make the decisions. Be direct and concise, say plainly when you are unsure, "
+    "and never claim to have taken an action."
 )
 
 
@@ -37,8 +45,8 @@ def build_chat_prompt(channel: str, history: list, message: str, persona: str) -
     """Prompt for one chat turn: who the assistant is, recent turns, then Alan's new message last."""
     if channel not in CHANNELS:
         raise ValueError("unknown channel")
-    assistant = "ECC" if channel == "ecc" else "Axiom"
-    intro = ECC_PREAMBLE if channel == "ecc" else persona
+    assistant = NAMES[channel]
+    intro = {"ecc": ECC_PREAMBLE, "axiom": persona}.get(channel) or MODEL_PREAMBLE.format(name=assistant)
     turns = [f"{'Alan' if m['role'] == 'user' else assistant}: {_clip(m['text'])}" for m in history[-HISTORY_TURNS:]]
     transcript = "\n".join(turns)
     context = f"Conversation so far:\n{transcript}\n\n" if transcript else ""

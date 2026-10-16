@@ -101,6 +101,8 @@ button.go { font-size: 22px; padding: 16px 40px; border-radius: 8px; }
 .chat-list { flex: 1; overflow: auto; display: flex; flex-direction: column; gap: 10px; padding: 8px 0; }
 .chat-input { padding: 10px 0 14px; }
 .chat-input textarea { flex: 1; resize: none; }
+.pane[data-mode="relay"] .api-row .mic, .pane[data-mode="relay"] .api-row .primary { display: none; }
+.pane:not([data-mode="relay"]) .relay-row { display: none; }
 .bubble { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.45; white-space: pre-wrap; }
 .bubble.mine { align-self: flex-end; background: #2a1010; border: 1px solid var(--red); }
 .bubble.theirs { align-self: flex-start; background: var(--panel-2); border: 1px solid var(--line); }
@@ -118,6 +120,18 @@ button.go { font-size: 22px; padding: 16px 40px; border-radius: 8px; }
 .avatar-name { font-size: 13px; color: var(--muted); letter-spacing: 1px; }
 .orb { position: relative; width: 54px; height: 54px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ff6b6b, var(--red) 55%, #500); box-shadow: 0 0 0 2px #300; transition: transform .1s; }
 .orb.pulse { transform: scale(1.08); }
+:root { --sofia-img: url("/assets/sofia-day.webp"); --sofia-y: 0%; }
+.orb.portrait { width: 72px; height: 72px; background: #1a1a1c var(--sofia-img) 50% var(--sofia-y) / 400% auto no-repeat; box-shadow: 0 0 0 2px #300; }
+.sofia-dock { position: fixed; left: 16px; bottom: 16px; z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+.sofia-dock { --rx: 0deg; --ry: 0deg; --px: 0%; --py: 0%; transform: perspective(500px) rotateY(var(--ry)) rotateX(var(--rx)); transition: transform .25s ease-out; }
+.sofia-dock .orb.portrait { width: 104px; height: 104px; background-position: calc(50% + var(--px)) calc(var(--sofia-y) + var(--py)); animation: breathe 4s ease-in-out infinite; }
+.avatar.talking .orb.portrait { animation: nod .32s ease-in-out infinite alternate; }
+@keyframes breathe { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.06); } }
+@keyframes nod { from { transform: translateY(0) scale(1); } to { transform: translateY(2px) scale(1.035); } }
+@media (prefers-reduced-motion: reduce) { .sofia-dock, .orb.portrait { animation: none !important; transition: none; } }
+.sofia-dock .sofia-look { font-size: 11px; color: var(--muted); letter-spacing: 1px; padding: 2px 8px; border-radius: 10px; }
+.sofia-dock .sofia-look:hover { background: #222; color: #fff; }
+@media (max-width: 1250px) { .sofia-dock { display: none; } }
 .eye { position: absolute; top: 20px; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
 .eye.left { left: 16px; } .eye.right { right: 16px; }
 .mouth { position: absolute; left: 50%; bottom: 13px; width: 16px; height: 3px; border-radius: 3px; background: #fff; transform: translateX(-50%); }
