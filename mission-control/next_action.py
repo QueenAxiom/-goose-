@@ -36,7 +36,7 @@ def candidates(f: dict) -> list:
 
     if not f["asked_today"] and not f["dismissed_today"]:
         out.append(_action("council-checkin", "Daily council check-in",
-                           "Your standing first step each day: does Axiom or you have a question for the council?",
+                           "Your standing first step each day: do you or Axiom have a question for the council?",
                            _pane("council")))
     if f["sites_down"]:
         out.append(_action("site-down", "Look at the down site: " + ", ".join(f["sites_down"]),

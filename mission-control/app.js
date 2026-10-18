@@ -439,7 +439,7 @@ async function checkCouncilBanner() {
     const banner = $("councilBanner");
     if (data.asked_today || data.dismissed_today) { banner.style.display = "none"; return; }
     banner.replaceChildren(
-      el("span", { textContent: "Does Axiom or you have a question for the council today?" }),
+      el("span", { textContent: "Do you or Axiom have a question for the council today?" }),
       el("button", { class: "btn primary", textContent: "Ask now", onclick: () => { banner.style.display = "none"; showPane("council"); } }),
       el("button", { class: "btn", textContent: "Not today", onclick: () => api("/api/council/dismiss", {}).then(() => { banner.style.display = "none"; }) }));
     banner.style.display = "flex";
