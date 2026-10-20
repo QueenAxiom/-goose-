@@ -9,6 +9,7 @@ import os
 import secrets
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -16,10 +17,12 @@ from pathlib import Path
 import chat
 import convlog
 import files
+import news
 import next_action
 import posting
 import providers
 import status
+import weather
 from store import COUNCIL_TOPICS, STATUSES, Store
 from voice_ctl import VoiceProcess
 
@@ -254,6 +257,15 @@ class App:
         github = remote[:-4] if remote.endswith(".git") else remote
         return {"links": {"GitHub": github, "n8n": N8N_URL, "Email": EMAIL_URL, "GoDaddy": GODADDY_URL, "Grok": GROK_URL}}
 
+    def news_info(self) -> dict:
+        return {"items": news.fetch_headlines("reuters")}
+
+    def weather_info(self) -> dict:
+        return {"cities": weather.fetch_all()}
+
+    def news_ap_info(self) -> dict:
+        return {"items": news.fetch_headlines("ap")}
+
     def posts_info(self) -> dict:
         platforms = [{**p, "configured": self.poster.configured(p["id"])} for p in posting.platform_info()]
         return {"platforms": platforms, "posts": self.store.posts()[:POST_HISTORY_LIMIT], "undo_seconds": UNDO_WINDOW_SECONDS}
@@ -403,9 +415,12 @@ class App:
 
     def system_status(self) -> dict:
         checkout = self.sites.get(CHECKOUT_SITE, {})
+        with ThreadPoolExecutor(max_workers=2) as pool:  # site and Stripe probes are independent, so overlap them
+            sites_job = pool.submit(status.check_all_sites, self.sites)
+            stripe_job = pool.submit(status.stripe_modes, checkout)
         return {
-            "sites": status.check_all_sites(self.sites),
-            "stripe": {view: status.stripe_mode_for(url) for view, url in checkout.items() if url},
+            "sites": sites_job.result(),
+            "stripe": stripe_job.result(),
             "git": status.git_summary(REPO),
             "backup": status.backup_summary(REPO),
             "voice": {"running": self.voice.running()},
@@ -494,7 +509,8 @@ def make_handler(app: App):
             getters = {"/api/status": app.system_status, "/api/sales": app.sales, "/api/posts": app.posts_info,
                "/api/council": app.council_info,
                "/api/next": app.next_plan,
-               "/api/files": app.files_info, "/api/links": app.links_info}
+               "/api/files": app.files_info, "/api/links": app.links_info, "/api/news": app.news_info,
+               "/api/news-ap": app.news_ap_info, "/api/weather": app.weather_info}
             if self.path in getters:
                 if not self._guard():
                     return

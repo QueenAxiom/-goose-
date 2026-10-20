@@ -1,23 +1,27 @@
 """Read-only status probes for Mission Control: sites, Stripe mode, git, backups, templates."""
 import logging
 import re
+import ssl
 import subprocess
 import time
 import urllib.error
 import urllib.request
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait
 from pathlib import Path
 
 log = logging.getLogger("mission-control.status")
 
 FETCH_TIMEOUT_SECONDS = 10
+SITE_CHECK_ATTEMPTS = 2
 MAX_FETCH_BYTES = 2_000_000
 STRIPE_CACHE_SECONDS = 60
+STRIPE_WAIT_SECONDS = 4  # slow checkout pages must not hold up the whole status response
 STRIPE_KEY_RE = re.compile(r"pk_(test|live)_[A-Za-z0-9]{8,}")
 TEMPLATE_HEAD_RE = re.compile(r"^## (Email (\d+)[^\n]*)$", re.MULTILINE)
 USER_AGENT = "AxiomMissionControl/1.0"
 
 _stripe_cache: dict = {}
+_stripe_pool = ThreadPoolExecutor(max_workers=4)
 
 
 def default_fetch(url: str) -> "tuple[int, dict, str]":
@@ -48,13 +52,24 @@ def frame_allowed(headers: dict) -> bool:
     return "frame-ancestors" not in csp or "frame-ancestors *" in csp
 
 
+def failure_reason(exc: Exception) -> str:
+    """Short label for why a probe failed; a rejected cert chain usually means a network proxy/firewall."""
+    cause = getattr(exc, "reason", exc)
+    if isinstance(cause, ssl.SSLCertVerificationError):
+        return "cert not trusted (network firewall?)"
+    return "unreachable"
+
+
 def check_site(url: str, fetch=default_fetch) -> dict:
     started = time.perf_counter()
-    try:
-        code, headers, _ = fetch(url)
-    except (OSError, ValueError):
-        log.warning("site check failed for %s", url)
-        return {"up": False, "status": None, "ms": None, "frame_ok": True}
+    for attempt in range(SITE_CHECK_ATTEMPTS):  # one slow probe under load must not flip a site to "down"
+        try:
+            code, headers, _ = fetch(url)
+            break
+        except (OSError, ValueError) as exc:
+            if attempt == SITE_CHECK_ATTEMPTS - 1:
+                log.warning("site check failed for %s", url)
+                return {"up": False, "status": None, "ms": None, "frame_ok": True, "reason": failure_reason(exc)}
     return {
         "up": code < 500,
         "status": code,
@@ -75,6 +90,17 @@ def stripe_mode_for(base_url: str, fetch=default_fetch, now=time.monotonic) -> s
         mode = "unknown"
     _stripe_cache[base_url] = (now(), mode)
     return mode
+
+
+def stripe_modes(urls: dict, fetch=default_fetch, wait_seconds: float = STRIPE_WAIT_SECONDS) -> dict:
+    """Stripe mode per view, probed in parallel. Slow probes keep running and fill the cache for the next poll."""
+    futures = {view: _stripe_pool.submit(stripe_mode_for, url, fetch) for view, url in urls.items() if url}
+    wait(futures.values(), timeout=wait_seconds)
+    out = {}
+    for view, fut in futures.items():
+        cached = _stripe_cache.get(urls[view])
+        out[view] = fut.result() if fut.done() else (cached[1] if cached else "unknown")
+    return out
 
 
 def check_all_sites(sites: dict, fetch=default_fetch) -> dict:

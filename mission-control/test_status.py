@@ -47,6 +47,37 @@ class CheckSiteTests(unittest.TestCase):
         self.assertFalse(r["up"])
         self.assertNotIn("secret", str(r))
 
+    def test_one_transient_failure_is_retried(self):
+        fetch = mock.Mock(side_effect=[TimeoutError("slow"), (200, {}, "")])
+        r = status.check_site("https://a.example", fetch=fetch)
+        self.assertTrue(r["up"])
+        self.assertEqual(fetch.call_count, 2)
+
+    def test_untrusted_cert_is_labelled(self):
+        import ssl, urllib.error
+        err = urllib.error.URLError(ssl.SSLCertVerificationError("unable to get local issuer certificate"))
+        r = status.check_site("https://a.example", fetch=mock.Mock(side_effect=err))
+        self.assertFalse(r["up"])
+        self.assertIn("cert not trusted", r["reason"])
+
+
+class StripeModesTests(unittest.TestCase):
+    def test_slow_probe_falls_back_to_unknown_without_blocking(self):
+        import threading
+        gate = threading.Event()
+        def slow(url):
+            gate.wait(5)
+            return 200, {}, "pk_live_ABCdef456"
+        status._stripe_cache.clear()
+        out = status.stripe_modes({"live": "https://slow.example"}, fetch=slow, wait_seconds=0.1)
+        gate.set()
+        self.assertEqual(out, {"live": "unknown"})
+
+    def test_fast_probes_return_mode(self):
+        status._stripe_cache.clear()
+        out = status.stripe_modes({"live": "https://fast.example"}, fetch=lambda u: (200, {}, "pk_test_AbC123xyz"), wait_seconds=2)
+        self.assertEqual(out, {"live": "test"})
+
 
 class ParseTemplatesTests(unittest.TestCase):
     def test_splits_email_sections(self):

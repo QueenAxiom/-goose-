@@ -138,3 +138,8 @@ button.go { font-size: 22px; padding: 16px 40px; border-radius: 8px; }
 .avatar.talking .orb { box-shadow: 0 0 0 2px #300, 0 0 18px 6px rgba(204, 0, 0, .55); }
 .avatar.talking .mouth { animation: mouth .22s infinite alternate ease-in-out; }
 @keyframes mouth { from { height: 3px; width: 16px; } to { height: 12px; width: 12px; border-radius: 50%; } }
+.news-row { display: flex; gap: 12px; padding: 5px 0; font-size: 13px; border-bottom: 1px solid var(--line); }
+.wx-day { display: flex; gap: 12px; padding: 5px 0; font-size: 13px; border-bottom: 1px solid var(--line); }
+.wx-day .wx-date { flex: 0 0 90px; color: var(--muted); }
+.wx-day .wx-sum { flex: 1; }
+.news-time { flex: 0 0 120px; color: var(--muted); font-size: 12px; }

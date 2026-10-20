@@ -4,8 +4,8 @@
 const TOKEN = window.MC_TOKEN;
 const STATUS_REFRESH_MS = 60000;
 const CHAT_CHANNELS = ["ecc", "axiom", "gpt", "deepseek", "claude"];
-const PANES = ["next", "ecc", "axiom", "gpt", "deepseek", "claude", "sites", "files", "council", "posts", "sales", "voice", "system"];
-const PANE_LABELS = { ecc: "ECC chat", axiom: "Axiom chat", gpt: "GPT chat", deepseek: "DeepSeek chat", claude: "Claude chat" };
+const PANES = ["next", "ecc", "axiom", "gpt", "deepseek", "claude", "sites", "files", "council", "posts", "sales", "voice", "weather", "reuters", "ap", "system"];
+const PANE_LABELS = { ecc: "ECC chat", axiom: "Axiom chat", gpt: "GPT chat", deepseek: "DeepSeek chat", claude: "Claude chat", weather: "Weather", reuters: "Reuters News", ap: "AP News" };
 const $ = (id) => document.getElementById(id);
 
 const state = { sites: {}, names: [], current: 0, view: "staging", system: null, pane: "next", mode: "text", undoSeconds: 300, councilDraft: "" };
@@ -52,6 +52,9 @@ function showPane(name) {
   if (name === "posts") loadPosts();
   if (name === "sales") loadSales();
   if (name === "voice") renderVoice();
+  if (name === "weather") loadWeather();
+  if (name === "reuters") loadNews("reuters");
+  if (name === "ap") loadNews("ap");
   if (name === "system") loadSystem();
 }
 
@@ -163,8 +166,14 @@ function renderBadges() {
   const s = stripeSummary(sys.stripe);
   setBadge("badgeStripe", s.text, s.cls);
   const cells = Object.values(sys.sites).flatMap((v) => Object.values(v));
-  const down = cells.filter((c) => !c.up).length;
-  setBadge("badgeSites", down ? `Sites: ${down} down` : "Sites: all up", down ? "bad" : "ok");
+  const isBlocked = (c) => !c.up && c.reason && c.reason.startsWith("cert not trusted");
+  const blocked = cells.filter(isBlocked).length;
+  const down = cells.filter((c) => !c.up && !isBlocked(c)).length;
+  const siteText = down ? `Sites: ${down} down` : blocked ? `Sites: ${blocked} blocked by firewall` : "Sites: all up";
+  setBadge("badgeSites", siteText, down ? "bad" : blocked ? "warn" : "ok");
+  try {
+    if (sys.voice.running && !state.modeAutoSet && !state.modeChosen) { state.modeAutoSet = true; setMode("voice"); }
+  } catch (e) { /* storage unavailable */ }
   setBadge("badgeVoice", sys.voice.running ? "Voice: on" : "Voice: off", sys.voice.running ? "ok" : "");
   if (state.pane === "sites") renderSites();
 }
@@ -177,7 +186,7 @@ function renderSystem() {
       rows.push(el("tr", {},
         el("td", {}, el("span", { class: "dot " + (r.up ? "ok" : "bad") }), name),
         el("td", { textContent: view }),
-        el("td", { textContent: r.status === null ? "unreachable" : String(r.status) }),
+        el("td", { textContent: r.status === null ? (r.reason || "unreachable") : String(r.status) }),
         el("td", { textContent: r.ms === null ? "—" : r.ms + " ms" }),
         el("td", { textContent: r.frame_ok ? "yes" : "blocked" })));
     }
@@ -785,6 +794,45 @@ async function loadFiles() {
   } catch (e) { root.replaceChildren(el("div", { class: "empty", textContent: "Files unavailable: " + e.message })); }
 }
 
+// ---------- reuters news ----------
+function formatStoryTime(iso) {
+  return new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
+const NEWS_SOURCES = { reuters: { path: "/api/news", title: "Reuters News" }, ap: { path: "/api/news-ap", title: "AP News" } };
+
+async function loadNews(source) {
+  const { path, title } = NEWS_SOURCES[source], root = $(source + "Root");
+  try {
+    const { items } = await api(path);
+    root.replaceChildren(
+      el("h2", { textContent: title }),
+      el("div", { class: "row" }, el("button", { class: "btn", textContent: "Refresh", onclick: () => loadNews(source) })),
+      ...(items.length ? items.map((i) => el("div", { class: "news-row" },
+        el("span", { class: "news-time", textContent: formatStoryTime(i.published) }),
+        el("a", { href: i.link, target: "_blank", rel: "noopener", textContent: i.title })))
+        : [el("div", { class: "empty", textContent: "No headlines right now." })]));
+  } catch (e) { root.replaceChildren(el("div", { class: "empty", textContent: title + " unavailable: " + e.message })); }
+}
+
+// ---------- weather ----------
+async function loadWeather() {
+  const root = $("weatherRoot");
+  try {
+    const { cities } = await api("/api/weather");
+    root.replaceChildren(
+      el("h2", { textContent: "10-day forecast" }),
+      el("div", { class: "row" }, el("button", { class: "btn", textContent: "Refresh", onclick: loadWeather })),
+      ...Object.entries(cities).flatMap(([city, c]) => [
+        el("h2", { textContent: city }),
+        ...(c.days.length ? c.days.map((d) => el("div", { class: "wx-day" },
+          el("span", { class: "wx-date", textContent: new Date(d.date + "T12:00:00").toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" }) }),
+          el("span", { class: "wx-sum", textContent: d.summary }),
+          el("span", { textContent: `${Math.round(d.high)}° / ${Math.round(d.low)}° · ${d.rain_chance ?? 0}% rain` })))
+          : [el("div", { class: "empty", textContent: c.error || "No forecast right now." })])]));
+  } catch (e) { root.replaceChildren(el("div", { class: "empty", textContent: "Weather unavailable: " + e.message })); }
+}
+
 // ---------- quick links ----------
 async function loadLinks() {
   try {
@@ -799,8 +847,8 @@ buildNav();
 CHAT_CHANNELS.forEach(buildChatPane);
 buildSofiaDock();
 loadLinks();
-$("modeToggle").onclick = () => setMode(state.mode === "voice" ? "text" : "voice");
-try { setMode(localStorage.getItem("mc-mode") === "voice" ? "voice" : "text"); } catch (e) { setMode("text"); }
+$("modeToggle").onclick = () => { state.modeChosen = true; setMode(state.mode === "voice" ? "text" : "voice"); };
+try { const saved = localStorage.getItem("mc-mode"); if (saved) setMode(saved === "voice" ? "voice" : "text"); else document.body.classList.remove("mode-voice"); } catch (e) { setMode("text"); }
 checkCouncilBanner();
 fetch("/sites.json").then((r) => r.json()).then((data) => { initSites(data); showPane("next"); loadSystem(); });
 setInterval(() => { if (state.pane !== "system") loadSystem(); }, STATUS_REFRESH_MS);
