@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://everythinginternet.ca/sitemap.xml

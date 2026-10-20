@@ -19,6 +19,8 @@ h2{font-size:15px;letter-spacing:2px;color:#c00;margin:20px 0 12px}
 .check span{font-size:13px;color:#999}
 .check.done{opacity:.45}
 .check.done b{text-decoration:line-through}
+.next{display:none;margin-top:18px;text-align:center;padding:14px;border-radius:10px;background:#c00;color:#fff;font-weight:700;font-size:16px;text-decoration:none}
+.next.ready{display:block}
 .foot{text-align:center;font-size:11px;color:#555;padding:14px;border-top:1px solid #222}
 </style>
 </head>
@@ -30,6 +32,7 @@ h2{font-size:15px;letter-spacing:2px;color:#c00;margin:20px 0 12px}
 <div class="sub">Sofia here. Your empire is waking up — here is today's work. Check them off as you go.</div>
 <h2>TODAY'S CHECKS — BINGO BANGO</h2>
 <div id="checks"></div>
+<a class="next" id="next" href="http://127.0.0.1:8765/">Next &rarr; Mission Control</a>
 </div>
 <div class="foot">&copy; Axiom Enterprises</div>
 </div>
@@ -44,7 +47,8 @@ var box=document.getElementById('checks');
 checks.forEach(function(c,i){
 var d=document.createElement('label');d.className='check';
 d.innerHTML='<input type="checkbox"><div><b>'+(i+1)+'. '+c[0]+'</b><span>'+c[1]+'</span></div>';
-d.querySelector('input').onchange=function(){d.classList.toggle('done',this.checked);};
+d.querySelector('input').onchange=function(){d.classList.toggle('done',this.checked);
+document.getElementById('next').classList.toggle('ready',box.querySelectorAll('input:not(:checked)').length===0);};
 box.appendChild(d);
 });
 </script>

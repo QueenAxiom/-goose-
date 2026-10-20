@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://everythingclaude.ca/sitemap.xml

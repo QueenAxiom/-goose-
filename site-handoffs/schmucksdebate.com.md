@@ -1,0 +1,93 @@
+# SchmucksDebate.com handoff package
+
+Copy everything from "PASTE FROM HERE" to the end into another AI. Attach the image files listed under Images.
+
+---
+## PASTE FROM HERE
+
+### Your job
+You are improving a starter web page for a small Canadian business (Axiom Enterprises, Alberta). Take the attached HTML and turn it into a polished, professional, production-ready page.
+
+Rules:
+1. Keep it a single self-contained HTML file (inline CSS, no external scripts). It must work pasted into a WordPress Custom HTML block.
+2. Keep the colour palette and tone of the file. Improve layout, spacing, typography, hierarchy, mobile behaviour and polish.
+3. Do NOT invent facts. Anything marked `[FLAG: ...]` stays marked. No fake testimonials, statistics, reviews, awards, customer counts, prices or credentials.
+4. Keep the footer exactly: copyright, Alberta Registration placeholder, rise@empoweredathome.com, Privacy, Terms, Contact.
+5. Target WCAG 2.2 AA: visible focus states, skip link, sufficient contrast, semantic headings, 44px touch targets.
+6. Fast: no heavy images or libraries. Where an image would help, add a labelled placeholder with a one-line production brief instead of stock filler.
+7. Tone: direct, warm, confident, proudly Canadian. Never corporate, hype-driven or fear-based. Avoid "synergy", "leverage", "disrupt".
+8. Return only the finished HTML, then a short list of the FLAGs I still need to fill.
+
+### About this site
+- **Site:** SchmucksDebate.com (Axiom Enterprises, Alberta, Canada)
+- **One-liner:** Debate, negotiation and critical-thinking coaching built on Sun Tzu's Art of War: Fight = Debate = Negotiate. (DRAFT line, not yet approved.)
+- **Tone:** Straight-talking, sharp, educational, no fluff.
+- **Offer:** Coaching, certifications, video consultations, blog. Real names, prices and what is included are FLAGs for Alan. Separate product: a business-learning game positioned as the 'Rocksmith of learning to play business'.
+- **Hard guardrail:** No outcome claims (no promotions, wins, results). No fake testimonials.
+- **Anchor phrase:** "Proud Sponsor of The Golden Goose Project - Building Stronger Communities." (use where appropriate)
+- **Footer copyright:** "Axiom Enterprises". Keep existing wording of names, taglines and disclaimers unless told otherwise.
+
+### Images
+- No existing images for this site.
+
+Still needed (use a labelled placeholder with a one-line production brief, no stock filler):
+- Hero image placeholder with a one-line brief (Art of War / negotiating-table theme).
+- Game screenshot placeholders, labelled, until real screenshots are supplied.
+
+All photos and videos must be compressed before posting.
+
+### FLAGs still to fill (leave marked)
+- [FLAG: real names, prices, what is included]
+- [FLAG: real offer and who it is for]
+- [FLAG: real offer, duration, price]
+
+### Current code
+```html
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Schmucks Debate | Fight = Debate = Negotiate</title>
+<meta name="description" content="Debate, negotiation and critical-thinking coaching, drawing on Sun Tzu's Art of War.">
+<style>
+:root{--bg:#0b0b0c;--ink:#f5f5f4;--mute:#a8a29e;--accent:#f59e0b;--card:#161618;--line:#2a2a2d}
+*{box-sizing:border-box}body{margin:0;font:17px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg)}
+a{color:var(--accent)}h1,h2,h3{line-height:1.1;text-transform:uppercase;letter-spacing:.02em}.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+header{border-bottom:1px solid var(--line)}header .wrap{display:flex;justify-content:space-between;align-items:center;padding:18px 24px}
+.brand{font-weight:900;font-size:20px;letter-spacing:.06em}nav a{color:var(--ink);text-decoration:none;margin-left:22px;font-size:15px}
+.hero{padding:104px 0}.hero h1{font-size:clamp(38px,8vw,84px);margin:0 0 18px}.hero p{max-width:620px;color:var(--mute);font-size:19px}
+.btn{display:inline-block;background:var(--accent);color:#111;padding:15px 30px;text-decoration:none;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.btn:focus,a:focus{outline:3px solid #fff;outline-offset:2px}
+section{padding:64px 0}.grid{display:grid;gap:24px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);padding:28px}.card h3{margin-top:0;color:var(--accent)}
+.flag{background:#3a2f0b;border:1px dashed var(--accent);padding:10px 14px;font-size:14px;color:#fde68a}
+footer{border-top:1px solid var(--line);padding:32px 0;font-size:14px;color:var(--mute)}
+</style>
+</head>
+<body>
+<a href="#main" style="position:absolute;left:-999px">Skip to main content</a>
+<header><div class="wrap"><div class="brand">SCHMUCKS DEBATE</div>
+<nav aria-label="Main"><a href="#train">Train</a><a href="#method">Method</a><a href="#contact">Contact</a></nav></div></header>
+<main id="main">
+<div class="hero"><div class="wrap">
+<h1>Fight = Debate = Negotiate.</h1>
+<p>Straight-talking coaching in debate, negotiation and critical thinking, built on the principles of Sun Tzu's Art of War, for the battles in your career and life.</p>
+<a class="btn" href="#train">See the training</a> <a class="btn" href="[FLAG: Stripe payment link URL]" target="_blank" rel="noopener">Buy</a></div></div>
+<section id="train"><div class="wrap"><h2>Training</h2>
+<div class="grid">
+<div class="card"><h3>Courses and certifications</h3><p>[FLAG: real names, prices, what is included]</p></div>
+<div class="card"><h3>Video consultations</h3><p>[FLAG: real offer, duration, price]</p></div>
+<div class="card"><h3>Business services</h3><p>[FLAG: real offer and who it is for]</p></div></div></div></section>
+<section id="method" style="background:#111"><div class="wrap"><h2>The method</h2>
+<p>No fluff. You learn to argue a point, hold a position and reach a deal.</p>
+<div class="flag">FLAG: Alan to confirm the three-step method wording before this is expanded.</div></div></section>
+<section id="contact"><div class="wrap"><h2>Contact</h2>
+<p><a href="mailto:rise@empoweredathome.com">rise@empoweredathome.com</a></p></div></section>
+</main>
+<footer><div class="wrap">© 2026 SchmucksDebate.com / Axiom Enterprises. All rights reserved. | Alberta Registration: 769776022 | <a href="mailto:rise@empoweredathome.com">rise@empoweredathome.com</a> | <a href="/privacy">Privacy</a> | <a href="/terms">Terms</a> | <a href="#contact">Contact</a></div></footer>
+</body>
+</html>
+
+```
+## END PASTE
