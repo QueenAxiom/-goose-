@@ -1,0 +1,179 @@
+<!-- EverythingInternet.ca homepage redesign — paste as Custom HTML on page "Home" (id 50). Replace existing page content. -->
+<!-- Image rule: no <img> in this snippet. If you add one, use a real WebP (quality 75–80) with width and height. Below the fold: loading="lazy". Hero/LCP only: fetchpriority="high" and do not set loading="lazy". Do not add stock or fake company photos. -->
+<style>
+.ei-shell{--navy:#0f1f3d;--navy-deep:#0a1730;--red:#c1121f;--gold:#d4a017;--gold-soft:#f2c14e;--paper:#f7f5f0;--ink:#14213d;--mute:#5b6472;--line:#e2ddd0;--card:#fff;--max:1120px;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--paper);margin:0;line-height:1.55}
+.ei-shell *{box-sizing:border-box}
+.ei-skip{position:absolute;left:-9999px;top:0;z-index:10000;background:#fff;color:#000;padding:12px 18px;font-weight:700;text-decoration:none}
+.ei-skip:focus{left:12px;top:12px}
+.ei-nav{position:sticky;top:0;z-index:999;background:rgba(15,31,61,.97);backdrop-filter:blur(8px);border-bottom:1px solid rgba(212,160,23,.35)}
+.ei-nav-inner{max-width:var(--max);margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.ei-brand{color:#fff;text-decoration:none;font-weight:800;font-size:1.15rem;letter-spacing:-.02em}
+.ei-brand span{color:#ff6b6b}
+.ei-nav-links{display:flex;flex-wrap:wrap;gap:4px 18px;align-items:center}
+.ei-nav-links a{color:#e8ecf5;text-decoration:none;font-size:.95rem;font-weight:600;padding:10px 0;min-height:44px;display:inline-flex;align-items:center}
+.ei-nav-links a:hover{color:var(--gold-soft)}
+.ei-nav-cta{background:var(--red);color:#fff!important;padding:10px 16px!important;border-radius:6px;min-height:44px}
+.ei-hero{background:linear-gradient(165deg,var(--navy) 0%,#1a3260 55%,var(--navy-deep) 100%);color:#fff;padding:72px 24px 64px}
+.ei-hero-inner{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:1.4fr .9fr;gap:36px;align-items:center}
+.ei-eyebrow{display:inline-block;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-soft);font-weight:700;margin-bottom:14px}
+.ei-hero h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.08;margin:0 0 16px;font-weight:800;letter-spacing:-.03em;max-width:18ch}
+.ei-hero-lead{font-size:1.1rem;color:#d6dcea;max-width:36rem;margin:0 0 28px}
+.ei-cta-row{display:flex;flex-wrap:wrap;gap:12px}
+.ei-btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 22px;border-radius:7px;font-weight:700;text-decoration:none;font-size:1rem}
+.ei-btn-primary{background:var(--red);color:#fff}
+.ei-btn-primary:hover{filter:brightness(1.08)}
+.ei-btn-ghost{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.55)}
+.ei-btn-ghost:hover{border-color:#fff}
+.ei-counter{background:rgba(255,255,255,.08);border:1px solid rgba(242,193,78,.45);border-radius:12px;padding:22px 20px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.ei-counter-num{font-size:clamp(2.4rem,6vw,3.4rem);font-weight:800;color:var(--gold-soft);line-height:1;margin:8px 0}
+.ei-counter-label{font-size:.95rem;color:#dfe3ec;margin:0}
+.ei-counter-sub{font-size:.8rem;color:#aeb6c8;margin:10px 0 0}
+.ei-section{max-width:var(--max);margin:0 auto;padding:64px 24px}
+.ei-section h2{font-size:clamp(1.55rem,3vw,2.1rem);margin:0 0 10px;color:var(--navy);letter-spacing:-.02em}
+.ei-section .lede{color:var(--mute);max-width:42rem;margin:0 0 8px;font-size:1.05rem}
+.ei-disclaimer{font-size:.82rem;color:#6b6b6b;font-style:italic;max-width:46rem;margin:0 0 24px}
+.ei-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.ei-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 16px;transition:box-shadow .15s ease,border-color .15s ease}
+.ei-card:hover{border-color:#c9b98e;box-shadow:0 8px 24px rgba(15,31,61,.08)}
+.ei-card a{color:var(--navy);font-weight:800;text-decoration:none;font-size:1.02rem}
+.ei-card a:hover{text-decoration:underline;color:var(--red)}
+.ei-cat{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--red);font-weight:700;margin:.4rem 0 .15rem}
+.ei-loc{font-size:.8rem;color:#777;margin-bottom:.35rem}
+.ei-desc{font-size:.88rem;color:#444;line-height:1.45;margin:0}
+.ei-trust{text-align:center;font-weight:700;color:var(--navy);margin-top:28px}
+.ei-pricing{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.ei-price-card{background:linear-gradient(180deg,#fff,#fbf8f0);border:1px solid #e6d7a8;border-radius:14px;padding:28px;max-width:520px;box-shadow:0 10px 30px rgba(15,31,61,.06)}
+.ei-price{font-size:2.6rem;font-weight:800;color:var(--navy);margin:8px 0}
+.ei-price s{font-size:1.1rem;color:var(--mute);font-weight:500;margin-right:8px}
+.ei-badge{display:inline-block;background:#fff3cd;border:1px dashed var(--gold);color:#5c4a00;padding:6px 10px;border-radius:6px;font-size:.85rem;font-weight:700}
+.ei-list{margin:16px 0 22px;padding-left:1.1rem;color:#333}
+.ei-list li{margin:.4rem 0}
+.ei-about{display:grid;grid-template-columns:1.2fr .8fr;gap:28px}
+.ei-about-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px}
+.ei-faq details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:0 0 10px}
+.ei-faq summary{cursor:pointer;font-weight:700;color:var(--navy)}
+.ei-faq p{margin:10px 0 0;color:#444}
+.ei-footer{background:var(--navy);color:#c9d1e3;padding:36px 24px;font-size:.9rem}
+.ei-footer-inner{max-width:var(--max);margin:0 auto;display:grid;gap:18px}
+.ei-footer a{color:#fff;text-decoration:none}
+.ei-footer a:hover{color:var(--gold-soft)}
+.ei-footer-nav{display:flex;flex-wrap:wrap;gap:10px 18px}
+.ei-foot-meta{opacity:.9}
+@media (max-width:860px){.ei-hero-inner,.ei-about{grid-template-columns:1fr}.ei-hero{padding:56px 20px 48px}}
+@media (prefers-reduced-motion:reduce){.ei-card{transition:none}}
+</style>
+<div class="ei-shell">
+<a class="ei-skip" href="#ei-main">Skip to main content</a>
+<header class="ei-nav" role="banner">
+  <div class="ei-nav-inner">
+    <a class="ei-brand" href="https://everythinginternet.ca/">EverythingInternet<span>.ca</span></a>
+    <nav class="ei-nav-links" aria-label="Main">
+      <a href="#directory">Directory</a>
+      <a href="#listing">Get listed</a>
+      <a href="#about">About</a>
+      <a href="#faq">FAQ</a>
+      <a href="mailto:rise@empoweredathome.com">Contact</a>
+      <a class="ei-nav-cta" href="https://everythinginternet.ca/product/lifetime-directory-listing/">Get listed</a>
+    </nav>
+  </div>
+</header>
+<main id="ei-main">
+  <section class="ei-hero" aria-labelledby="ei-hero-title">
+    <div class="ei-hero-inner">
+      <div>
+        <div class="ei-eyebrow">Canada’s Directory for Canadian-Made Tech &amp; Internet Products</div>
+        <h1 id="ei-hero-title">Discover and support Canadian tech businesses.</h1>
+        <p class="ei-hero-lead">One honest board for Canadian-made tech and internet products — built so buyers can find them and companies can be found. No pay-to-play rankings.</p>
+        <div class="ei-cta-row">
+          <a class="ei-btn ei-btn-primary" href="https://everythinginternet.ca/product/lifetime-directory-listing/">Get a lifetime listing</a>
+          <a class="ei-btn ei-btn-ghost" href="#directory">Browse sample directory</a>
+        </div>
+      </div>
+      <aside class="ei-counter" aria-live="polite" data-founding-total="10" data-founding-left="10">
+        <div class="ei-eyebrow" style="margin:0">Founding members</div>
+        <div class="ei-counter-num"><span id="ei-spots-left">10</span> of 10</div>
+        <p class="ei-counter-label">founding spots left</p>
+        <p class="ei-counter-sub">First 10 Canadian companies. Early listings help shape the directory.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="ei-section" id="directory" aria-labelledby="dir-title">
+    <div class="ei-eyebrow" style="color:var(--red)">Sample directory</div>
+    <h2 id="dir-title">Real Canadian tech companies. The caliber this board is built for.</h2>
+    <p class="lede">Illustrative sample of notable Canadian tech and internet companies. Inclusion is not an endorsement or paid partnership.</p>
+    <p class="ei-disclaimer">Want your company on the live board? Founding lifetime listings are open now — <a href="https://everythinginternet.ca/product/lifetime-directory-listing/">one-time listing</a>. Or <a href="mailto:rise@empoweredathome.com?subject=Directory%20listing%20inquiry">email rise@empoweredathome.com</a>.</p>
+    <div class="ei-grid">
+      <article class="ei-card"><a href="https://www.shopify.com/" target="_blank" rel="noopener">Shopify</a><div class="ei-cat">Ecommerce</div><div class="ei-loc">Ottawa, ON</div><p class="ei-desc">Commerce platform — checkout, payments, POS, and creator tools.</p></article>
+      <article class="ei-card"><a href="https://www.lightspeedhq.com/" target="_blank" rel="noopener">Lightspeed</a><div class="ei-cat">Retail &amp; Restaurant POS</div><div class="ei-loc">Montréal, QC</div><p class="ei-desc">Retail and restaurant POS, ecommerce, and payments for merchants.</p></article>
+      <article class="ei-card"><a href="https://www.hootsuite.com/" target="_blank" rel="noopener">Hootsuite</a><div class="ei-cat">Social Media</div><div class="ei-loc">Vancouver, BC</div><p class="ei-desc">Social media management and listening for brands and agencies.</p></article>
+      <article class="ei-card"><a href="https://www.opentext.com/" target="_blank" rel="noopener">OpenText</a><div class="ei-cat">Enterprise Content</div><div class="ei-loc">Waterloo, ON</div><p class="ei-desc">Enterprise content, cybersecurity, DevOps, and analytics.</p></article>
+      <article class="ei-card"><a href="https://www.blackberry.com/" target="_blank" rel="noopener">BlackBerry</a><div class="ei-cat">Secure Communications</div><div class="ei-loc">Waterloo, ON</div><p class="ei-desc">Critical event management and sovereign-grade secure communications.</p></article>
+      <article class="ei-card"><a href="https://www.wealthsimple.com/" target="_blank" rel="noopener">Wealthsimple</a><div class="ei-cat">Trading &amp; Investing</div><div class="ei-loc">Toronto, ON</div><p class="ei-desc">Trading, managed investing, cash, tax, and crypto for Canadians.</p></article>
+      <article class="ei-card"><a href="https://1password.com/" target="_blank" rel="noopener">1Password</a><div class="ei-cat">Password &amp; Security</div><div class="ei-loc">Toronto, ON</div><p class="ei-desc">Password, passkey, and security vault for people and enterprises.</p></article>
+      <article class="ei-card"><a href="https://www.freshbooks.com/" target="_blank" rel="noopener">FreshBooks</a><div class="ei-cat">Accounting</div><div class="ei-loc">Toronto, ON</div><p class="ei-desc">Cloud accounting, invoicing, and time tracking for SMBs.</p></article>
+      <article class="ei-card"><a href="https://www.getjobber.com/" target="_blank" rel="noopener">Jobber</a><div class="ei-cat">Field Service</div><div class="ei-loc">Edmonton, AB</div><p class="ei-desc">Scheduling, invoicing, and client management for home services.</p></article>
+      <article class="ei-card"><a href="https://www.clio.com/" target="_blank" rel="noopener">Clio</a><div class="ei-cat">Legal Tech</div><div class="ei-loc">Vancouver, BC</div><p class="ei-desc">Practice management, CRM, accounting, and AI tools for law firms.</p></article>
+      <article class="ei-card"><a href="https://www.benevity.com/" target="_blank" rel="noopener">Benevity</a><div class="ei-cat">Corporate Giving</div><div class="ei-loc">Calgary, AB</div><p class="ei-desc">Employee giving, volunteering, grants, and impact reporting.</p></article>
+      <article class="ei-card"><a href="https://www.coveo.com/" target="_blank" rel="noopener">Coveo</a><div class="ei-cat">AI Search</div><div class="ei-loc">Québec City, QC</div><p class="ei-desc">AI relevance for search, recommendations, and generative experiences.</p></article>
+    </div>
+    <p class="ei-trust">No pay-to-play rankings. No pay-to-fake reviews. <a href="https://everythinginternet.ca/sample-directory/">View full sample directory →</a></p>
+  </section>
+
+  <section class="ei-section ei-pricing" id="listing" aria-labelledby="list-title">
+    <div class="ei-eyebrow" style="color:var(--red)">Lifetime founding listing</div>
+    <h2 id="list-title">One-time. Permanent listing.</h2>
+    <p class="lede">No monthly fees. No renewals. If you ever want to cancel, we’ll open the spot for another Canadian business.</p>
+    <div class="ei-price-card">
+      <span class="ei-badge">🔥 Founding Member — Only 10 Spots</span>
+      <p style="margin:8px 0;color:var(--mute)">Lifetime Directory Listing · one-time</p>
+      <ul class="ei-list">
+        <li>Permanent listing while the directory operates</li>
+        <li>Logo, name, URL, and description — you control updates</li>
+        <li>No monthly bill and no annual renewal</li>
+        <li>Equal footing in your category — no pay-to-play rankings</li>
+      </ul>
+      <a class="ei-btn ei-btn-primary" href="https://everythinginternet.ca/product/lifetime-directory-listing/">Claim a founding spot</a>
+      <p style="margin:14px 0 0;font-size:.9rem;color:var(--mute)">Also available: <a href="https://everythinginternet.ca/product/monthly-listing/">$12.99/month listing</a>.</p>
+    </div>
+  </section>
+
+  <section class="ei-section" id="about" aria-labelledby="about-title">
+    <h2 id="about-title">Built by a Canadian entrepreneur</h2>
+    <div class="ei-about">
+      <div class="ei-about-card">
+        <p><strong>Alan Gooding</strong> — entrepreneur and business builder with experience spanning sound engineering, video production, programming, business administration, real estate and public service. Founder of Empowered At Home and Axiom Enterprises, and an Executive Contributor with Brainz Magazine. He created EverythingInternet.ca to help Canadian businesses become easier to find, trust and support.</p>
+        <p style="margin-bottom:0">EverythingInternet.ca is a proud sponsor of the <strong>Golden Goose Project</strong>, a community-strengthening initiative.</p>
+      </div>
+      <div class="ei-about-card">
+        <h3 style="margin-top:0;color:var(--navy)">Questions?</h3>
+        <p style="margin-bottom:12px">Email <a href="mailto:rise@empoweredathome.com">rise@empoweredathome.com</a></p>
+        <p style="margin:0;font-size:.9rem;color:var(--mute)">Operated by Axiom Enterprises, Alberta, Canada.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="ei-section ei-faq" id="faq" aria-labelledby="faq-title">
+    <h2 id="faq-title">FAQ</h2>
+    <details><summary>Is it really a lifetime listing?</summary><p>Yes — your listing stays active as long as the directory operates and your business remains qualified. Full terms are in the listing agreement.</p></details>
+    <details><summary>Does this guarantee sales or traffic?</summary><p>No, and we’re upfront about that. It gives you visibility — what you make of it is up to you.</p></details>
+    <details><summary>Why a one-time fee?</summary><p>Because we believe in affordable access, not locking businesses into recurring fees. Founding spots are capped at 10.</p></details>
+    <details><summary>How do I qualify?</summary><p>You manufacture or sell Canadian-made internet/tech products. We verify with a few basic documents.</p></details>
+    <details><summary>Who runs this?</summary><p>Alan Gooding, a Canadian entrepreneur. Questions? rise@empoweredathome.com</p></details>
+  </section>
+</main>
+<footer class="ei-footer" role="contentinfo">
+  <div class="ei-footer-inner">
+    <nav class="ei-footer-nav" aria-label="Footer">
+      <a href="#directory">Directory</a>
+      <a href="https://everythinginternet.ca/sample-directory/">Sample directory</a>
+      <a href="https://everythinginternet.ca/product/lifetime-directory-listing/">Get listed</a>
+      <a href="https://everythinginternet.ca/shop/">Shop</a>
+      <a href="https://everythinginternet.ca/privacy/">Privacy</a>
+      <a href="https://everythinginternet.ca/terms/">Terms</a>
+      <a href="mailto:rise@empoweredathome.com">Contact</a>
+    </nav>
+    <p class="ei-foot-meta">© 2026 EverythingInternet.ca / Axiom Enterprises. All rights reserved. | Alberta Registration: 769776022 | <a href="mailto:rise@empoweredathome.com">rise@empoweredathome.com</a></p>
+  </div>
+</footer>
+</div>

@@ -1,0 +1,44 @@
+<!-- Product page pricing card — paste into Lifetime Directory Listing product SHORT DESCRIPTION (and optionally Description). Do not hardcode a price. Leave the WooCommerce price fields as they already are. -->
+<!-- Image rule: no <img> in this snippet. If you add one, use a real WebP (quality 75–80) with width and height. Below the fold: loading="lazy". Hero/LCP only: fetchpriority="high" and do not set loading="lazy". Do not add stock or fake company photos. -->
+<style>
+.ei-prod{--navy:#0f1f3d;--navy-deep:#0a1730;--red:#c1121f;--gold:#d4a017;--gold-soft:#f2c14e;--paper:#f7f5f0;--ink:#14213d;--mute:#5b6472;--line:#e2ddd0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);line-height:1.55;max-width:720px;margin:0 auto 24px}
+.ei-prod *{box-sizing:border-box}
+.ei-prod-nav{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin:0 0 20px;padding:12px 0;border-bottom:1px solid var(--line)}
+.ei-prod-nav a{color:var(--navy);font-weight:700;text-decoration:none;font-size:.92rem}
+.ei-prod-nav a:hover{color:var(--red)}
+.ei-prod-card{background:linear-gradient(180deg,#fff,#fbf8f0);border:1px solid #e6d7a8;border-radius:16px;padding:28px 24px;box-shadow:0 12px 32px rgba(15,31,61,.08)}
+.ei-prod-eyebrow{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:800;margin:0 0 8px}
+.ei-prod h2{margin:0 0 8px;font-size:clamp(1.5rem,3vw,2rem);color:var(--navy);letter-spacing:-.02em}
+.ei-prod-lead{color:var(--mute);margin:0 0 16px}
+.ei-badge{display:inline-block;background:#fff3cd;border:1px dashed var(--gold);color:#5c4a00;padding:6px 10px;border-radius:6px;font-size:.85rem;font-weight:700;margin-bottom:12px}
+.ei-price-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin:8px 0 6px}
+.ei-price-now{font-size:2.5rem;font-weight:800;color:var(--navy)}
+.ei-price-was{font-size:1.1rem;color:var(--mute);text-decoration:line-through}
+.ei-spots{font-weight:800;color:var(--red);margin:0 0 14px}
+.ei-list{margin:0 0 18px;padding-left:1.15rem}
+.ei-list li{margin:.45rem 0}
+.ei-note{font-size:.9rem;color:var(--mute);margin:0}
+.ei-note a{color:var(--red);font-weight:700}
+</style>
+<div class="ei-prod">
+  <nav class="ei-prod-nav" aria-label="Product">
+    <a href="https://everythinginternet.ca/">← Home</a>
+    <a href="https://everythinginternet.ca/sample-directory/">Sample directory</a>
+    <a href="https://everythinginternet.ca/#listing">Founding offer</a>
+    <a href="mailto:rise@empoweredathome.com">Contact</a>
+  </nav>
+  <div class="ei-prod-card">
+    <p class="ei-prod-eyebrow">EverythingInternet.ca</p>
+    <h2>Lifetime Directory Listing</h2>
+    <p class="ei-prod-lead">Get your company in front of Canadian tech buyers already searching. One flat fee, listed for good — no renewals, no algorithm to feed, no pay-to-play rankings.</p>
+    <span class="ei-badge">🔥 Founding Member — Only 10 Spots</span>
+    <p class="ei-spots"><span data-founding-left="10">10</span> of 10 founding spots left</p>
+    <ul class="ei-list">
+      <li>Permanent listing — no renewal fees, ever</li>
+      <li>Full profile setup handled for you</li>
+      <li>Dedicated profile: description, category, logo, contact, outbound link</li>
+      <li>Equal footing in your category — no pay-to-play ranking games</li>
+    </ul>
+    <p class="ei-note">Browse the sample board before you list: <a href="https://everythinginternet.ca/sample-directory/">View sample directory</a>. Every company shown there is real — we don’t publish fictional listings to pad the count.</p>
+  </div>
+</div>
