@@ -1,0 +1,78 @@
+/* EverythingInternet.ca branded redesign — Additional CSS
+   Apply in GoDaddy/WP: Appearance → Customize → Additional CSS
+   Do NOT install plugins. Keeps existing security headers/plugins untouched. */
+
+:root {
+  --ei-navy: #0f1f3d;
+  --ei-navy-deep: #0a1730;
+  --ei-red: #c1121f;
+  --ei-gold: #d4a017;
+  --ei-gold-soft: #f2c14e;
+  --ei-paper: #f7f5f0;
+  --ei-ink: #14213d;
+  --ei-mute: #5b6472;
+  --ei-line: #e2ddd0;
+  --ei-card: #ffffff;
+  --ei-max: 1120px;
+}
+
+/* Hide default theme chrome that fights the branded shell on home/product/directory */
+body.home .wp-site-blocks > header,
+body.single-product .wp-site-blocks > header,
+body.page-slug-sample-directory .wp-site-blocks > header,
+body.page-id-50 .wp-site-blocks > header {
+  display: none !important;
+}
+
+/* Product page: hide faded promo image, default widgets, serif leftovers */
+body.single-product .woocommerce-product-gallery,
+body.single-product .wp-block-post-featured-image,
+body.single-product .widget_recent_entries,
+body.single-product .widget_recent_comments,
+body.single-product .wp-block-latest-posts,
+body.single-product .wp-block-latest-comments,
+body.single-product aside.widget-area,
+body.single-product .related.products,
+body.single-product .woocommerce-tabs,
+body.single-product .woocommerce-product-rating,
+body.single-product .product_meta {
+  display: none !important;
+}
+
+body.single-product .site-main,
+body.single-product .wp-block-post-content,
+body.single-product .entry-content {
+  max-width: var(--ei-max) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !important;
+}
+
+body.single-product .product {
+  display: block !important;
+}
+
+body.single-product .summary {
+  width: 100% !important;
+  float: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Soften default Woo title when pricing card provides its own */
+body.single-product .product_title {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+}
+
+body {
+  background: var(--ei-paper) !important;
+}
+
+a:focus, button:focus, .ei-btn:focus {
+  outline: 3px solid var(--ei-gold-soft) !important;
+  outline-offset: 2px !important;
+}
