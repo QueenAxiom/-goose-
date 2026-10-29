@@ -16,11 +16,15 @@
   --ei-max: 1120px;
 }
 
-/* Hide default theme chrome that fights the branded shell on home/product/directory */
+/* Hide default theme chrome that fights the branded shell */
 body.home .wp-site-blocks > header,
 body.single-product .wp-site-blocks > header,
 body.page-slug-sample-directory .wp-site-blocks > header,
-body.page-id-50 .wp-site-blocks > header {
+body.page-slug-privacy .wp-site-blocks > header,
+body.page-slug-terms .wp-site-blocks > header,
+body.page-id-50 .wp-site-blocks > header,
+body:has(.ei-shell) .wp-site-blocks > header,
+body:has(.ei-shell) .wp-block-post-title {
   display: none !important;
 }
 

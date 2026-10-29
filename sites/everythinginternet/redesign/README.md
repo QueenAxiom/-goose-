@@ -11,7 +11,11 @@ These files are **not live**. Production WordPress is unchanged until someone pa
 | `product-pricing-card.html` | Products → Lifetime Directory Listing → Short description |
 | `product-description.html` | Same product → Description (long) |
 | `directory-sample.html` | Pages → Add New → title “Sample Directory”, slug `sample-directory`, Custom HTML |
+| `privacy.html` | Pages → Privacy, slug `privacy`, Custom HTML (draft, pending legal sign-off) |
+| `terms.html` | Pages → Terms, slug `terms`, Custom HTML (draft, pending legal sign-off) |
 | `APPLY.md` | Apply notes for the person pasting into WordPress (do not paste this file into a page) |
+
+Shop, cart, checkout, and my account stay WooCommerce. Do not replace those with these snippets.
 
 ## Images
 
