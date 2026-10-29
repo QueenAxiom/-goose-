@@ -19,6 +19,8 @@
 | `product-pricing-card.html` | Products → Lifetime Directory Listing → Short description |
 | `product-description.html` | Same product → Description (long) |
 | `directory-sample.html` | Pages → Add New → title “Sample Directory”, slug `sample-directory`, Custom HTML, Publish |
+| `privacy.html` | Pages → Privacy (slug `privacy`) → Custom HTML. Draft. Do not publish until legal sign-off. |
+| `terms.html` | Pages → Terms (slug `terms`) → Custom HTML. Draft. Do not publish until legal sign-off. |
 
 ## Images
 
@@ -35,6 +37,8 @@ If a real logo or photo is added later: WebP at quality 75–80, `width` and `he
 - Home: sticky navy nav, full-width hero, **10 of 10 founding spots left**, real Canadian companies, working Sample directory link.
 - `/product/lifetime-directory-listing/`: pricing card matches home messaging; no fake widgets; no hardcoded price in the pasted HTML; checkout still works.
 - `/sample-directory/`: sample board loads (fixes old `#` View sample).
+- `/privacy/` and `/terms/`: same navy shell as the homepage. Draft banners still visible. Do not publish either until legal sign-off.
+- Shop, cart, checkout, and my account stay the existing WooCommerce pages.
 - No call/phone button added.
 - Do not install/remove/update/deactivate plugins; no mu-plugins; no deploy backups.
 
