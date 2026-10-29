@@ -20,6 +20,12 @@
 | `product-description.html` | Same product → Description (long) |
 | `directory-sample.html` | Pages → Add New → title “Sample Directory”, slug `sample-directory`, Custom HTML, Publish |
 
+## Images
+
+This package ships **no image files**. `APPLY.md` does not point at any asset to upload. Do not add stock or fake company photos. The product featured image (faded promo graphic) should be removed, not replaced.
+
+If a real logo or photo is added later: WebP at quality 75–80, `width` and `height` set to the file’s pixel size, `loading="lazy"` below the fold. The hero / LCP image gets `fetchpriority="high"` and must not be lazy-loaded.
+
 ## Product cleanup (no plugins)
 1. Edit product → remove / unset Featured image (faded promo graphic).
 2. In product page template / widgets: leave plugins alone; Additional CSS hides recent posts/comments, gallery, related, tabs.
