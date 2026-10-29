@@ -1,6 +1,6 @@
-# EverythingInternet.ca — $499 founding funnel redesign
+# EverythingInternet.ca — founding funnel redesign
 
-Paste-ready WordPress / GoDaddy snippets for the EverythingInternet.ca founding-funnel redesign (Lifetime Directory Listing at **$499**, regular price **$2,999**).
+Paste-ready WordPress / GoDaddy snippets for the EverythingInternet.ca founding-funnel redesign (Lifetime Directory Listing). These snippets do not name a price.
 
 These files are **not live**. Production WordPress is unchanged until someone pastes them in the GoDaddy / WordPress editor. Follow `APPLY.md` for where each snippet goes. Do not install plugins or deploy from this folder.
 
