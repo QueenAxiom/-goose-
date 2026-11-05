@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "Axiom IPO Intelligence",
+    "slug": "axiom-ipo-intelligence",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "axiom",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTabletMode": true,
+      "bundleIdentifier": "com.axiom.ipointelligence",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "This app requires local network access",
+        "NSBonjourServices": [
+          "_axiom-api._tcp"
+        ]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.axiom.ipointelligence",
+      "versionCode": 1
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow $(PRODUCT_NAME) to access your face ID"
+        }
+      ],
+      [
+        "expo-sharing",
+        {}
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "axiom-ipo-intelligence"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
+  }
+}
