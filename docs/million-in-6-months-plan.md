@@ -5,12 +5,11 @@ Start: $0 cash, strong tech skills. Target: ~$170K/month revenue run-rate by mon
 ## Target customer
 Canadian owner-operated SMBs (5–50 staff): trades, clinics, law/accounting, agencies.
 Offer: $499 site + automation setup -> $500–$2,000/mo retainer (hosting, n8n automation, lead follow-up, booking, invoicing).
-Secondary: $499 Lifetime Directory Listing to Canadian tech companies (EverythingInternet.ca) — quick cash, not the scale path.
+EverythingInternet.ca sells only Axiom Enterprises' own products plus affiliate products (decided 2026-11-22). The $499 Lifetime Directory Listing for outside companies is discontinued.
 
 ## Phase 1 (Oct 8–15): able to take money
 - [ ] Fix EverythingInternet checkout (no payment method live as of 2026-09-22) — needs wp-admin / WooCommerce Payments reconnect. Blocked: Stripe MCP needs `/mcp` re-auth; Chrome extension not connected.
-- [ ] Make a real test purchase of product 13, verify unstyled shop/checkout pages are fixed.
-- [ ] Stand up a payment link for the SMB $499 offer (Stripe Payment Link) independent of WooCommerce.
+- [ ] Make a real test purchase of an Axiom product, verify unstyled shop/checkout pages are fixed.- [ ] Stand up a payment link for the SMB $499 offer (Stripe Payment Link) independent of WooCommerce.
 
 ## Phase 2 (Oct 15–Nov 30): first $25K
 - 30 conversations/week via n8n-driven outreach (drafts go to Alan for approval; no auto-send).
