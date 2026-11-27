@@ -56,14 +56,17 @@ body:has(.ei-bab){overflow-x:clip}
 .ei-bab-door h3{font-size:1.05rem;color:var(--navy);font-weight:700}
 .ei-bab-price{font-size:clamp(1.9rem,3vw,2.4rem);font-weight:800;color:var(--navy);letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
 .ei-bab-price small{font-size:1rem;font-weight:700;letter-spacing:0;color:var(--mute)}
-.ei-bab-door p:not(.ei-bab-price){color:var(--mute);font-size:.98rem;flex:1}
+.ei-bab-door p:not(.ei-bab-price){color:var(--mute);font-size:.98rem}
+.ei-bab-door p:not(.ei-bab-price):not(.ei-bab-terms){flex:1;line-height:1.5}
+.ei-bab-door p.ei-bab-terms:not(.ei-bab-price){color:var(--navy);font-weight:700;font-size:.95rem;margin-top:-2px}
+.ei-bab-door--lead p.ei-bab-terms:not(.ei-bab-price){color:var(--gold-soft)}
 .ei-bab-door .ei-bab-btn{width:100%;margin-top:6px}
 .ei-bab-door-btn{background:#fff;color:var(--navy);border-color:var(--navy)}
 .ei-bab-door-btn:hover{background:var(--navy);color:#fff}
 .ei-bab-door--lead{background:var(--navy);border-color:var(--gold);box-shadow:0 18px 40px rgba(15,31,61,.22),0 3px 8px rgba(15,31,61,.12)}
 .ei-bab-door--lead h3,.ei-bab-door--lead .ei-bab-price{color:#fff}
 .ei-bab-door--lead .ei-bab-price small{color:#c9d1e3}
-.ei-bab-door--lead p:not(.ei-bab-price){color:#d3daea}
+.ei-bab-door--lead p:not(.ei-bab-price):not(.ei-bab-terms){color:#d3daea}
 .ei-bab-tag{align-self:flex-start;font-size:.85rem;font-weight:700;color:var(--navy-deep);background:var(--gold-soft);border-radius:999px;padding:3px 12px}
 .ei-bab-cad{margin-top:20px;color:var(--mute);font-size:.95rem}
 
@@ -177,25 +180,29 @@ body:has(.ei-bab) .ei-bab-apply .contact-form-submission{background:#fff;border:
       <span class="ei-bab-tag">Easiest start</span>
       <h3>Monthly</h3>
       <p class="ei-bab-price">$197<small>/month</small></p>
-      <p>Start with a 14-day trial.</p>
+      <p class="ei-bab-terms">14-day free trial</p>
+      <p>The whole Business in a Bot, licensed to your business for one monthly payment. Start with 14 days free. It runs your automated business day to day, and nothing posts or sends without your <span style="white-space:nowrap">say-so</span>.</p>
       <a class="ei-bab-btn ei-bab-btn-primary" href="#apply" data-door="Monthly with 14-day trial">Apply for the trial</a>
     </article>
     <article class="ei-bab-door">
       <h3>Cash</h3>
       <p class="ei-bab-price">$30,000</p>
-      <p>One payment.</p>
+      <p class="ei-bab-terms">One payment</p>
+      <p>The full licence, paid once. Your automated business, built and running — no monthly bill, and no share of your sales, ever.</p>
       <a class="ei-bab-btn ei-bab-door-btn" href="#apply" data-door="Cash licence">Apply: cash</a>
     </article>
     <article class="ei-bab-door">
       <h3>Financed</h3>
       <p class="ei-bab-price">$45,000</p>
-      <p>10% down.</p>
+      <p class="ei-bab-terms">Paid over time</p>
+      <p>The full licence, spread out. 10% down, and the rest paid from 1% of your gross sales as you earn. For owners who want it now and would rather pay out of revenue than out of pocket.</p>
       <a class="ei-bab-btn ei-bab-door-btn" href="#apply" data-door="Financed licence">Apply: financed</a>
     </article>
     <article class="ei-bab-door">
       <h3>Royalty</h3>
-      <p class="ei-bab-price">2%<small> royalty</small></p>
-      <p>Nothing up front. Royalty for life.</p>
+      <p class="ei-bab-price">2%<small> of gross sales</small></p>
+      <p class="ei-bab-terms">Nothing up front</p>
+      <p>The full licence with nothing to pay today. Axiom takes 2% of your gross sales for life — we earn only when you do.</p>
       <a class="ei-bab-btn ei-bab-door-btn" href="#apply" data-door="Royalty licence">Apply: royalty</a>
     </article>
   </div>
