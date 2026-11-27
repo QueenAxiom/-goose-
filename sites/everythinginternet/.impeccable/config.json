@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "business-in-a-bot/page.html"
+        ],
+        "createdAt": "2026-11-27T00:20:57.400Z",
+        "reason": "Claude decided: .ei-bab-faq border-top is a hairline divider above the first FAQ row; each summary has 18px vertical padding, so the text is not flush"
+      }
+    ]
+  }
+}
