@@ -52,7 +52,10 @@ body:has(.ei-bab){overflow-x:clip}
 .ei-bab-quote{color:var(--ink);font-weight:700}
 
 .ei-bab-doors-wrap{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.ei-bab-doors{display:grid;grid-template-columns:minmax(0,1.25fr) repeat(3,minmax(0,1fr));gap:16px;margin-top:40px;align-items:stretch}
+.ei-bab-doors{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px;margin-top:40px;align-items:stretch}
+.ei-bab-door{grid-column:span 2}
+.ei-bab-door:nth-child(-n+2){grid-column:span 3}
+.ei-bab-reg{color:var(--gold-soft);font-weight:700}
 .ei-bab-door{display:flex;flex-direction:column;gap:10px;padding:28px 22px 22px;border:1px solid var(--line);border-radius:12px;background:var(--paper)}
 .ei-bab-door h3{font-size:1.05rem;color:var(--navy);font-weight:700}
 .ei-bab-price{font-size:clamp(1.9rem,3vw,2.4rem);font-weight:800;color:var(--navy);letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
@@ -99,6 +102,8 @@ body:has(.ei-bab) .ei-bab-apply .contact-form-submission{background:#fff;border:
 
 @media (max-width:960px){
  .ei-bab-doors{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ei-bab-door,.ei-bab-door:nth-child(-n+2){grid-column:auto}
+ .ei-bab-door:first-child{grid-column:1/-1}
  .ei-bab-own{grid-template-columns:1fr;gap:40px}
 }
 @media (max-width:760px){
@@ -112,7 +117,6 @@ body:has(.ei-bab) .ei-bab-apply .contact-form-submission{background:#fff;border:
  body:has(.ei-bab) .ei-bab-apply{padding:0 16px;margin-bottom:72px}
 }
 @media (max-width:560px){
- .ei-bab-door--lead{order:-1}
  .ei-bab-doors{grid-template-columns:1fr}
  .ei-bab-ctas .ei-bab-btn{width:100%}
  .ei-bab-links{gap:4px 14px}
@@ -141,7 +145,7 @@ body:has(.ei-bab) .ei-bab-apply .contact-form-submission{background:#fff;border:
       <p class="ei-bab-lead">An SI agent team that runs an automated business in almost any industry. <strong>Nothing posts or sends without your say-so.</strong></p>
       <div class="ei-bab-ctas">
         <a class="ei-bab-btn ei-bab-btn-primary" href="#apply" data-door="Monthly with 14-day trial">Start with the 14-day trial</a>
-        <a class="ei-bab-btn ei-bab-btn-ghost" href="#doors">See all four ways to buy</a>
+        <a class="ei-bab-btn ei-bab-btn-ghost" href="#doors">See all five ways to get it</a>
       </div>
       <p class="ei-bab-fine">$197/month with a 14-day trial. All prices in CAD, GST included.</p>
     </div>
@@ -175,16 +179,23 @@ body:has(.ei-bab) .ei-bab-apply .contact-form-submission{background:#fff;border:
 
 <div class="ei-bab-doors-wrap ei-bleed">
 <section class="ei-bab-section" id="doors" aria-labelledby="bab-doors">
-  <h2 id="bab-doors">Four ways to buy</h2>
+  <h2 id="bab-doors">Five ways to get it</h2>
   <p class="ei-bab-sub">Pick the door that fits your business. Every door starts with a short application.</p>
   <div class="ei-bab-doors">
     <article class="ei-bab-door ei-bab-door--lead">
-      <span class="ei-bab-tag">Easiest start</span>
+      <span class="ei-bab-tag">Free</span>
+      <h3>Registered business</h3>
+      <p class="ei-bab-price">$0</p>
+      <p class="ei-bab-terms">With your business registration number</p>
+      <p>Free to use for any registered business. Apply with your business registration number. Need to register your business? <a class="ei-bab-reg" href="https://www.alberta.ca/register-business-name" target="_blank" rel="noopener">Click here</a>.</p>
+      <a class="ei-bab-btn ei-bab-btn-primary" href="#apply" data-door="Free with business registration number">Apply for free</a>
+    </article>
+    <article class="ei-bab-door">
       <h3>Monthly</h3>
       <p class="ei-bab-price">$197<small>/month</small></p>
       <p class="ei-bab-terms">14-day free trial</p>
       <p>The whole Business in a Bot, licensed to your business for one monthly payment. Start with 14 days free. It runs your automated business day to day, and nothing posts or sends without your <span style="white-space:nowrap">say-so</span>.</p>
-      <a class="ei-bab-btn ei-bab-btn-primary" href="#apply" data-door="Monthly with 14-day trial">Apply for the trial</a>
+      <a class="ei-bab-btn ei-bab-door-btn" href="#apply" data-door="Monthly with 14-day trial">Apply for the trial</a>
     </article>
     <article class="ei-bab-door">
       <h3>Cash</h3>
@@ -244,7 +255,7 @@ body:has(.ei-bab) .ei-bab-apply .contact-form-submission{background:#fff;border:
 
 <!-- wp:group {"className":"ei-bab-apply"} -->
 <div class="wp-block-group ei-bab-apply"><!-- wp:shortcode -->
-[contact-form subject="Business in a Bot application" submit_button_text="Send my application"][contact-field label="Name" type="name" required="1"/][contact-field label="Business name" type="text" required="1"/][contact-field label="Email" type="email" required="1"/][contact-field label="Phone" type="telephone" required="1"/][contact-field label="Which door?" type="radio" required="1" options="Monthly with 14-day trial,Cash licence,Financed licence,Royalty licence"/][/contact-form]
+[contact-form subject="Business in a Bot application" submit_button_text="Send my application"][contact-field label="Name" type="name" required="1"/][contact-field label="Business name" type="text" required="1"/][contact-field label="Business registration number (needed for the free door)" type="text"/][contact-field label="Email" type="email" required="1"/][contact-field label="Phone" type="telephone" required="1"/][contact-field label="Which door?" type="radio" required="1" options="Free with business registration number,Monthly with 14-day trial,Cash licence,Financed licence,Royalty licence"/][/contact-form]
 <!-- /wp:shortcode --></div>
 <!-- /wp:group -->
 

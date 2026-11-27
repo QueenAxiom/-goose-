@@ -40,6 +40,8 @@ These prices are ruled. Do not change, round, or add to them.
 
 Business in a Bot is licensed to business owners only. Its page says "For business owners" near the top, and its application form requires the applicant to name their business.
 
+Free door (owner, 2026-11-27): Business in a Bot is free to use for any registered business that gives its business registration number. It is sold commercially through the paid doors. Visitors without a registration get a "Need to register your business? Click here" link. Open: what the free door includes compared with the paid doors, and where "Click here" goes (owner says Axiom builds it; the draft page links to Alberta's business name registration page for now).
+
 Confirmed by the owner (2026-11-27), and safe to use on pages:
 - All prices are CAD, GST included.
 - Financed: 10% down, and the rest paid from 1% of gross sales.
