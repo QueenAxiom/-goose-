@@ -23,8 +23,9 @@ body:has(.ei-bab){overflow-x:clip}
 
 .ei-bab-hero{background:linear-gradient(165deg,var(--navy) 0%,var(--navy-mid) 58%,var(--navy-deep) 100%);color:#fff;padding:72px 24px 80px}
 .ei-bab-hero-inner{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.65fr);gap:56px;align-items:center}
-.ei-bab-hero h1{font-size:clamp(2.4rem,6vw,4.25rem);line-height:1.02;font-weight:800;letter-spacing:-.035em;margin-bottom:20px}
+.ei-bab-hero h1{font-size:clamp(2.4rem,6vw,4.25rem);line-height:1.02;font-weight:800;letter-spacing:-.035em;margin-bottom:12px}
 .ei-bab-hero h1 sup{font-size:.35em;vertical-align:super;letter-spacing:0;font-weight:700;color:var(--gold-soft)}
+.ei-bab-for{font-size:clamp(1.15rem,2vw,1.4rem);font-weight:800;color:var(--gold-soft);margin-bottom:14px;letter-spacing:-.01em}
 .ei-bab-lead{font-size:clamp(1.15rem,2vw,1.35rem);color:#dbe1ee;max-width:34ch;margin-bottom:32px;line-height:1.45}
 .ei-bab-lead strong{color:#fff}
 .ei-bab-ctas{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px}
@@ -136,6 +137,7 @@ body:has(.ei-bab) .ei-bab-apply .contact-form-submission{background:#fff;border:
   <div class="ei-bab-hero-inner">
     <div>
       <h1 id="bab-title">Business in a Bot<sup>™</sup></h1>
+      <p class="ei-bab-for">For business owners</p>
       <p class="ei-bab-lead">An SI agent team that runs an automated business in almost any industry. <strong>Nothing posts or sends without your say-so.</strong></p>
       <div class="ei-bab-ctas">
         <a class="ei-bab-btn ei-bab-btn-primary" href="#apply" data-door="Monthly with 14-day trial">Start with the 14-day trial</a>
@@ -242,7 +244,7 @@ body:has(.ei-bab) .ei-bab-apply .contact-form-submission{background:#fff;border:
 
 <!-- wp:group {"className":"ei-bab-apply"} -->
 <div class="wp-block-group ei-bab-apply"><!-- wp:shortcode -->
-[contact-form subject="Business in a Bot application" submit_button_text="Send my application"][contact-field label="Name" type="name" required="1"/][contact-field label="Business" type="text" required="1"/][contact-field label="Email" type="email" required="1"/][contact-field label="Phone" type="telephone" required="1"/][contact-field label="Which door?" type="radio" required="1" options="Monthly with 14-day trial,Cash licence,Financed licence,Royalty licence"/][/contact-form]
+[contact-form subject="Business in a Bot application" submit_button_text="Send my application"][contact-field label="Name" type="name" required="1"/][contact-field label="Business name" type="text" required="1"/][contact-field label="Email" type="email" required="1"/][contact-field label="Phone" type="telephone" required="1"/][contact-field label="Which door?" type="radio" required="1" options="Monthly with 14-day trial,Cash licence,Financed licence,Royalty licence"/][/contact-form]
 <!-- /wp:shortcode --></div>
 <!-- /wp:group -->
 
