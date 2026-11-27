@@ -1,0 +1,286 @@
+<!-- wp:html -->
+<!-- Business in a Bot page, block 1 of 3. Paste the WHOLE file into a new Page via ⋮ → Code editor. See APPLY.md. -->
+<!-- Replace VIDEO_URL and POSTER_URL with the Media Library URLs of business-in-a-bot-medium.mp4 and business-in-a-bot-poster.webp. -->
+<style>
+body:has(.ei-bab){overflow-x:clip}
+.ei-bab{--navy:#0f1f3d;--navy-deep:#0a1730;--navy-mid:#1a3260;--red:#c1121f;--red-hover:#a50f1a;--gold:#d4a017;--gold-soft:#f2c14e;--paper:#f7f5f0;--ink:#14213d;--mute:#535c6a;--line:#e2ddd0;--card:#fff;--max:1120px;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);line-height:1.55;font-size:1.0625rem}
+.ei-bab *{box-sizing:border-box}
+.ei-bab ::selection,.ei-bab-apply ::selection{background:var(--gold-soft);color:var(--navy-deep)}
+.ei-bleed{width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw)}
+.ei-bab a:focus-visible,.ei-bab button:focus-visible,.ei-bab summary:focus-visible,.ei-bab video:focus-visible{outline:3px solid var(--gold-soft);outline-offset:3px;border-radius:4px}
+:where(.ei-bab) :where(h1,h2,h3){text-wrap:balance;margin:0}
+:where(.ei-bab) :where(p){margin:0}
+
+.ei-bab-nav{position:sticky;top:0;z-index:999;background:rgba(15,31,61,.97);border-bottom:1px solid rgba(212,160,23,.35)}
+.ei-bab-nav-inner{max-width:var(--max);margin:0 auto;padding:10px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ei-bab-brand{color:#fff;text-decoration:none;font-weight:800;font-size:1.15rem;letter-spacing:-.02em}
+.ei-bab-brand span{color:#ff6b6b}
+.ei-bab-links{display:flex;flex-wrap:wrap;gap:4px 20px;align-items:center}
+.ei-bab-links a{color:#e8ecf5;text-decoration:none;font-size:.95rem;font-weight:600;min-height:44px;display:inline-flex;align-items:center}
+.ei-bab-links a:hover{color:var(--gold-soft)}
+.ei-bab-links .ei-bab-nav-cta{background:var(--red);color:#fff;padding:0 16px;border-radius:6px}
+.ei-bab-links .ei-bab-nav-cta:hover{background:var(--red-hover);color:#fff}
+
+.ei-bab-hero{background:linear-gradient(165deg,var(--navy) 0%,var(--navy-mid) 58%,var(--navy-deep) 100%);color:#fff;padding:72px 24px 80px}
+.ei-bab-hero-inner{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.65fr);gap:56px;align-items:center}
+.ei-bab-hero h1{font-size:clamp(2.4rem,6vw,4.25rem);line-height:1.02;font-weight:800;letter-spacing:-.035em;margin-bottom:12px}
+.ei-bab-hero h1 sup{font-size:.35em;vertical-align:super;letter-spacing:0;font-weight:700;color:var(--gold-soft)}
+.ei-bab-for{font-size:clamp(1.15rem,2vw,1.4rem);font-weight:800;color:var(--gold-soft);margin-bottom:14px;letter-spacing:-.01em}
+.ei-bab-lead{font-size:clamp(1.15rem,2vw,1.35rem);color:#dbe1ee;max-width:34ch;margin-bottom:32px;line-height:1.45}
+.ei-bab-lead strong{color:#fff}
+.ei-bab-ctas{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.ei-bab-btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:12px 24px;border-radius:7px;font-weight:700;text-decoration:none;font-size:1.02rem;border:2px solid transparent;cursor:pointer;transition:background-color .2s cubic-bezier(.16,1,.3,1),border-color .2s cubic-bezier(.16,1,.3,1)}
+.ei-bab-btn-primary{background:var(--red);color:#fff}
+.ei-bab-btn-primary:hover{background:var(--red-hover);color:#fff}
+.ei-bab-btn-ghost{color:#fff;border-color:rgba(255,255,255,.5)}
+.ei-bab-btn-ghost:hover{border-color:#fff;color:#fff}
+.ei-bab-fine{font-size:.92rem;color:#b9c3d8}
+
+.ei-bab-film{justify-self:center;width:min(100%,300px);position:relative}
+.ei-bab-film video{display:block;width:100%;height:auto;aspect-ratio:9/16;background:#05070d;border-radius:20px;border:1px solid rgba(242,193,78,.5);box-shadow:0 24px 60px rgba(3,8,20,.55),0 4px 12px rgba(3,8,20,.35)}
+.ei-bab-film figcaption{margin-top:12px;font-size:.88rem;color:#b9c3d8;text-align:center}
+
+.ei-bab-section{max-width:var(--max);margin:0 auto;padding:88px 24px}
+.ei-bab-section h2{font-size:clamp(1.75rem,3.4vw,2.5rem);line-height:1.1;letter-spacing:-.025em;color:var(--navy);margin-bottom:14px}
+.ei-bab-sub{color:var(--mute);max-width:52ch;font-size:1.08rem}
+
+.ei-bab-steps{list-style:none;margin:40px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px;counter-reset:step}
+.ei-bab-steps li{counter-increment:step;border-top:2px solid var(--navy);padding-top:20px}
+.ei-bab-steps li::before{content:counter(step);display:block;font-weight:800;font-size:.95rem;color:var(--red);margin-bottom:10px;font-variant-numeric:tabular-nums}
+.ei-bab-steps h3{font-size:1.3rem;color:var(--navy);margin-bottom:8px;letter-spacing:-.015em}
+.ei-bab-steps p{color:var(--mute)}
+.ei-bab-quote{color:var(--ink);font-weight:700}
+
+.ei-bab-doors-wrap{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.ei-bab-doors{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px;margin-top:40px;align-items:stretch}
+.ei-bab-door{grid-column:span 2}
+.ei-bab-door:nth-child(-n+2){grid-column:span 3}
+.ei-bab-reg{color:var(--gold-soft);font-weight:700}
+.ei-bab-door{display:flex;flex-direction:column;gap:10px;padding:28px 22px 22px;border:1px solid var(--line);border-radius:12px;background:var(--paper)}
+.ei-bab-door h3{font-size:1.05rem;color:var(--navy);font-weight:700}
+.ei-bab-price{font-size:clamp(1.9rem,3vw,2.4rem);font-weight:800;color:var(--navy);letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.ei-bab-price small{font-size:1rem;font-weight:700;letter-spacing:0;color:var(--mute)}
+.ei-bab-door p:not(.ei-bab-price){color:var(--mute);font-size:.98rem}
+.ei-bab-door p:not(.ei-bab-price):not(.ei-bab-terms){flex:1;line-height:1.5}
+.ei-bab-door p.ei-bab-terms:not(.ei-bab-price){color:var(--navy);font-weight:700;font-size:.95rem;margin-top:-2px}
+.ei-bab-door--lead p.ei-bab-terms:not(.ei-bab-price){color:var(--gold-soft)}
+.ei-bab-door .ei-bab-btn{width:100%;margin-top:6px}
+.ei-bab-door-btn{background:#fff;color:var(--navy);border-color:var(--navy)}
+.ei-bab-door-btn:hover{background:var(--navy);color:#fff}
+.ei-bab-door--lead{background:var(--navy);border-color:var(--gold);box-shadow:0 18px 40px rgba(15,31,61,.22),0 3px 8px rgba(15,31,61,.12)}
+.ei-bab-door--lead h3,.ei-bab-door--lead .ei-bab-price{color:#fff}
+.ei-bab-door--lead .ei-bab-price small{color:#c9d1e3}
+.ei-bab-door--lead p:not(.ei-bab-price):not(.ei-bab-terms){color:#d3daea}
+.ei-bab-tag{align-self:flex-start;font-size:.85rem;font-weight:700;color:var(--navy-deep);background:var(--gold-soft);border-radius:999px;padding:3px 12px}
+.ei-bab-cad{margin-top:20px;color:var(--mute);font-size:.95rem}
+
+.ei-bab-own{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:start}
+.ei-bab-own-body p{color:var(--mute);margin-bottom:12px;max-width:48ch}
+.ei-bab-faq{border-top:1px solid var(--line)}
+.ei-bab-faq details{border-bottom:1px solid var(--line)}
+.ei-bab-faq summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 0;font-weight:700;color:var(--navy);font-size:1.05rem;min-height:44px}
+.ei-bab-faq summary::-webkit-details-marker{display:none}
+.ei-bab-faq summary svg{flex:none;transition:transform .25s cubic-bezier(.16,1,.3,1)}
+.ei-bab-faq details[open] summary svg{transform:rotate(45deg)}
+.ei-bab-faq details p{padding:0 0 18px;color:var(--mute);max-width:60ch}
+
+.ei-bab-apply-head{max-width:640px;margin:0 auto;padding:88px 24px 8px}
+.ei-bab-apply-head h2{font-size:clamp(1.75rem,3.4vw,2.5rem);line-height:1.1;letter-spacing:-.025em;color:var(--navy);margin-bottom:12px}
+.ei-bab-apply-head p{color:var(--mute)}
+
+/* Jetpack form, styled to match. It sits in its own block between the two HTML blocks. */
+body:has(.ei-bab) .ei-bab-apply{max-width:640px;margin:0 auto 96px;padding:0 24px;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink,#14213d)}
+body:has(.ei-bab) .ei-bab-apply *{box-sizing:border-box}
+body:has(.ei-bab) .ei-bab-apply form{background:#fff;border:1px solid #e2ddd0;border-radius:14px;padding:28px 24px;box-shadow:0 14px 36px rgba(15,31,61,.08)}
+body:has(.ei-bab) .ei-bab-apply label,body:has(.ei-bab) .ei-bab-apply legend{font-weight:700;color:#0f1f3d;font-size:1rem}
+body:has(.ei-bab) .ei-bab-apply input[type=text],body:has(.ei-bab) .ei-bab-apply input[type=email],body:has(.ei-bab) .ei-bab-apply input[type=tel]{width:100%;min-height:48px;padding:10px 14px;border:1px solid #b8b2a3;border-radius:7px;font:inherit;font-size:1rem;background:#fff;color:#14213d;caret-color:#c1121f}
+body:has(.ei-bab) .ei-bab-apply input:focus{outline:3px solid #f2c14e;outline-offset:1px;border-color:#0f1f3d}
+body:has(.ei-bab) .ei-bab-apply input[type=radio]{accent-color:#c1121f;width:20px;height:20px}
+body:has(.ei-bab) .ei-bab-apply button,body:has(.ei-bab) .ei-bab-apply input[type=submit],body:has(.ei-bab) .ei-bab-apply .wp-block-button__link{background:#c1121f;color:#fff;border:0;border-radius:7px;min-height:52px;padding:12px 28px;font:inherit;font-weight:700;font-size:1.02rem;cursor:pointer}
+body:has(.ei-bab) .ei-bab-apply button:hover,body:has(.ei-bab) .ei-bab-apply input[type=submit]:hover{background:#a50f1a}
+body:has(.ei-bab) .ei-bab-apply .contact-form-submission{background:#fff;border:1px solid #d4a017;border-radius:14px;padding:28px 24px}
+
+@media (max-width:960px){
+ .ei-bab-doors{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ei-bab-door,.ei-bab-door:nth-child(-n+2){grid-column:auto}
+ .ei-bab-door:first-child{grid-column:1/-1}
+ .ei-bab-own{grid-template-columns:1fr;gap:40px}
+}
+@media (max-width:760px){
+ .ei-bab-hero{padding:48px 16px 64px}
+ .ei-bab-hero-inner{grid-template-columns:1fr;gap:40px}
+ .ei-bab-film{width:min(100%,280px)}
+ .ei-bab-section{padding:64px 16px}
+ .ei-bab-steps{grid-template-columns:1fr;gap:28px}
+ .ei-bab-nav-inner{padding:8px 16px}
+ .ei-bab-apply-head{padding:64px 16px 8px}
+ body:has(.ei-bab) .ei-bab-apply{padding:0 16px;margin-bottom:72px}
+}
+@media (max-width:560px){
+ .ei-bab-doors{grid-template-columns:1fr}
+ .ei-bab-ctas .ei-bab-btn{width:100%}
+ .ei-bab-links{gap:4px 14px}
+ .ei-bab-links a:not(.ei-bab-nav-cta){display:none}
+}
+@media (prefers-reduced-motion:reduce){.ei-bab *{transition:none!important}}
+</style>
+
+<div class="ei-shell ei-bab">
+<header class="ei-bab-nav ei-bleed">
+  <div class="ei-bab-nav-inner">
+    <a class="ei-bab-brand" href="https://everythinginternet.ca/">EverythingInternet<span>.ca</span></a>
+    <nav class="ei-bab-links" aria-label="Main">
+      <a href="#how">How it works</a>
+      <a href="#doors">Ways to buy</a>
+      <a class="ei-bab-nav-cta" href="#apply">Apply</a>
+    </nav>
+  </div>
+</header>
+
+<section class="ei-bab-hero ei-bleed" aria-labelledby="bab-title">
+  <div class="ei-bab-hero-inner">
+    <div>
+      <h1 id="bab-title">Business in a Bot<sup>™</sup></h1>
+      <p class="ei-bab-for">For business owners</p>
+      <p class="ei-bab-lead">An SI agent team that runs an automated business in almost any industry. <strong>Nothing posts or sends without your say-so.</strong></p>
+      <div class="ei-bab-ctas">
+        <a class="ei-bab-btn ei-bab-btn-primary" href="#apply" data-door="Monthly with 14-day trial">Start with the 14-day trial</a>
+        <a class="ei-bab-btn ei-bab-btn-ghost" href="#doors">See all five ways to get it</a>
+      </div>
+      <p class="ei-bab-fine">$197/month with a 14-day trial. All prices in CAD, GST included.</p>
+    </div>
+    <figure class="ei-bab-film">
+      <video controls playsinline preload="metadata" width="1080" height="1920" poster="POSTER_URL" aria-label="Business in a Bot video, 22 seconds">
+        <source src="VIDEO_URL" type="video/mp4">
+      </video>
+      <figcaption>Watch: 22 seconds</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="ei-bab-section" id="how" aria-labelledby="bab-how">
+  <h2 id="bab-how">How it works</h2>
+  <p class="ei-bab-sub">You run the business. The bot does the work. You stay in charge.</p>
+  <ol class="ei-bab-steps">
+    <li>
+      <h3>It checks in every morning</h3>
+      <p>One agent starts your day with one question: <span class="ei-bab-quote">“Are you ready to start your day?”</span></p>
+    </li>
+    <li>
+      <h3>The team runs the business</h3>
+      <p>An SI agent team, programmed by Alan Gooding, runs an automated business in almost any industry.</p>
+    </li>
+    <li>
+      <h3>You say yes first</h3>
+      <p>Nothing posts or sends without your explicit say-so.</p>
+    </li>
+  </ol>
+</section>
+
+<div class="ei-bab-doors-wrap ei-bleed">
+<section class="ei-bab-section" id="doors" aria-labelledby="bab-doors">
+  <h2 id="bab-doors">Five ways to get it</h2>
+  <p class="ei-bab-sub">Pick the door that fits your business. Every door starts with a short application.</p>
+  <div class="ei-bab-doors">
+    <article class="ei-bab-door ei-bab-door--lead">
+      <span class="ei-bab-tag">Free</span>
+      <h3>Registered business</h3>
+      <p class="ei-bab-price">$0</p>
+      <p class="ei-bab-terms">With your business registration number</p>
+      <p>Free to use for any registered business. Apply with your business registration number. Need to register your business? <a class="ei-bab-reg" href="https://www.alberta.ca/register-business-name" target="_blank" rel="noopener">Click here</a>.</p>
+      <a class="ei-bab-btn ei-bab-btn-primary" href="#apply" data-door="Free with business registration number">Apply for free</a>
+    </article>
+    <article class="ei-bab-door">
+      <h3>Monthly</h3>
+      <p class="ei-bab-price">$197<small>/month</small></p>
+      <p class="ei-bab-terms">14-day free trial</p>
+      <p>The whole Business in a Bot, licensed to your business for one monthly payment. Start with 14 days free. It runs your automated business day to day, and nothing posts or sends without your <span style="white-space:nowrap">say-so</span>.</p>
+      <a class="ei-bab-btn ei-bab-door-btn" href="#apply" data-door="Monthly with 14-day trial">Apply for the trial</a>
+    </article>
+    <article class="ei-bab-door">
+      <h3>Cash</h3>
+      <p class="ei-bab-price">$30,000</p>
+      <p class="ei-bab-terms">One payment</p>
+      <p>The full licence, paid once. Your automated business, built and running — no monthly bill, and no share of your sales, ever.</p>
+      <a class="ei-bab-btn ei-bab-door-btn" href="#apply" data-door="Cash licence">Apply: cash</a>
+    </article>
+    <article class="ei-bab-door">
+      <h3>Financed</h3>
+      <p class="ei-bab-price">$45,000</p>
+      <p class="ei-bab-terms">Paid over time</p>
+      <p>The full licence, spread out. 10% down, and the rest paid from 1% of your gross sales as you earn. For owners who want it now and would rather pay out of revenue than out of pocket.</p>
+      <a class="ei-bab-btn ei-bab-door-btn" href="#apply" data-door="Financed licence">Apply: financed</a>
+    </article>
+    <article class="ei-bab-door">
+      <h3>Royalty</h3>
+      <p class="ei-bab-price">2%<small> of gross sales</small></p>
+      <p class="ei-bab-terms">Nothing up front</p>
+      <p>The full licence with nothing to pay today. Axiom takes 2% of your gross sales for life — we earn only when you do.</p>
+      <a class="ei-bab-btn ei-bab-door-btn" href="#apply" data-door="Royalty licence">Apply: royalty</a>
+    </article>
+  </div>
+  <p class="ei-bab-cad">All prices in CAD, GST included.</p>
+</section>
+</div>
+
+<section class="ei-bab-section" aria-labelledby="bab-own">
+  <div class="ei-bab-own">
+    <div class="ei-bab-own-body">
+      <h2 id="bab-own">You license it. Axiom owns it.</h2>
+      <p>Axiom owns all code and design. Every door gives you a licence to use Business in a Bot. It does not give you the code.</p>
+    </div>
+    <div class="ei-bab-faq">
+      <details>
+        <summary>Will it post or send anything without me?<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 3v12M3 9h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary>
+        <p>No. Nothing posts or sends without your explicit say-so.</p>
+      </details>
+      <details>
+        <summary>Do I own the code?<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 3v12M3 9h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary>
+        <p>No. Axiom owns all code and design. You hold a licence.</p>
+      </details>
+      <details>
+        <summary>How do I start the 14-day trial?<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 3v12M3 9h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary>
+        <p>Send the application below and pick Monthly.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<div class="ei-bab-apply-head" id="apply">
+  <h2>Apply</h2>
+  <p>Pick your door and tell us about your business.</p>
+</div>
+</div>
+<!-- /wp:html -->
+
+<!-- wp:group {"className":"ei-bab-apply"} -->
+<div class="wp-block-group ei-bab-apply"><!-- wp:shortcode -->
+[contact-form subject="Business in a Bot application" submit_button_text="Send my application"][contact-field label="Name" type="name" required="1"/][contact-field label="Business name" type="text" required="1"/][contact-field label="Business registration number (needed for the free door)" type="text"/][contact-field label="Email" type="email" required="1"/][contact-field label="Phone" type="telephone" required="1"/][contact-field label="Which door?" type="radio" required="1" options="Free with business registration number,Monthly with 14-day trial,Cash licence,Financed licence,Royalty licence"/][/contact-form]
+<!-- /wp:shortcode --></div>
+<!-- /wp:group -->
+
+<!-- wp:html -->
+<div class="ei-shell ei-bab">
+<footer class="ei-bleed" style="background:#0f1f3d;color:#c9d1e3;padding:36px 24px;font-size:.9rem">
+  <div style="max-width:1120px;margin:0 auto;display:grid;gap:18px">
+    <nav aria-label="Footer" style="display:flex;flex-wrap:wrap;gap:10px 18px">
+      <a style="color:#fff;text-decoration:none" href="https://everythinginternet.ca/">Home</a>
+      <a style="color:#fff;text-decoration:none" href="https://everythinginternet.ca/shop/">Shop</a>
+      <a style="color:#fff;text-decoration:none" href="https://everythinginternet.ca/privacy/">Privacy</a>
+      <a style="color:#fff;text-decoration:none" href="https://everythinginternet.ca/terms/">Terms</a>
+      <a style="color:#fff;text-decoration:none" href="mailto:rise@empoweredathome.com">Contact</a>
+    </nav>
+    <p>© 2026 EverythingInternet.ca / Axiom Enterprises. All rights reserved. | Alberta Registration: 769776022</p>
+  </div>
+</footer>
+</div>
+<script>
+/* Door buttons pre-pick the matching answer in the Jetpack form. */
+document.addEventListener('click',function(e){
+  var a=e.target.closest('[data-door]');if(!a)return;
+  var door=a.getAttribute('data-door');
+  var radios=document.querySelectorAll('.ei-bab-apply input[type=radio]');
+  for(var i=0;i<radios.length;i++){if(radios[i].value===door){radios[i].checked=true;}}
+});
+</script>
+<!-- /wp:html -->
