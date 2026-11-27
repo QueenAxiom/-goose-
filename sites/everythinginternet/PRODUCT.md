@@ -40,7 +40,12 @@ These prices are ruled. Do not change, round, or add to them.
 
 Business in a Bot is licensed to business owners only. Its page says "For business owners" near the top, and its application form requires the applicant to name their business.
 
-Extra detail in the Axiom repo (`docs/products-services.md`, `docs/axiom-bible.md`), not confirmed here: prices are CAD with GST included; financed is 10% down, with the balance paid as 1% of gross sales; the royalty is 2% of gross sales for life with nothing up front; the subscription also comes at $1,970/year. Confirm before using these on a page.
+Confirmed by the owner (2026-11-27), and safe to use on pages:
+- All prices are CAD, GST included.
+- Financed: 10% down, and the rest paid from 1% of gross sales.
+- Royalty: 2% of gross sales for life, nothing up front.
+- $197/month with the 14-day trial is its own door, not an add-on.
+- The $1,970/year option is retired. Do not use it.
 
 ## Brand Commitments
 
